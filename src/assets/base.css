@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-background: #fafbfb;
+  --color-text: #1f2937;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #111827;
+    --color-text: #e5e7eb;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.5;
+  font-family: 'Comfortaa', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Safe-area helpers */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.mb-safe { margin-bottom: env(safe-area-inset-bottom); }
+.pt-safe { padding-top: env(safe-area-inset-top); }
+.mt-safe { margin-top: env(safe-area-inset-top); }
+
+@layer components {
+  .btn-primary {
+    @apply rounded-full bg-brand-primary px-4 py-2 text-sm text-white font-semibold active:scale-[0.98] transition;
+  }
+  .btn-secondary {
+    @apply rounded-full bg-brand-primary px-4 py-2 text-sm text-white font-semibold active:scale-[0.98] transition;
+  }
+  .card {
+    @apply rounded-xl bg-white p-4 border border-gray-100;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
+  }
+  /* Ensure all pill anchors/buttons never wrap */
+  a.rounded-full, button.rounded-full {
+    @apply whitespace-nowrap inline-flex items-center justify-center;
+  }
+  .dark .card { @apply bg-gray-800 border-gray-700; }
+  .dark .btn-secondary { @apply text-gray-900; }
+}
