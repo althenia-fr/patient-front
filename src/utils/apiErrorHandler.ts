@@ -62,7 +62,7 @@ export function createApiError(error: any): ApiError {
   const message = backendMessage !== 'Une erreur est survenue. Veuillez réessayer.'
     ? backendMessage
     : (statusCode ? getStatusMessage(statusCode) : backendMessage)
-  
+
   return {
     message,
     code: error?.response?.data?.code || error?.code,
@@ -90,7 +90,7 @@ export function isValidationError(error: any): boolean {
 
 export function logError(context: string, error: any): void {
   const apiError = createApiError(error)
-  
+
   console.error(`[${context}] API Error:`, {
     message: apiError.message,
     code: apiError.code,

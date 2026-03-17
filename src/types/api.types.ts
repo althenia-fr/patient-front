@@ -15,31 +15,11 @@ export interface ApiErrorResponse {
 
 export const API_ENDPOINTS = {
   AUTH: {
-    SIGNUP: '/org/signup',
-    LOGIN: '/org/login',
-    PWDRESET: '/user/pwdreset',
-    PWDEDIT: '/user/pwdedit',
-    REFRESH_TOKEN: '/user/refresh-token',
-  },
-  PATIENT: {
-    ADD: '/patient/add',
-    LIST: '/patient/list',
-    DELETE: '/patient/delete',
-    VIEW: '/patient/view',
-    UPDATE: '/patient/update',
-  },
-  PEC: {
-    CREATE: '/pec/create',
-    LIST: '/pec/list',
-    PDF_UPLOAD: '/pec/pdfupload',
-    SKU_LIST: '/pec/skulist',
-    SKU_PROGRAMS: '/pec/skuPrograms',
-  },
-  MEMBERS: {
-    LIST: '/member/all',
-    CREATE: '/member/add',
-    DELETE: (id?: number) => `/member/delete?uid=${id}`,
-    UPDATE: (id: number) => `/member/update?uid=${id}`,
+    SIGNUP: '/auth/signup',
+    LOGIN: '/auth/login',
+    PWDRESET: '/auth/pwdreset',
+    PWDEDIT: '/auth/pwdedit',
+    REFRESH_TOKEN: '/auth/refresh-token',
   },
 } as const
 
