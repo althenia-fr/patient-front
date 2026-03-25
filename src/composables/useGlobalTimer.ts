@@ -13,6 +13,7 @@ const globalState = {
   interval: ref<number | null>(null),
   startTime: ref<number | null>(null),
   pausedTime: ref(0), // Total time spent paused
+  lastPauseTime: ref<number | null>(null), // When timer was last paused
 }
 
 export function useGlobalTimer() {
@@ -47,10 +48,21 @@ export function useGlobalTimer() {
   })
 
   // Initialize timer with protocol agenda and check for existing sessions
-  const initializeTimer = async (protocolAgenda: ProtocolAgendaData, sessionDurationMinutes: number) => {
+  const initializeTimer = async (protocolAgenda: ProtocolAgendaData, sessionDurationMinutes: number, forceReinitialize = false) => {
+    // Don't reinitialize if timer is already running and we're not forcing it
+    if (globalState.isInitialized && globalState.running.value && !forceReinitialize) {
+      console.log('Timer already running, skipping reinitialization')
+      return
+    }
+    
     globalState.protocolAgenda.value = protocolAgenda
     globalState.totalDuration.value = sessionDurationMinutes * 60
-    globalState.remaining.value = sessionDurationMinutes * 60
+    
+    // Only reset remaining time if timer is not running or if forcing reinitialize
+    if (!globalState.running.value || forceReinitialize) {
+      globalState.remaining.value = sessionDurationMinutes * 60
+    }
+    
     globalState.isInitialized = true
     
     // Fetch existing sessions to check for resumable sessions
@@ -66,10 +78,13 @@ export function useGlobalTimer() {
         if (existingSession && existingSession.sessionTimeRemaining > 0) {
           // Set up timer to resume existing session
           // Handle both decimal minutes and integer minutes from API
-          globalState.sessionId.value = existingSession.id
-          globalState.remaining.value = Math.round(existingSession.sessionTimeRemaining * 60)
-          console.log('Found resumable session:', existingSession)
-          console.log('Converted', existingSession.sessionTimeRemaining, 'minutes to', globalState.remaining.value, 'seconds')
+          // Only update if timer is not currently running
+          if (!globalState.running.value || forceReinitialize) {
+            globalState.sessionId.value = existingSession.id
+            globalState.remaining.value = Math.round(existingSession.sessionTimeRemaining * 60)
+            console.log('Found resumable session:', existingSession)
+            console.log('Converted', existingSession.sessionTimeRemaining, 'minutes to', globalState.remaining.value, 'seconds')
+          }
         }
       }
     } catch (error) {
@@ -105,7 +120,7 @@ export function useGlobalTimer() {
           sessions: [
             {
               date: new Date().toISOString().split('T')[0],
-              sessionTimeRemaining: globalState.totalDuration.value
+              sessionTimeRemaining: Math.round((globalState.totalDuration.value / 60) * 100) / 100
             }
           ]
         }
@@ -146,6 +161,7 @@ export function useGlobalTimer() {
     if (!globalState.running.value) return
 
     globalState.running.value = false
+    globalState.lastPauseTime.value = Date.now()
     
     // Clear interval
     if (globalState.interval.value) {
@@ -153,16 +169,11 @@ export function useGlobalTimer() {
       globalState.interval.value = null
     }
 
-    // Track pause duration
-    if (globalState.startTime.value) {
-      globalState.pausedTime.value += Date.now() - globalState.startTime.value
-    }
-
     // Update session tracking
     if (globalState.sessionId.value) {
       try {
-        // Save exact decimal minutes (e.g., 18.83 for 18:50)
-        const exactMinutes = globalState.remaining.value / 60
+        // Save exact decimal minutes rounded to 2 decimal places
+        const exactMinutes = Math.round((globalState.remaining.value / 60) * 100) / 100
         await updateSession({
           id: globalState.sessionId.value,
           sessionTimeRemaining: exactMinutes
@@ -184,7 +195,6 @@ export function useGlobalTimer() {
     if (!globalState.isInitialized) return
 
     globalState.running.value = true
-    globalState.startTime.value = Date.now()
     
     // Resume countdown
     globalState.interval.value = window.setInterval(() => {
@@ -234,6 +244,7 @@ export function useGlobalTimer() {
     globalState.sessionId.value = null
     globalState.startTime.value = null
     globalState.pausedTime.value = 0
+    globalState.lastPauseTime.value = null
     
     if (globalState.interval.value) {
       clearInterval(globalState.interval.value)

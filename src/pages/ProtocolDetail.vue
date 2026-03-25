@@ -91,10 +91,11 @@ function savePain() {
 const handleTimerEnd = async (elapsedTime: number) => {
   // Continue with existing logic
   lastElapsed.value = Math.max(0, elapsedTime)
-  import('@/utils/sessions')
-    .then(m => { try { m.addSession({ durationSec: Math.max(0, elapsedTime) }) } catch {} })
-    .catch(() => {})
-  const s = addPoints(ACTION_POINTS.sessionComplete, 'Séance terminée')
+  endTimer()
+  // import('@/utils/sessions')
+  //   .then(m => { try { m.addSession({ durationSec: Math.max(0, elapsedTime) }) } catch {} })
+  //   .catch(() => {})
+  // const s = addPoints(ACTION_POINTS.sessionComplete, 'Séance terminée')
   showSessionCompleteModal.value = true
 }
 
@@ -163,16 +164,16 @@ onMounted(() => {
               : 'bg-green-500 text-white hover:bg-green-600'
           ]"
         >
-          {{ isRunning ? 'Pause' : canResumeSession ? 'Resume Session' : 'Start Session' }}
+          {{ isRunning ? 'Pause' : canResumeSession ? 'Reprendre la session' : 'Démarrer la session' }}
         </button>
         
-        <button
+        <!-- <button
           v-if="hasActiveSession"
           @click="endTimer"
           class="px-6 py-2 rounded-full font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors"
         >
           End Session
-        </button>
+        </button> -->
       </div>
     </div>
 
