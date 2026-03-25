@@ -5,6 +5,7 @@ import { getWeekInfo } from '@/utils/protocol'
 import { getPoints, getMaxPoints, seedDemoIfEmpty } from '@/utils/gamification'
 import { getOnboarding } from '@/utils/onboarding'
 import { protocolApi } from '@/services/api'
+import { useGlobalTimer } from '@/composables/useGlobalTimer'
 import GlobalTimer from '@/components/GlobalTimer.vue'
 import type { ProtocolAgendaData } from '@/types/protocol.types'
 
@@ -21,11 +22,20 @@ const firstName = computed(() => {
 const protocolAgenda = ref<ProtocolAgendaData | null>(null)
 const agendaLoading = ref(false)
 
-// Fetch protocol agenda
+// Global timer
+const { initializeTimer } = useGlobalTimer()
+
+// Fetch protocol agenda and initialize timer
 const fetchProtocolAgenda = async () => {
   try {
     agendaLoading.value = true
     protocolAgenda.value = await protocolApi.getProtocolAgenda()
+    
+    // Initialize timer to check for existing sessions
+    if (protocolAgenda.value) {
+      const sessionDuration = protocolAgenda.value?.sessionDurationMin || getOnboarding()?.sessionDuration || 20
+      await initializeTimer(protocolAgenda.value, sessionDuration)
+    }
   } catch (error) {
     console.error('Failed to fetch protocol agenda in TopBanner:', error)
     // Continue with fallback data if API fails
@@ -42,18 +52,18 @@ const week = computed(() => {
   return getWeekInfo()
 })
 
-const protocolDuration = computed(() => {
-  // Use API data if available, otherwise fallback to onboarding
-  return protocolAgenda.value?.durationWeeks || getOnboarding()?.protocolDuration || 13
-})
+// const protocolDuration = computed(() => {
+//   // Use API data if available, otherwise fallback to onboarding
+//   return protocolAgenda.value?.durationWeeks || getOnboarding()?.protocolDuration || 13
+// })
 
-const sessionCount = computed(() => getOnboarding()?.sessionCount || 1)
-const points = computed(() => getPoints())
-const max = computed(() => getMaxPoints(protocolDuration.value, sessionCount.value))
-const pct = computed(() => (max.value ? points.value / max.value : 0))
+// const sessionCount = computed(() => getOnboarding()?.sessionCount || 1)
+// const points = computed(() => getPoints())
+// const max = computed(() => getMaxPoints(protocolDuration.value, sessionCount.value))
+// const pct = computed(() => (max.value ? points.value / max.value : 0))
 
-const tier = computed<'bronze' | 'silver' | 'gold'>(() => pct.value >= 0.66 ? 'gold' : pct.value >= 0.33 ? 'silver' : 'bronze')
-const star = computed(() => tier.value === 'gold' ? '#ffd54f' : tier.value === 'silver' ? '#c0c0c0' : '#cd7f32')
+// const tier = computed<'bronze' | 'silver' | 'gold'>(() => pct.value >= 0.66 ? 'gold' : pct.value >= 0.33 ? 'silver' : 'bronze')
+// const star = computed(() => tier.value === 'gold' ? '#ffd54f' : tier.value === 'silver' ? '#c0c0c0' : '#cd7f32')
 
 const unread = ref(0)
 onMounted(() => {

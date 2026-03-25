@@ -248,7 +248,7 @@ const protocolName = computed(() => {
   return `Protocole TENS ${specialty}`
 })
 
-const sessionCount = computed(() => getOnboarding()?.sessionCount || 1)
+// const sessionCount = computed(() => getOnboarding()?.sessionCount || 1)
 
 const tips = computed(() => {
   const list: string[] = []
@@ -281,19 +281,9 @@ const tips = computed(() => {
         <div class="text-center text-lg font-semibold text-gray-800">{{ today }}</div>
       </div>
       <div class="mt-3 space-y-2">
-        <template v-if="sessionCount === 1">
-          <RouterLink :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
-            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none bg-brand-secondary text-white">Débuter une nouvelle séance</div>
-          </RouterLink>
-        </template>
-        <template v-else>
-          <RouterLink :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
-            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none bg-brand-secondary text-white">Ma première séance du jour</div>
-          </RouterLink>
-          <RouterLink :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
-            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none bg-brand-secondary text-white">Ma deuxième séance du jour</div>
-          </RouterLink>
-        </template>
+        <RouterLink :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
+          <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none bg-brand-secondary text-white">Débuter une nouvelle séance</div>
+        </RouterLink>
       </div>
       <div v-if="lastSession" class="mt-2 text-center text-xs text-gray-500 sm:text-left">• Dernière séance: {{ lastSession }}</div>
     </div>
