@@ -1,35 +1,68 @@
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount, defineEmits, watch } from 'vue'
 
-const props = withDefaults(defineProps<{ durationSec?: number; size?: number; stroke?: number; canStart?: boolean }>(), {
+const props = withDefaults(defineProps<{ 
+  durationSec?: number; 
+  size?: number; 
+  stroke?: number; 
+  canStart?: boolean;
+  remainingTime?: number;
+  isRunning?: boolean;
+}>(), {
   durationSec: 1200, // 20 minutes par défaut
   size: 220,
   stroke: 12,
   canStart: true,
+  remainingTime: undefined,
+  isRunning: false,
 })
 
-const emit = defineEmits<{ (e: 'finished', seconds: number): void; (e: 'blocked'): void }>()
+const emit = defineEmits<{ 
+  (e: 'finished', seconds: number): void; 
+  (e: 'blocked'): void;
+  (e: 'started'): void;
+  (e: 'paused', remainingTime: number): void;
+}>()
 
 const running = ref(false)
 const remaining = ref(props.durationSec)
 
+// Use global timer state if provided, otherwise use local state
+const effectiveRunning = computed(() => {
+  return props.isRunning !== undefined ? props.isRunning : running.value
+})
+
+const effectiveRemaining = computed(() => {
+  return props.remainingTime !== undefined ? props.remainingTime : remaining.value
+})
+
+const isUsingGlobalState = computed(() => {
+  return props.isRunning !== undefined || props.remainingTime !== undefined
+})
+
 const timeDisplay = computed(() => {
-  const m = Math.floor(remaining.value / 60)
-  const s = Math.floor(remaining.value % 60)
+  const m = Math.floor(effectiveRemaining.value / 60)
+  const s = Math.floor(effectiveRemaining.value % 60)
   const pad = (n: number) => n.toString().padStart(2, '0')
-  return m > 0 || remaining.value > 0 ? `${pad(m)}:${pad(s)}` : '00:00'
+  return m > 0 || effectiveRemaining.value > 0 ? `${pad(m)}:${pad(s)}` : '00:00'
 })
 let timer: number | null = null
 
 const radius = computed(() => (props.size - props.stroke) / 2)
 const circumference = computed(() => 2 * Math.PI * radius.value)
-const dashOffset = computed(() => circumference.value * (1 - (props.durationSec - remaining.value) / props.durationSec))
+const dashOffset = computed(() => circumference.value * (1 - (props.durationSec - effectiveRemaining.value) / props.durationSec))
 
 function toggle() {
+  // If using global state, don't handle local timer logic
+  if (props.isRunning !== undefined || props.remainingTime !== undefined) {
+    return // Global timer controls the state
+  }
+  
   if (running.value) {
     running.value = false
     if (timer) window.clearInterval(timer)
     timer = null
+    emit('paused', remaining.value)
   } else {
     if (!props.canStart) { emit('blocked'); return }
     running.value = true
@@ -40,15 +73,26 @@ function toggle() {
         finish()
       }
     }, 1000)
+    emit('started')
   }
 }
 function reset() {
+  // If using global state, don't handle local timer logic
+  if (props.isRunning !== undefined || props.remainingTime !== undefined) {
+    return // Global timer controls the state
+  }
+  
   if (timer) window.clearInterval(timer)
   timer = null
   running.value = false
   remaining.value = props.durationSec
 }
 function finish() {
+  // If using global state, don't handle local timer logic
+  if (props.isRunning !== undefined || props.remainingTime !== undefined) {
+    return // Global timer controls the state
+  }
+  
   if (timer) window.clearInterval(timer)
   timer = null
   running.value = false
@@ -105,7 +149,7 @@ onBeforeUnmount(() => { if (timer) window.clearInterval(timer) })
       </text>
     </svg>
 
-    <div class="flex flex-wrap justify-center gap-3">
+    <div v-if="!isUsingGlobalState" class="flex flex-wrap justify-center gap-3">
       <Button :variant="running ? 'secondary' : 'primary'" @click="toggle" :class="!running && !props.canStart ? 'opacity-70' : ''">{{ running ? 'Pause' : 'Démarrer' }}</Button>
       <Button variant="secondary" @click="finish">Terminer</Button>
     </div>

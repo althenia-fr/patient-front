@@ -13,6 +13,31 @@ export interface ApiErrorResponse {
   details?: any
 }
 
+// Session Tracking Types
+export interface SessionTrackingItem {
+  id: number
+  date: string
+  sessionTimeRemaining: number
+  sessionStatus?: string
+}
+
+// For POST requests (creating new sessions - no id yet)
+export interface SessionTrackingRequestItem {
+  date: string
+  sessionTimeRemaining: number
+}
+
+export interface SessionTrackingPayload {
+  pecId: number
+  weekNumber: number
+  sessions: SessionTrackingRequestItem[]
+}
+
+export interface UpdateSessionTrackingPayload {
+  id: number
+  sessionTimeRemaining: number
+}
+
 export const API_ENDPOINTS = {
   AUTH: {
     SIGNUP: '/auth/signup',
@@ -20,6 +45,18 @@ export const API_ENDPOINTS = {
     PWDRESET: '/auth/pwdreset',
     PWDEDIT: '/auth/pwdedit',
     REFRESH_TOKEN: '/auth/refresh-token',
+  },
+  PEC: {
+    GET_PEC: '/pec',
+    UPDATE_PEC: '/pec',
+  },
+  PROTOCOL: {
+    GET_AGENDA: '/protocolAgenda',
+  },
+  SESSION_TRACKING: {
+    GET_SESSIONS: '/getSessionTracking',
+    CREATE_SESSIONS: '/sessionTracking',
+    UPDATE_SESSION: '/updateSessionTracking',
   },
 } as const
 
