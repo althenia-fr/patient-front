@@ -39,6 +39,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/protocolAgenda': {
+        target: BACKEND_URL,
+        changeOrigin: true,
+        secure: false,
+      },
       '/member': {
         target: BACKEND_URL,
         changeOrigin: true,

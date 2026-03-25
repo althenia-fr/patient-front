@@ -4,6 +4,9 @@ import { authUser } from '@/utils/auth'
 import { getWeekInfo } from '@/utils/protocol'
 import { getPoints, getMaxPoints, seedDemoIfEmpty } from '@/utils/gamification'
 import { getOnboarding } from '@/utils/onboarding'
+import { protocolApi } from '@/services/api'
+import GlobalTimer from '@/components/GlobalTimer.vue'
+import type { ProtocolAgendaData } from '@/types/protocol.types'
 
 const firstName = computed(() => {
   const meta = authUser.value?.user_metadata || {}
@@ -13,8 +16,37 @@ const firstName = computed(() => {
   const base = raw.split(/[._-]/)[0] || raw
   return base.charAt(0).toUpperCase() + base.slice(1)
 })
-const week = computed(() => getWeekInfo())
-const protocolDuration = computed(() => getOnboarding()?.protocolDuration || 13)
+
+// Protocol agenda state
+const protocolAgenda = ref<ProtocolAgendaData | null>(null)
+const agendaLoading = ref(false)
+
+// Fetch protocol agenda
+const fetchProtocolAgenda = async () => {
+  try {
+    agendaLoading.value = true
+    protocolAgenda.value = await protocolApi.getProtocolAgenda()
+  } catch (error) {
+    console.error('Failed to fetch protocol agenda in TopBanner:', error)
+    // Continue with fallback data if API fails
+  } finally {
+    agendaLoading.value = false
+  }
+}
+
+const week = computed(() => {
+  if (protocolAgenda.value) {
+    return getWeekInfo(protocolAgenda.value)
+  }
+  // Fallback to onboarding data
+  return getWeekInfo()
+})
+
+const protocolDuration = computed(() => {
+  // Use API data if available, otherwise fallback to onboarding
+  return protocolAgenda.value?.durationWeeks || getOnboarding()?.protocolDuration || 13
+})
+
 const sessionCount = computed(() => getOnboarding()?.sessionCount || 1)
 const points = computed(() => getPoints())
 const max = computed(() => getMaxPoints(protocolDuration.value, sessionCount.value))
@@ -26,6 +58,8 @@ const star = computed(() => tier.value === 'gold' ? '#ffd54f' : tier.value === '
 const unread = ref(0)
 onMounted(() => {
   seedDemoIfEmpty(75)
+  fetchProtocolAgenda() // Fetch protocol agenda on mount
+  
   const readUnread = () => {
     const v = Number(localStorage.getItem('unread_notifications') || '0')
     unread.value = Number.isNaN(v) ? 0 : v
@@ -55,7 +89,10 @@ onMounted(() => {
             </span>
           </div>
         </div>
-        <div class="flex items-center gap-6"></div>
+        <div class="flex items-center gap-6">
+          <!-- Global Timer -->
+          <GlobalTimer />
+        </div>
       </div>
     </div>
   </div>
