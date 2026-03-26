@@ -159,17 +159,18 @@ export function useGlobalTimer() {
   // Pause timer and update session tracking
   const pauseTimer = async () => {
     if (!globalState.running.value) return
-
+    
+    // Update UI state immediately
     globalState.running.value = false
     globalState.lastPauseTime.value = Date.now()
     
-    // Clear interval
+    // Clear interval immediately to stop timer
     if (globalState.interval.value) {
       clearInterval(globalState.interval.value)
       globalState.interval.value = null
     }
 
-    // Update session tracking
+    // Update session tracking in background (don't block UI)
     if (globalState.sessionId.value) {
       try {
         // Save exact decimal minutes rounded to 2 decimal places
@@ -185,6 +186,7 @@ export function useGlobalTimer() {
         })
       } catch (error) {
         console.error('Failed to pause session tracking:', error)
+        // Don't re-throw - timer should still pause in UI even if API fails
       }
     }
   }

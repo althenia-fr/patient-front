@@ -93,10 +93,21 @@ export const sessionTrackingApi = {
         payload,
       )
 
-      // console.log('updateSessionTracking response:', response);
+      console.log('updateSessionTracking response:', response.data);
 
-      if (response.data.success && response.data.data) {
-        return response.data.data
+      // Handle success response - API might return success=true with or without data
+      if (response.data.success) {
+        // If data is returned, use it; otherwise create a basic success response
+        if (response.data.data) {
+          return response.data.data
+        } else {
+          // Create a minimal session item for successful update when no data returned
+          return {
+            id: payload.id,
+            date: new Date().toISOString().split('T')[0], // Today's date
+            sessionTimeRemaining: payload.sessionTimeRemaining
+          }
+        }
       }
 
       throw new Error(response.data.message || 'Failed to update session tracking entry')

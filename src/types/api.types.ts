@@ -51,12 +51,12 @@ export const API_ENDPOINTS = {
     UPDATE_PEC: '/pec',
   },
   PROTOCOL: {
-    GET_AGENDA: '/protocolAgenda',
+    GET_AGENDA: '/patient/protocolAgenda/list',
   },
   SESSION_TRACKING: {
-    GET_SESSIONS: '/getSessionTracking',
-    CREATE_SESSIONS: '/sessionTracking',
-    UPDATE_SESSION: '/updateSessionTracking',
+    GET_SESSIONS: '/patient/sessionTracking/list',
+    CREATE_SESSIONS: '/patient/sessionTracking/add',
+    UPDATE_SESSION: '/patient/sessionTracking/update',
   },
 } as const
 
