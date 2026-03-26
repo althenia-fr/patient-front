@@ -1,4 +1,4 @@
-import { getResults } from './questionnaireResults'
+import { getResults, type QuestionnaireResult } from './questionnaireResults'
 
 export interface ChartDataPoint {
   week: number
@@ -68,8 +68,8 @@ export function getEvolutionMetrics(data: Record<string, any>): EvolutionMetrics
 }
 
 // Grouper les résultats par semaine pour le graphique
-export function getChartDataByWeek(): ChartDataPoint[] {
-  const results = getResults()
+export function getChartDataByWeek(providedResults?: QuestionnaireResult[]): ChartDataPoint[] {
+  const results = providedResults || getResults()
   const weekMap = new Map<number, ChartDataPoint>()
 
   // Initialiser les semaines avec des résultats

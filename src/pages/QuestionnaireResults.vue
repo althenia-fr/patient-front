@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch, onActivated } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getResults, getLatestResultByWeekAndQuestionnaire } from '@/utils/questionnaireResults'
+import { getLatestResultByWeekAndQuestionnaire } from '@/utils/questionnaireResults'
 import { getOnboarding } from '@/utils/onboarding'
 import { getProtocolAgenda, getQuestionnairesForWeekExcludingCalendar } from '@/utils/protocolAgenda'
 import { getChartDataByWeek } from '@/utils/chartData'
@@ -78,14 +78,14 @@ async function refreshResults() {
       
       results.value = flatResults
     } else {
-      results.value = getResults()
+      results.value = []
     }
   } catch (err) {
     console.error('Failed to fetch external results:', err)
-    results.value = getResults()
+    results.value = []
   }
   
-  chartData.value = getChartDataByWeek()
+  chartData.value = getChartDataByWeek(results.value)
 }
 
 onMounted(() => {
