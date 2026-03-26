@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { getProtocolStart } from '@/utils/protocol'
-import { seedAllDemoData } from '@/utils/demoQuestionnaireData'
+import apiClient from '@/services/core/apiClient'
 import { calculateMonthlyStats, calculateGlobalStats, getChartDataByWeek } from '@/utils/mictionnelStats'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js'
 import { Chart } from 'vue-chartjs'
@@ -471,6 +470,7 @@ const toggleMictionEdit = (miction: MictionData) => {
       totalUrine: currentDay.value.totalUrine,
       totalLeaks: currentDay.value.totalLeaks,
     })
+    saveDayData()
   }
 }
 
@@ -510,6 +510,7 @@ const toggleLeakEdit = (leak: LeakData) => {
       totalUrine: currentDay.value.totalUrine,
       totalLeaks: currentDay.value.totalLeaks,
     })
+    saveDayData()
   }
 }
 
@@ -551,6 +552,7 @@ const toggleHydricIntakeEdit = (hydricIntake: HydricIntakeEntry) => {
       totalUrine: currentDay.value.totalUrine,
       totalLeaks: currentDay.value.totalLeaks,
     })
+    saveDayData()
   }
 }
 
@@ -575,7 +577,8 @@ const saveDayData = async () => {
     return
   }
   
-  if (currentDay.value.hydricIntake < 0) {
+  const hasNegativeHydric = currentDay.value.hydricIntakes.some(h => h.quantity < 0)
+  if (hasNegativeHydric) {
     errorMessage.value = 'L\'apport hydrique ne peut pas être négatif'
     return
   }
@@ -592,43 +595,42 @@ const saveDayData = async () => {
   loading.value = true
   
   try {
+    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const user = JSON.parse(userStr)
+    const patientId = user.uid || user.id || null
     const payload = {
+      patientId: patientId,
+      formType: 'Mictionnel',
       date: currentDay.value.date,
-      mictions: currentDay.value.mictions.map(m => ({
-        time: m.time,
-        volume: m.volume,
-        urge: m.urge,
-        particularities: m.particularities,
-        circumstances: m.circumstances,
-        precautionDetails: m.precautionDetails.length > 0 ? m.precautionDetails : undefined,
-      })),
-      leaks: currentDay.value.leaks.map(leak => ({
-        time: leak.time,
-        intensity: leak.intensity,
-        circumstances: leak.circumstances,
-        otherText: leak.otherText,
-      })),
-      hydricIntakes: currentDay.value.hydricIntakes.map(h => ({
-        time: h.time,
-        drinkType: h.drinkType,
-        quantity: h.quantity,
-        otherDrink: h.otherDrink,
-      })),
-      totalUrine: currentDay.value.totalUrine,
-      totalLeaks: currentDay.value.totalLeaks,
-    }
-    
-    const response = await fetch('/api/mictionnel', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+      answers: {
+        mictions: currentDay.value.mictions.map(m => ({
+          time: m.time,
+          volume: m.volume,
+          urge: m.urge,
+          particularities: m.particularities,
+          circumstances: m.circumstances,
+          precautionDetails: m.precautionDetails.length > 0 ? m.precautionDetails : undefined,
+        })),
+        leaks: currentDay.value.leaks.map(leak => ({
+          time: leak.time,
+          intensity: leak.intensity,
+          circumstances: leak.circumstances,
+          otherText: leak.otherText,
+        })),
+        hydricIntakes: currentDay.value.hydricIntakes.map(h => ({
+          time: h.time,
+          drinkType: h.drinkType,
+          quantity: h.quantity,
+          otherDrink: h.otherDrink,
+        })),
       },
-      body: JSON.stringify(payload),
-    })
-    
-    if (!response.ok) {
-      throw new Error('Erreur lors de l\'envoi')
+      scores: {
+        totalUrine: currentDay.value.totalUrine,
+        totalLeaks: currentDay.value.totalLeaks,
+      }
     }
+    
+    await apiClient.post('/formSubmission/add', payload)
     
     // Save to local results
     if (currentDay.value) {
@@ -690,13 +692,6 @@ onMounted(() => {
 
       <div v-if="successMessage" class="rounded-xl bg-green-50 border border-green-200 p-4">
         <p class="text-sm text-green-700 font-medium">✓ {{ successMessage }}</p>
-      </div>
-
-      <div class="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4 text-center">
-        <p class="text-sm text-gray-700 mb-3">Charger les données de démonstration (26 semaines complètes)?</p>
-        <button @click="loadDemoData" class="w-full rounded-full bg-brand-primary text-white font-semibold py-3 transition hover:bg-brand-primary/90">
-          📥 Charger les données de démo
-        </button>
       </div>
 
       <button

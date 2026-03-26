@@ -12,6 +12,7 @@ import { useSessionTracking } from '@/composables/useSessionTracking'
 import { protocolApi } from '@/services/api'
 import type { ProtocolAgendaData } from '@/types/protocol.types'
 import { formIdToRouteName, formIdToDisplayName } from '@/types/protocol.types'
+import apiClient from '@/services/core/apiClient'
 
 const reminder = ref(readConf())
 const remEnabled = computed(() => reminder.value.enabled)
@@ -21,6 +22,7 @@ const remTime = computed(() => `${String(reminder.value.hour).padStart(2,'0')}:$
 const protocolAgenda = ref<ProtocolAgendaData | null>(null)
 const agendaLoading = ref(false)
 const agendaError = ref<string | null>(null)
+const completedForms = ref<string[]>([])
 
 // Session tracking state
 const { 
@@ -49,11 +51,40 @@ const fetchProtocolAgenda = async () => {
         // Don't fail the whole page if session tracking fails
       }
     }
+    // Fetch completed forms to filter them from the agenda
+    await fetchCompletedForms()
   } catch (error: any) {
     console.error('Failed to fetch protocol agenda:', error)
     agendaError.value = error.message || 'Impossible de charger l\'agenda du protocole'
   } finally {
     agendaLoading.value = false
+  }
+}
+
+const fetchCompletedForms = async () => {
+  try {
+    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const user = JSON.parse(userStr)
+    const patientId = user.uid || user.id || null
+    
+    const response = await apiClient.get('/formSubmission/list', {
+      params: { patientId }
+    })
+    const apiData = response.data?.data || response.data || []
+    
+    const currentWeekApiData = Array.isArray(apiData) 
+      ? apiData.find((w: any) => String(w.weekNumber) === String(currentWeek.value)) 
+      : null
+      
+    if (currentWeekApiData && currentWeekApiData.forms) {
+      completedForms.value = currentWeekApiData.forms
+        .filter((f: any) => f.submissions && f.submissions.length > 0)
+        .map((f: any) => String(f.formType).toUpperCase())
+    } else {
+      completedForms.value = []
+    }
+  } catch (e) {
+    console.error('Failed to fetch completed forms', e)
   }
 }
 
@@ -68,11 +99,26 @@ onMounted(() => {
   fetchProtocolAgenda()
 })
 
-// Computed property for current week forms
 const currentWeekForms = computed(() => {
   if (!protocolAgenda.value) return []
   let res = protocolApi.getCurrentWeekForms(protocolAgenda.value, currentWeek.value)
-  return res
+  
+  // Automatically hide forms that have already been submitted this week
+  return res.filter((form: any) => {
+    const displayName = formIdToDisplayName(form.formId) || ''
+    const upperName = displayName.toUpperCase()
+    
+    const isCompleted = completedForms.value.some(completedType => {
+       if (upperName.includes('QUALIVEEN') && completedType.includes('QUALIVEEN')) return true
+       if (upperName.includes('SATISFACTION') && completedType.includes('SATISFACTION')) return true
+       if ((upperName.includes('PG') || upperName.includes('PGI')) && (completedType.includes('PG') || completedType.includes('PGI'))) return true
+       if ((upperName.includes('EVOLUTION') || upperName.includes('ÉVOLUTION') || upperName.includes('THERA')) && (completedType.includes('EVOLUTION') || completedType.includes('THERA') || completedType.includes('ÉVOLUTION'))) return true
+       if (upperName.includes('MICTIONNEL') && completedType.includes('MICTIONNEL')) return true
+       if (upperName.includes('USP') && completedType.includes('USP')) return true
+       return completedType === upperName
+    })
+    return !isCompleted
+  })
 })
 
 const week = computed(() => {

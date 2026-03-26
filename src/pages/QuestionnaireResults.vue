@@ -3,7 +3,6 @@ import { computed, ref, onMounted, watch, onActivated } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getResults, getLatestResultByWeekAndQuestionnaire } from '@/utils/questionnaireResults'
 import { getOnboarding } from '@/utils/onboarding'
-import { seedAllDemoData } from '@/utils/demoQuestionnaireData'
 import { getProtocolAgenda, getQuestionnairesForWeekExcludingCalendar } from '@/utils/protocolAgenda'
 import { getChartDataByWeek } from '@/utils/chartData'
 import type { QuestionnaireResult } from '@/utils/questionnaireResults'
@@ -14,23 +13,79 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const router = useRouter()
 const route = useRoute()
-const showDemoButton = ref(true)
 const results = ref<QuestionnaireResult[]>([])
+const apiRawWeeks = ref<any[]>([])
 const chartData = ref([])
 const expandedWeeks = ref<Set<number>>(new Set())
 
 const protocolDuration = computed(() => getOnboarding()?.protocolDuration || 13)
 const protocolAgenda = computed(() => getProtocolAgenda(protocolDuration.value))
 
-function refreshResults() {
-  results.value = getResults()
-  chartData.value = getChartDataByWeek()
-  showDemoButton.value = results.value.length === 0
+import apiClient from '@/services/core/apiClient'
+
+function normalizeFormType(type: string): string {
+  const upper = String(type).toUpperCase()
+  if (upper.includes('QUALIVEEN')) return 'Qualiveen'
+  if (upper.includes('SATISFACTION')) return 'Satisfaction'
+  if (upper.includes('PG') || upper.includes('PG-I') || upper.includes('PGI')) return 'PG-I'
+  if (upper.includes('EVOLUTION') || upper.includes('ÉVOLUTION') || upper.includes('THERA')) return 'Evolution Thérapeutique'
+  if (upper.includes('MICTIONNEL')) return 'Calendrier Mictionnel'
+  if (upper.includes('USP')) return 'USP'
+  return type
 }
 
-function loadDemoData() {
-  seedAllDemoData()
-  refreshResults()
+async function refreshResults() {
+  try {
+    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const user = JSON.parse(userStr)
+    const patientId = user.uid || user.id || null
+    
+    const response = await apiClient.get('/formSubmission/list', {
+      params: { patientId }
+    })
+    
+    const apiData = response.data?.data || response.data || []
+    apiRawWeeks.value = Array.isArray(apiData) ? apiData : []
+    const flatResults: QuestionnaireResult[] = []
+    
+    if (Array.isArray(apiData)) {
+      apiData.forEach((weekGroup: any) => {
+        const weekNum = weekGroup.weekNumber
+        const forms = weekGroup.forms || []
+        
+        forms.forEach((formGroup: any) => {
+          const type = normalizeFormType(formGroup.formType)
+          const submissions = formGroup.submissions || []
+          
+          submissions.forEach((sub: any) => {
+            // Reconstruct the flat 'data' object the frontend expects
+            const dataObj = {
+               ...(sub.answers || {}),
+               scores: sub.scores || {}
+            }
+            
+            flatResults.push({
+              id: String(sub.id || Math.random()),
+              questionnaireName: type,
+              date: sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR'),
+              timestamp: sub.submittedAt ? new Date(sub.submittedAt).getTime() : Date.now(),
+              week: weekNum,
+              data: dataObj
+            })
+          })
+        })
+      })
+      
+      results.value = flatResults
+    } else {
+      results.value = getResults()
+    }
+  } catch (err) {
+    console.error('Failed to fetch external results:', err)
+    results.value = getResults()
+  }
+  
+  chartData.value = getChartDataByWeek()
 }
 
 onMounted(() => {
@@ -52,13 +107,30 @@ watch(() => route.name, (newRouteName) => {
 const resultsByWeek = computed(() => {
   const weeks: Record<number, Record<string, QuestionnaireResult[]>> = {}
 
-  for (let week = 1; week <= protocolDuration.value; week++) {
-    weeks[week] = {}
-    const questionnairesInAgenda = getQuestionnairesForWeekExcludingCalendar(week, protocolDuration.value)
+  // Pre-fill every week and every form the API knows about (even if empty)
+  for (const weekData of apiRawWeeks.value) {
+    const w = weekData.weekNumber
+    if (!weeks[w]) weeks[w] = {}
+    for (const f of weekData.forms || []) {
+      const type = normalizeFormType(f.formType)
+      weeks[w][type] = []
+    }
+  }
 
-    for (const questionnaire of questionnairesInAgenda) {
-      const matching = results.value.filter(r => r.week === week && r.questionnaireName === questionnaire).sort((a, b) => b.timestamp - a.timestamp)
-      weeks[week][questionnaire] = matching
+  // Populate buckets with actual submissions
+  for (const r of results.value) {
+    if (!weeks[r.week]) {
+      weeks[r.week] = {}
+    }
+    if (!weeks[r.week][r.questionnaireName]) {
+      weeks[r.week][r.questionnaireName] = []
+    }
+    weeks[r.week][r.questionnaireName].push(r)
+  }
+
+  for (const week in weeks) {
+    for (const q in weeks[week]) {
+      weeks[week][q].sort((a, b) => b.timestamp - a.timestamp)
     }
   }
 
@@ -66,14 +138,9 @@ const resultsByWeek = computed(() => {
 })
 
 const weeksShouldDisplay = computed(() => {
-  const weeksWithContent: number[] = []
-  for (let week = 1; week <= protocolDuration.value; week++) {
-    const questionnaires = getQuestionnairesForWeekExcludingCalendar(week, protocolDuration.value)
-    if (questionnaires.length > 0) {
-      weeksWithContent.push(week)
-    }
-  }
-  return weeksWithContent
+  return Object.keys(resultsByWeek.value)
+    .map(Number)
+    .sort((a, b) => a - b)
 })
 
 function getQuestionnaireStatus(results: QuestionnaireResult[]) {
@@ -329,13 +396,6 @@ function getBarChartData() {
       </div>
     </header>
 
-    <div class="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4 text-center">
-      <p class="text-sm text-gray-700 mb-3">Charger les données de démonstration (26 semaines complètes)?</p>
-      <button @click="loadDemoData" class="w-full btn-primary">
-        Charger les données de démonstration
-      </button>
-    </div>
-
     <div v-if="results.length === 0" class="rounded-2xl border border-gray-100 bg-white p-6 text-center">
       <p class="text-gray-500">Aucun résultat enregistré pour le moment.</p>
     </div>
@@ -355,7 +415,7 @@ function getBarChartData() {
 
         <!-- Questionnaires for this week -->
         <div v-show="isWeekExpanded(week)" class="divide-y">
-          <div v-for="questionnaire in getQuestionnairesForWeekExcludingCalendarFn(week, protocolDuration)" :key="questionnaire" class="p-4 hover:bg-gray-50 transition">
+          <div v-for="(resultsArr, questionnaire) in resultsByWeek[week]" :key="String(questionnaire)" class="p-4 hover:bg-gray-50 transition">
             <!-- If multiple results, show each one -->
             <div v-if="resultsByWeek[week][questionnaire].length > 1" class="space-y-3">
               <div class="flex items-center justify-between">

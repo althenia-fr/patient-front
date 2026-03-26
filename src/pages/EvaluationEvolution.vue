@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { saveResult } from '@/utils/questionnaireResults'
+import apiClient from '@/services/core/apiClient'
 
 const router = useRouter()
 
@@ -88,24 +89,25 @@ const submitQuestionnaire = async () => {
   loading.value = true
 
   try {
+    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const user = JSON.parse(userStr)
+    const patientId = user.uid || user.id || null
     const payload = {
+      patientId: patientId,
+      formType: 'Evolution Thérapeutique',
       date: data.value.date,
-      urgenturies: data.value.urgenturies,
-      mictions_nocturnes: data.value.mictions_nocturnes,
-      fuites_urinaires: data.value.fuites_urinaires,
-      douleur: data.value.douleur,
-      protections: data.value.protections,
+      answers: {
+        urgenturies: data.value.urgenturies,
+        mictions_nocturnes: data.value.mictions_nocturnes,
+        fuites_urinaires: data.value.fuites_urinaires,
+        douleur: data.value.douleur,
+        protections: data.value.protections,
+      },
     }
 
     saveResult('Evolution Thérapeutique', payload)
 
-    const response = await fetch('/api/evaluation-evolution', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    }).catch(() => null)
+    const response = await apiClient.post('/formSubmission/add', payload).catch(() => null)
 
     successMessage.value = 'Questionnaire envoyé avec succès !'
     setTimeout(() => {

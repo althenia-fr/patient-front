@@ -2,7 +2,7 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { authUser } from '@/utils/auth'
 import { getWeekInfo } from '@/utils/protocol'
-import { getPoints, getMaxPoints, seedDemoIfEmpty } from '@/utils/gamification'
+import { getPoints, getMaxPoints } from '@/utils/gamification'
 import { getOnboarding } from '@/utils/onboarding'
 import { protocolApi } from '@/services/api'
 import { useGlobalTimer } from '@/composables/useGlobalTimer'
@@ -67,7 +67,6 @@ const week = computed(() => {
 
 const unread = ref(0)
 onMounted(() => {
-  seedDemoIfEmpty(75)
   fetchProtocolAgenda() // Fetch protocol agenda on mount
   
   const readUnread = () => {
