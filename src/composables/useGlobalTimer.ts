@@ -126,7 +126,8 @@ export function useGlobalTimer() {
         }
         
         const createdSessions = await createSessions(payload)
-        if (createdSessions.length > 0) {
+        console.log('createdSessions', createdSessions);
+        if (createdSessions?.length > 0) {
           globalState.sessionId.value = createdSessions[0].id
           console.log('Global session tracking created:', createdSessions[0])
         }

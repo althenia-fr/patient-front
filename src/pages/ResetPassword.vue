@@ -59,8 +59,8 @@ async function handleSubmit() {
     const response = await authApi.resetPassword({
       email: email.value,
       resetToken: token.value,
-      newPassword: password.value,
-      confirmPassword: confirmPassword.value
+      password: password.value,
+      confirm: confirmPassword.value
     })
 
     if (response.success) {

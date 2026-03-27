@@ -37,8 +37,8 @@ export interface PasswordResetRequest {
 export interface PasswordEditRequest {
     email: string
     resetToken: string
-    newPassword: string
-    confirmPassword: string
+    password: string
+    confirm: string
 }
 
 export interface UserData {
