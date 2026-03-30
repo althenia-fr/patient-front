@@ -154,6 +154,21 @@ const usp1Week = computed(() => {
 })
 
 const protocolAgenda = computed(() => {
+  if (fetchedAgenda.value) {
+    // Build agenda dynamically from the API response
+    const total = fetchedAgenda.value.durationWeeks
+    const protocolWeeks = fetchedAgenda.value.Protocol
+    const items = []
+    for (let week = 1; week <= total; week++) {
+      const match = protocolWeeks.find((pw) => pw.weekNumber === week)
+      const questionnaires = match
+        ? match.forms.map((f) => formIdToDisplayName(f.formId))
+        : []
+      items.push({ week, questionnaires })
+    }
+    return items
+  }
+  // Fallback to local static calculation while loading
   return getProtocolAgenda(protocolDuration.value)
 })
 
