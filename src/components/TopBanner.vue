@@ -2,8 +2,12 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { authUser } from '@/utils/auth'
 import { getWeekInfo } from '@/utils/protocol'
-import { getPoints, getMaxPoints, seedDemoIfEmpty } from '@/utils/gamification'
+import { getPoints, getMaxPoints } from '@/utils/gamification'
 import { getOnboarding } from '@/utils/onboarding'
+import { protocolApi } from '@/services/api'
+import { useGlobalTimer } from '@/composables/useGlobalTimer'
+import GlobalTimer from '@/components/GlobalTimer.vue'
+import type { ProtocolAgendaData } from '@/types/protocol.types'
 
 const firstName = computed(() => {
   const meta = authUser.value?.user_metadata || {}
@@ -13,19 +17,61 @@ const firstName = computed(() => {
   const base = raw.split(/[._-]/)[0] || raw
   return base.charAt(0).toUpperCase() + base.slice(1)
 })
-const week = computed(() => getWeekInfo())
-const protocolDuration = computed(() => getOnboarding()?.protocolDuration || 13)
-const sessionCount = computed(() => getOnboarding()?.sessionCount || 1)
-const points = computed(() => getPoints())
-const max = computed(() => getMaxPoints(protocolDuration.value, sessionCount.value))
-const pct = computed(() => (max.value ? points.value / max.value : 0))
 
-const tier = computed<'bronze' | 'silver' | 'gold'>(() => pct.value >= 0.66 ? 'gold' : pct.value >= 0.33 ? 'silver' : 'bronze')
-const star = computed(() => tier.value === 'gold' ? '#ffd54f' : tier.value === 'silver' ? '#c0c0c0' : '#cd7f32')
+// Protocol agenda state
+const protocolAgenda = ref<ProtocolAgendaData | null>(null)
+const agendaLoading = ref(false)
+
+// Global timer
+const { initializeTimer } = useGlobalTimer()
+
+// Fetch protocol agenda and initialize timer
+const fetchProtocolAgenda = async () => {
+  try {
+    agendaLoading.value = true
+    protocolAgenda.value = await protocolApi.getProtocolAgenda()
+    
+    // Initialize timer to check for existing sessions
+    if (protocolAgenda.value) {
+      const sessionDuration = protocolAgenda.value?.sessionDurationMin || getOnboarding()?.sessionDuration || 20
+      await initializeTimer(protocolAgenda.value, sessionDuration)
+    }
+  } catch (error) {
+    console.error('Failed to fetch protocol agenda in TopBanner:', error)
+    // Continue with fallback data if API fails
+  } finally {
+    agendaLoading.value = false
+  }
+}
+
+const week = computed(() => {
+  if (protocolAgenda.value) {
+    return getWeekInfo(protocolAgenda.value)
+  }
+  // Fallback to onboarding data
+  return getWeekInfo()
+})
+
+// const protocolDuration = computed(() => {
+//   // Use API data if available, otherwise fallback to onboarding
+//   return protocolAgenda.value?.durationWeeks || getOnboarding()?.protocolDuration || 13
+// })
+
+// const sessionCount = computed(() => getOnboarding()?.sessionCount || 1)
+// const points = computed(() => getPoints())
+// const max = computed(() => getMaxPoints(protocolDuration.value, sessionCount.value))
+// const pct = computed(() => (max.value ? points.value / max.value : 0))
+
+// const tier = computed<'bronze' | 'silver' | 'gold'>(() => pct.value >= 0.66 ? 'gold' : pct.value >= 0.33 ? 'silver' : 'bronze')
+// const star = computed(() => tier.value === 'gold' ? '#ffd54f' : tier.value === 'silver' ? '#c0c0c0' : '#cd7f32')
 
 const unread = ref(0)
 onMounted(() => {
-  seedDemoIfEmpty(75)
+  // Only fetch protocol agenda if user is authenticated
+  if (authUser.value) {
+    fetchProtocolAgenda()
+  }
+  
   const readUnread = () => {
     const v = Number(localStorage.getItem('unread_notifications') || '0')
     unread.value = Number.isNaN(v) ? 0 : v
@@ -50,12 +96,15 @@ onMounted(() => {
           <div>
             <div class="text-base font-bold whitespace-nowrap">Bonjour, {{ firstName }}</div>
             <span class="inline-flex items-center gap-2 rounded-full bg-brand-secondary/30 px-3 py-1 text-xs font-semibold text-gray-700 whitespace-nowrap">
-              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-              Actif • Semaine {{ week.current }}/{{ week.total }}
+              <!-- <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> -->
+              Semaine {{ week.current }}/{{ week.total }}
             </span>
           </div>
         </div>
-        <div class="flex items-center gap-6"></div>
+        <div class="flex items-center gap-6">
+          <!-- Global Timer -->
+          <GlobalTimer />
+        </div>
       </div>
     </div>
   </div>

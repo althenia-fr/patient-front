@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { saveResult } from '@/utils/questionnaireResults'
+import apiClient from '@/services/core/apiClient'
 
 const router = useRouter()
 
@@ -163,7 +164,13 @@ const submitQuestionnaire = async () => {
   loading.value = true
 
   try {
+    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const user = JSON.parse(userStr)
+    const patientId = user.uid || user.id || null
+
     const payload = {
+      patientId: patientId,
+      formType: 'Qualiveen',
       date: data.value.date,
       answers: data.value.answers,
       scores: scores.value,
@@ -171,13 +178,7 @@ const submitQuestionnaire = async () => {
 
     saveResult('Qualiveen', payload)
 
-    const response = await fetch('/api/qualiveen', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    }).catch(() => null)
+    const response = await apiClient.post('/formSubmission/add', payload).catch(() => null)
 
     successMessage.value = 'Questionnaire envoyé avec succès !'
     setTimeout(() => {

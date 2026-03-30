@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { saveResult } from '@/utils/questionnaireResults'
+import apiClient from '@/services/core/apiClient'
 
 const router = useRouter()
 
@@ -82,21 +83,20 @@ const submitQuestionnaire = async () => {
   loading.value = true
 
   try {
+    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const user = JSON.parse(userStr)
+    const patientId = user.uid || user.id || null
     const payload = {
+      patientId: patientId,
+      formType: 'Satisfaction',
       date: data.value.date,
-      satisfaction: data.value.satisfaction,
-      satisfactionScore: getNumericScore(data.value.satisfaction),
+      answers: { satisfaction: data.value.satisfaction },
+      scores: { satisfactionScore: getNumericScore(data.value.satisfaction) },
     }
 
     saveResult('Satisfaction', payload)
 
-    const response = await fetch('/api/satisfaction', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    }).catch(() => null)
+    const response = await apiClient.post('/formSubmission/add', payload).catch(() => null)
 
     successMessage.value = 'Votre réponse a été enregistrée'
     setTimeout(() => {

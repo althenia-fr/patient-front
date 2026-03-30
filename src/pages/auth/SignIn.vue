@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { signIn } from '@/utils/auth'
+import { authApi } from '@/services/auth.service'
+import { authUser } from '@/utils/auth'
 
 const router = useRouter()
 const route = useRoute()
@@ -12,12 +13,18 @@ const remember = ref(false)
 const error = ref('')
 const loading = ref(false)
 
+onMounted(() => {
+  if (authUser.value) {
+    router.replace('/home')
+  }
+})
+
 async function submit(e: Event) {
   e.preventDefault()
   error.value = ''
   loading.value = true
   try {
-    await signIn(email.value, password.value, remember.value)
+    await authApi.login({ email: email.value, password: password.value })
     const redirect = (route.query.redirect as string) || '/home'
     router.replace(redirect)
   } catch (err: any) {

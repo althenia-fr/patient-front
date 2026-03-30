@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { signUp, signIn } from '@/utils/auth'
+import { authApi } from '@/services/auth.service'
 
 const router = useRouter()
 const route = useRoute()
 const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
+const phone = ref('')
 const password = ref('')
 const confirm = ref('')
 const consent = ref(false)
 const error = ref('')
 const loading = ref(false)
+const signupSuccess = ref(false)
 
 async function submit(e: Event) {
   e.preventDefault()
@@ -21,9 +23,21 @@ async function submit(e: Event) {
   if (!consent.value) { error.value = 'Le consentement est requis'; return }
   loading.value = true
   try {
-    await signUp(email.value, password.value, { firstName: firstName.value, lastName: lastName.value, consent: true })
-    await signIn(email.value, password.value)
-    router.push('/home')
+    await authApi.signUp({
+      firstname: firstName.value,
+      lastname: lastName.value,
+      email: email.value,
+      mobile: phone.value,
+      password: password.value,
+      confirmPassword: confirm.value,
+      service: '',
+      admin: false,
+      role: 'patient',
+      rpps: 0,
+      url: '',
+      app: 'patient',
+    })
+    signupSuccess.value = true
   } catch (err: any) {
     error.value = err?.message || 'Échec de l’inscription'
   } finally {
@@ -51,12 +65,28 @@ async function submit(e: Event) {
     </nav>
     <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-soft">
       <h2 class="mb-4 text-center text-2xl font-extrabold">Créer un compte</h2>
-    <form class="space-y-3" @submit="submit">
+    
+    <div v-if="signupSuccess" class="text-center space-y-4 py-4">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+        <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900">Inscription réussie !</h3>
+      <p class="text-gray-600 px-2">
+        Un email de confirmation a été envoyé à <strong>{{ email }}</strong>. 
+        Veuillez confirmer votre compte avant de vous connecter.
+      </p>
+      <RouterLink to="/signin" class="btn-primary block w-full text-center">Aller à la page de connexion</RouterLink>
+    </div>
+
+    <form v-else class="space-y-3" @submit="submit">
       <div class="grid grid-cols-2 gap-3">
         <input v-model="firstName" class="rounded-xl border border-gray-200 p-3" placeholder="Prénom" required />
         <input v-model="lastName" class="rounded-xl border border-gray-200 p-3" placeholder="Nom" required />
       </div>
       <input v-model="email" class="w-full rounded-xl border border-gray-200 p-3" type="email" placeholder="Email" required />
+      <input v-model="phone" class="w-full rounded-xl border border-gray-200 p-3" type="tel" placeholder="Numéro de téléphone" required />
       <input v-model="password" class="w-full rounded-xl border border-gray-200 p-3" type="password" placeholder="Mot de passe" required />
       <input v-model="confirm" class="w-full rounded-xl border border-gray-200 p-3" type="password" placeholder="Confirmer le mot de passe" required />
       <label class="flex w-full items-start gap-3 text-sm">

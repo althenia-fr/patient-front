@@ -16,6 +16,17 @@ function readUsers(): User[] {
 function writeUsers(users: User[]) { localStorage.setItem(USERS_KEY, JSON.stringify(users)) }
 
 export async function initAuth() {
+  // Check real auth first
+  const realUser = sessionStorage.getItem('alth_user')
+  if (realUser) {
+    try {
+      const data = JSON.parse(realUser)
+      authUser.value = { email: data.email, user_metadata: data }
+      return
+    } catch (e) { /* ignore */ }
+  }
+
+  // Fallback to mock auth
   const email = localStorage.getItem(CURRENT_KEY) || sessionStorage.getItem(CURRENT_KEY)
   if (!email) { authUser.value = null; return }
   const user = readUsers().find(u => u.email === email) || null
@@ -44,8 +55,16 @@ export async function signIn(email: string, password: string, remember = true) {
 }
 
 export async function signOut() {
+  // Clear mock auth
   localStorage.removeItem(CURRENT_KEY)
   sessionStorage.removeItem(CURRENT_KEY)
+  
+  // Clear real auth tokens
+  sessionStorage.removeItem('auth_token')
+  sessionStorage.removeItem('refresh_token')
+  sessionStorage.removeItem('alth_user')
+  
+  // Clear auth state
   authUser.value = null
 }
 

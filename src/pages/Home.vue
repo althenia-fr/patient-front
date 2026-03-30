@@ -8,10 +8,85 @@ import { getHistory, ACTION_POINTS } from '@/utils/gamification'
 import { listMeasures } from '@/utils/measures'
 import { listSessions } from '@/utils/sessions'
 import { useProtocol } from '@/composables/useProtocol'
+import { useSessionTracking } from '@/composables/useSessionTracking'
+import { protocolApi } from '@/services/api'
+import type { ProtocolAgendaData } from '@/types/protocol.types'
+import { formIdToRouteName, formIdToDisplayName } from '@/types/protocol.types'
+import apiClient from '@/services/core/apiClient'
 
 const reminder = ref(readConf())
 const remEnabled = computed(() => reminder.value.enabled)
 const remTime = computed(() => `${String(reminder.value.hour).padStart(2,'0')}:${String(reminder.value.minute).padStart(2,'0')}`)
+
+// Protocol agenda state
+const protocolAgenda = ref<ProtocolAgendaData | null>(null)
+const agendaLoading = ref(false)
+const agendaError = ref<string | null>(null)
+const completedForms = ref<string[]>([])
+
+// Session tracking state
+const { 
+  sessions: trackedSessions, 
+  loading: sessionsLoading, 
+  error: sessionsError,
+  fetchSessions,
+  createSessions,
+  updateSession
+} = useSessionTracking()
+
+// Fetch protocol agenda on component mount
+const fetchProtocolAgenda = async () => {
+  try {
+    agendaLoading.value = true
+    agendaError.value = null
+    protocolAgenda.value = await protocolApi.getProtocolAgenda()
+    
+    // After getting protocol agenda, fetch session tracking data
+    if (protocolAgenda.value?.Protocol?.length > 0) {
+      const pecId = protocolAgenda.value.Protocol[0].pecId
+      try {
+        await fetchSessions(pecId)
+      } catch (sessionError) {
+        console.warn('Failed to fetch session tracking data:', sessionError)
+        // Don't fail the whole page if session tracking fails
+      }
+    }
+    // Fetch completed forms to filter them from the agenda
+    await fetchCompletedForms()
+  } catch (error: any) {
+    console.error('Failed to fetch protocol agenda:', error)
+    agendaError.value = error.message || 'Impossible de charger l\'agenda du protocole'
+  } finally {
+    agendaLoading.value = false
+  }
+}
+
+const fetchCompletedForms = async () => {
+  try {
+    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const user = JSON.parse(userStr)
+    const patientId = user.uid || user.id || null
+    
+    const response = await apiClient.get('/formSubmission/list', {
+      params: { patientId }
+    })
+    const apiData = response.data?.data || response.data || []
+    
+    const currentWeekApiData = Array.isArray(apiData) 
+      ? apiData.find((w: any) => String(w.weekNumber) === String(currentWeek.value)) 
+      : null
+      
+    if (currentWeekApiData && currentWeekApiData.forms) {
+      completedForms.value = currentWeekApiData.forms
+        .filter((f: any) => f.submissions && f.submissions.length > 0)
+        .map((f: any) => String(f.formType).toUpperCase())
+    } else {
+      completedForms.value = []
+    }
+  } catch (e) {
+    console.error('Failed to fetch completed forms', e)
+  }
+}
 
 onMounted(() => {
   const read = () => { try { reminder.value = readConf() } catch {}
@@ -19,11 +94,36 @@ onMounted(() => {
   window.addEventListener('storage', read)
   const id = window.setInterval(read, 2000)
   onUnmounted(() => { window.removeEventListener('storage', read); clearInterval(id) })
+  
+  // Fetch protocol agenda when component mounts
+  fetchProtocolAgenda()
+})
+
+const currentWeekForms = computed(() => {
+  if (!protocolAgenda.value) return []
+  let res = protocolApi.getCurrentWeekForms(protocolAgenda.value, currentWeek.value)
+  
+  // Automatically hide forms that have already been submitted this week
+  return res.filter((form: any) => {
+    const displayName = formIdToDisplayName(form.formId) || ''
+    const upperName = displayName.toUpperCase()
+    
+    const isCompleted = completedForms.value.some(completedType => {
+       if (upperName.includes('QUALIVEEN') && completedType.includes('QUALIVEEN')) return true
+       if (upperName.includes('SATISFACTION') && completedType.includes('SATISFACTION')) return true
+       if ((upperName.includes('PG') || upperName.includes('PGI')) && (completedType.includes('PG') || completedType.includes('PGI'))) return true
+       if ((upperName.includes('EVOLUTION') || upperName.includes('ÉVOLUTION') || upperName.includes('THERA')) && (completedType.includes('EVOLUTION') || completedType.includes('THERA') || completedType.includes('ÉVOLUTION'))) return true
+       if (upperName.includes('MICTIONNEL') && completedType.includes('MICTIONNEL')) return true
+       if (upperName.includes('USP') && completedType.includes('USP')) return true
+       return completedType === upperName
+    })
+    return !isCompleted
+  })
 })
 
 const week = computed(() => {
-  protocolDuration.value
-  return getWeekInfo()
+  const weekInfo = getWeekInfo(protocolAgenda.value || undefined)
+  return weekInfo
 })
 const today = computed(() => {
   try {
@@ -35,65 +135,84 @@ const today = computed(() => {
 })
 
 const history = computed(() => getHistory())
+
 const sessionsDone = computed(() => {
-  const date = getOnboarding()?.protocolStartDate
+  const date = protocolAgenda.value?.startDate || getOnboarding()?.protocolStartDate
   if (!date) return 0
-  const startDate = new Date(date).getTime()
-  return history.value.filter(h => {
-    const isSession = h.points === ACTION_POINTS.sessionComplete || /séance/i.test(h.reason || '')
-    const entryDate = new Date(h.date).getTime()
-    return isSession && entryDate >= startDate
+  
+  // Use session tracking API data instead of history
+  const startDate = new Date(date)
+  const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime()
+  
+  return trackedSessions.value.filter(session => {
+    const sessionDate = new Date(session.date).getTime()
+    // Consider a session "done" if sessionTimeRemaining is 0 or less
+    return sessionDate >= startDateOnly && session.sessionTimeRemaining <= 0
   }).length
 })
+
 const incompleteSessionsCount = computed(() => {
-  const date = getOnboarding()?.protocolStartDate
+  const date = protocolAgenda.value?.startDate || getOnboarding()?.protocolStartDate
   if (!date) return 0
-  const startDate = new Date(date).getTime()
-  const sessions = listSessions()
-  return sessions.filter(s => {
-    const sessionDate = new Date(s.date).getTime()
-    return s.durationSec < 1200 && sessionDate >= startDate
+  
+  // Use session tracking API data instead of listSessions
+  const startDate = new Date(date)
+  const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime()
+  
+  return trackedSessions.value.filter(session => {
+    const sessionDate = new Date(session.date).getTime()
+    // Consider a session "incomplete" if sessionTimeRemaining > 0
+    return sessionDate >= startDateOnly && session.sessionTimeRemaining > 0
   }).length
 })
+
+const adherence = computed(() => {
+  // Calculate adherence based on completed sessions vs expected sessions
+  const expectedSessions = daysElapsed.value // One session per day expected
+  const completedSessions = sessionsDone.value
+  
+  if (expectedSessions === 0) return 0
+  return Math.min(100, Math.round((completedSessions / expectedSessions) * 100))
+})
+
 const daysElapsed = computed(() => {
-  const date = getOnboarding()?.protocolStartDate
+  const date = protocolAgenda.value?.startDate || getOnboarding()?.protocolStartDate
   if (!date) return 1
   const msPerDay = 24*60*60*1000
   const startDay = new Date(new Date(date).getFullYear(), new Date(date).getMonth(), new Date(date).getDate()).getTime()
   const today = new Date(); const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
   return Math.max(1, Math.floor((todayDay - startDay)/msPerDay) + 1)
 })
-const adherence = computed(() => Math.min(100, Math.round((sessionsDone.value / daysElapsed.value) * 100)))
 
 const currentWeek = computed(() => {
   const daysElapsedValue = daysElapsed.value
   return Math.ceil(daysElapsedValue / 7)
 })
 
-const { protocolDuration } = useProtocol()
+const protocolDuration = computed(() => protocolAgenda?.value?.durationWeeks || 13)
 
 const protocolStartDate = computed(() => {
-  const date = getOnboarding()?.protocolStartDate
+  const date = protocolAgenda?.value?.startDate || getOnboarding()?.protocolStartDate
   if (!date) return '—'
   return new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }).replace('.', '').toUpperCase()
 })
 
 const protocolEndDate = computed(() => {
-  const date = getOnboarding()?.protocolStartDate
+  const date = protocolAgenda?.value?.startDate || getOnboarding()?.protocolStartDate
   if (!date) return '—'
   const startDate = new Date(date)
   const endDate = new Date(startDate)
-  endDate.setDate(endDate.getDate() + protocolDuration.value * 7)
+  endDate.setDate(endDate.getDate() + (protocolDuration.value) * 7)
   return endDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }).replace('.', '').toUpperCase()
 })
 
 const checkupWeek = computed(() => {
-  const date = getOnboarding()?.protocolStartDate
+  const date = protocolAgenda?.value?.startDate || getOnboarding()?.protocolStartDate
   if (!date || !protocolDuration.value) return null
 
   const startDate = new Date(date)
   const checkupDate = new Date(startDate)
-  checkupDate.setDate(checkupDate.getDate() + (protocolDuration.value - 1) * 7)
+  checkupDate.setDate(checkupDate.getDate() + ((protocolDuration.value) - 1) * 7)
 
   const msPerDay = 24*60*60*1000
   const startDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime()
@@ -104,7 +223,7 @@ const checkupWeek = computed(() => {
 })
 
 const protocolProgress = computed(() => {
-  const date = getOnboarding()?.protocolStartDate
+  const date = protocolAgenda?.value?.startDate || getOnboarding()?.protocolStartDate
   if (!date) return { percentage: 0, remaining: 0 }
   
   const startDate = new Date(date)
@@ -114,7 +233,7 @@ const protocolProgress = computed(() => {
   const startDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime()
   const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
   
-  const totalDays = protocolDuration.value * 7
+  const totalDays = (protocolDuration.value) * 7
   const elapsedDays = Math.max(0, Math.floor((todayDay - startDay) / msPerDay))
   const percentage = Math.min(100, Math.round((elapsedDays / totalDays) * 100))
   const remaining = Math.max(0, Math.round((totalDays - elapsedDays) / 7))
@@ -175,7 +294,7 @@ const protocolName = computed(() => {
   return `Protocole TENS ${specialty}`
 })
 
-const sessionCount = computed(() => getOnboarding()?.sessionCount || 1)
+// const sessionCount = computed(() => getOnboarding()?.sessionCount || 1)
 
 const tips = computed(() => {
   const list: string[] = []
@@ -208,46 +327,71 @@ const tips = computed(() => {
         <div class="text-center text-lg font-semibold text-gray-800">{{ today }}</div>
       </div>
       <div class="mt-3 space-y-2">
-        <template v-if="sessionCount === 1">
-          <RouterLink :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
-            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none bg-brand-secondary text-white">Débuter une nouvelle séance</div>
-          </RouterLink>
-        </template>
-        <template v-else>
-          <RouterLink :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
-            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none bg-brand-secondary text-white">Ma première séance du jour</div>
-          </RouterLink>
-          <RouterLink :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
-            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none bg-brand-secondary text-white">Ma deuxième séance du jour</div>
-          </RouterLink>
-        </template>
+        <RouterLink :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
+          <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none bg-brand-secondary text-white">Débuter une nouvelle séance</div>
+        </RouterLink>
       </div>
       <div v-if="lastSession" class="mt-2 text-center text-xs text-gray-500 sm:text-left">• Dernière séance: {{ lastSession }}</div>
     </div>
 
     <!-- Agenda de la semaine -->
     <div class="mt-4 rounded-2xl border border-gray-100 bg-white p-5">
-      <h2 class="text-lg font-semibold text-gray-800">Agenda de la semaine</h2>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold text-gray-800">Agenda de la semaine</h2>
+        <div v-if="agendaLoading" class="flex items-center gap-1 text-xs text-gray-500">
+          <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12a9 9 0 11-6.219-8.56"/>
+          </svg>
+          <span>Chargement...</span>
+        </div>
+      </div>
+      
+      <div v-if="agendaError" class="rounded-lg bg-red-50 p-3 mb-3">
+        <p class="text-sm text-red-600">{{ agendaError }}</p>
+      </div>
+      
       <div class="mt-3 space-y-2">
-        <RouterLink v-if="currentWeek === 1" :to="{ name: 'usp' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
-          <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">USP</span></p>
-        </RouterLink>
-        <RouterLink v-if="currentWeek === 1" :to="{ name: 'qualiveen' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
-          <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">Qualiveen</span></p>
-        </RouterLink>
-        <RouterLink v-if="currentWeek === 4 || currentWeek === 9 || currentWeek === 12 || currentWeek === 16 || currentWeek === 20 || currentWeek === 24" :to="{ name: 'satisfaction' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
-          <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">Satisfaction</span></p>
-        </RouterLink>
-        <RouterLink v-if="currentWeek === 4 || currentWeek === 9 || currentWeek === 12 || currentWeek === 16 || currentWeek === 20 || currentWeek === 24" :to="{ name: 'pgi_i' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
-          <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">PG-I</span></p>
-        </RouterLink>
-        <div v-if="checkupWeek && currentWeek === checkupWeek" class="rounded-lg bg-gray-50 p-3">
-          <p class="text-sm font-semibold text-gray-800">Date Rendez-vous de contrôle</p>
-        </div>
-        <div v-if="currentWeek === protocolDuration" class="rounded-lg bg-gray-50 p-3">
-          <p class="text-sm font-semibold text-gray-800">Date de fin du protocole</p>
-        </div>
-        <p v-if="!(currentWeek === 1 || currentWeek === 4 || currentWeek === 9 || currentWeek === 12 || currentWeek === 16 || currentWeek === 20 || currentWeek === 24 || (checkupWeek && currentWeek === checkupWeek) || currentWeek === protocolDuration)" class="text-sm text-gray-500">Aucun agenda cette semaine</p>
+        <!-- API-driven agenda forms -->
+        <template v-if="protocolAgenda && currentWeekForms.length > 0">
+          <RouterLink 
+            v-for="form in currentWeekForms" 
+            :key="form.formId"
+            :to="{ name: formIdToRouteName(form.formId) || 'usp' }" 
+            class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer"
+          >
+            <p class="text-xs text-gray-600">
+              <span class="text-gray-600">Merci de compléter le questionnaire </span>
+              <span class="font-semibold text-cyan-700">{{ formIdToDisplayName(form.formId) }}</span>
+            </p>
+          </RouterLink>
+        </template>
+        
+        <!-- Fallback to hardcoded logic if API data is not available -->
+        <template v-else-if="!protocolAgenda && !agendaLoading && !agendaError">
+          <RouterLink v-if="currentWeek === 1" :to="{ name: 'usp' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
+            <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">USP</span></p>
+          </RouterLink>
+          <RouterLink v-if="currentWeek === 1" :to="{ name: 'qualiveen' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
+            <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">Qualiveen</span></p>
+          </RouterLink>
+          <RouterLink v-if="currentWeek === 4 || currentWeek === 9 || currentWeek === 12 || currentWeek === 16 || currentWeek === 20 || currentWeek === 24" :to="{ name: 'satisfaction' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
+            <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">Satisfaction</span></p>
+          </RouterLink>
+          <RouterLink v-if="currentWeek === 4 || currentWeek === 9 || currentWeek === 12 || currentWeek === 16 || currentWeek === 20 || currentWeek === 24" :to="{ name: 'pgi_i' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
+            <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">PG-I</span></p>
+          </RouterLink>
+          <div v-if="checkupWeek && currentWeek === checkupWeek" class="rounded-lg bg-gray-50 p-3">
+            <p class="text-sm font-semibold text-gray-800">Date Rendez-vous de contrôle</p>
+          </div>
+          <div v-if="protocolDuration && currentWeek === protocolDuration" class="rounded-lg bg-gray-50 p-3">
+            <p class="text-sm font-semibold text-gray-800">Date de fin du protocole</p>
+          </div>
+        </template>
+        
+        <!-- No items message -->
+        <p v-if="(!protocolAgenda && currentWeekForms.length === 0) || (protocolAgenda && currentWeekForms.length === 0)" class="text-sm text-gray-500">
+          Aucun agenda cette semaine
+        </p>
       </div>
     </div>
 

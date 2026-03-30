@@ -1,14 +1,38 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { listMeasures } from '@/utils/measures'
 import { getWeekInfo, getProtocolStart } from '@/utils/protocol'
 import { getHistory, ACTION_POINTS } from '@/utils/gamification'
 import { getOnboarding } from '@/utils/onboarding'
 import { getProtocolAgenda, getQuestionnairesForWeek } from '@/utils/protocolAgenda'
 import { useProtocol } from '@/composables/useProtocol'
+import { protocolApi } from '@/services/api'
+import type { ProtocolAgendaData } from '@/types/protocol.types'
+import { formIdToRouteName, formIdToDisplayName } from '@/types/protocol.types'
 
 const agendaOpen = ref(false)
+
+// Fetched protocol agenda from API
+const fetchedAgenda = ref<ProtocolAgendaData | null>(null)
+
+const fetchAgenda = async () => {
+  try {
+    fetchedAgenda.value = await protocolApi.getProtocolAgenda()
+  } catch (e) {
+    console.error('Failed to fetch protocol agenda on Protocols page:', e)
+  }
+}
+
+onMounted(() => {
+  fetchAgenda()
+})
+
+// Forms for the current week from the API
+const currentWeekFormsList = computed(() => {
+  if (!fetchedAgenda.value) return []
+  return protocolApi.getCurrentWeekForms(fetchedAgenda.value, currentWeek.value)
+})
 
 // Calculate current week
 const currentWeek = computed(() => {
@@ -130,6 +154,21 @@ const usp1Week = computed(() => {
 })
 
 const protocolAgenda = computed(() => {
+  if (fetchedAgenda.value) {
+    // Build agenda dynamically from the API response
+    const total = fetchedAgenda.value.durationWeeks
+    const protocolWeeks = fetchedAgenda.value.Protocol
+    const items = []
+    for (let week = 1; week <= total; week++) {
+      const match = protocolWeeks.find((pw) => pw.weekNumber === week)
+      const questionnaires = match
+        ? match.forms.map((f) => formIdToDisplayName(f.formId))
+        : []
+      items.push({ week, questionnaires })
+    }
+    return items
+  }
+  // Fallback to local static calculation while loading
   return getProtocolAgenda(protocolDuration.value)
 })
 
@@ -179,30 +218,23 @@ const history = [
       </div>
     </div>
 
-    <!-- Tous les questionnaires -->
+    <!-- Questionnaires de la semaine -->
     <div class="mt-3 rounded-xl border border-gray-100 bg-white shadow-soft">
       <div class="p-4">
-        <h3 class="mb-3 text-sm font-semibold text-gray-800">Questionnaires</h3>
-        <div class="grid gap-2">
-          <RouterLink :to="{ name: 'qualiveen' }" class="block">
-            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold shadow-soft transition focus:outline-none bg-brand-primary text-white">Qualiveen</div>
-          </RouterLink>
-          <RouterLink :to="{ name: 'pgi_i' }" class="block">
-            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold shadow-soft transition focus:outline-none bg-brand-primary text-white">PG-I</div>
-          </RouterLink>
-          <RouterLink :to="{ name: 'usp' }" class="block">
-            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold shadow-soft transition focus:outline-none bg-brand-primary text-white">USP</div>
-          </RouterLink>
-          <RouterLink :to="{ name: 'satisfaction' }" class="block">
-            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold shadow-soft transition focus:outline-none bg-brand-primary text-white">Satisfaction</div>
-          </RouterLink>
-          <RouterLink :to="{ name: 'evaluation_evolution' }" class="block">
-            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold shadow-soft transition focus:outline-none bg-brand-primary text-white">Evolution Thérapeutique</div>
-          </RouterLink>
-          <RouterLink :to="{ name: 'mictionnel' }" class="block">
-            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold shadow-soft transition focus:outline-none bg-brand-primary text-white">Calendrier Mictionnel</div>
+        <h3 class="mb-3 text-sm font-semibold text-gray-800">Questionnaires — Semaine {{ currentWeek }}</h3>
+        <div v-if="currentWeekFormsList.length > 0" class="grid gap-2">
+          <RouterLink
+            v-for="form in currentWeekFormsList"
+            :key="form.formId"
+            :to="{ name: formIdToRouteName(form.formId) || 'home' }"
+            class="block"
+          >
+            <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold shadow-soft transition focus:outline-none bg-brand-primary text-white">
+              {{ formIdToDisplayName(form.formId) }}
+            </div>
           </RouterLink>
         </div>
+        <p v-else class="text-sm text-gray-500">Aucun questionnaire prévu cette semaine.</p>
       </div>
     </div>
 
