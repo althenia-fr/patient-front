@@ -90,8 +90,8 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest: any = error.config
-    const publicRoutes = ['/auth', '/reset-password', '/reset-password-error']
-    const isPublicRoute = publicRoutes.some((route) => window.location.pathname.startsWith(route))
+    const publicRoutes = ['/auth', '/reset-password', '/reset-password-error', '/signin', '/signup', '/forgot', '/consent']
+    const isPublicRoute = publicRoutes.some((route) => window.location.pathname.startsWith(route)) || window.location.pathname === '/reset-password'
 
     // Don't try to refresh for public routes or refresh-token endpoint itself
     if (

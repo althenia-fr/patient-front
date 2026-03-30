@@ -67,7 +67,10 @@ const week = computed(() => {
 
 const unread = ref(0)
 onMounted(() => {
-  fetchProtocolAgenda() // Fetch protocol agenda on mount
+  // Only fetch protocol agenda if user is authenticated
+  if (authUser.value) {
+    fetchProtocolAgenda()
+  }
   
   const readUnread = () => {
     const v = Number(localStorage.getItem('unread_notifications') || '0')

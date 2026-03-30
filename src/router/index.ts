@@ -30,7 +30,7 @@ const ResetPassword = () => import('../pages/ResetPassword.vue')
 
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'welcome', component: Welcome, meta: { layout: 'auth' } },
-  { path: '/home', name: 'home', component: Home },
+  { path: '/home', name: 'home', component: Home, meta: { requiresAuth: true } },
   { path: '/protocols', name: 'protocols', component: Protocols, meta: { requiresAuth: true } },
   { path: '/protocols/:id', name: 'protocol-detail', component: ProtocolDetail, meta: { requiresAuth: true } },
   { path: '/protocols-results', name: 'protocol-results', component: ProtocolResults, meta: { requiresAuth: true } },
@@ -54,7 +54,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/signup', name: 'signup', component: SignUp, meta: { layout: 'auth' } },
   { path: '/forgot', name: 'forgot', component: ForgotPassword, meta: { layout: 'auth' } },
   { path: '/consent', name: 'consent', component: Consent, meta: { layout: 'auth' } },
-  { path: '/reset-password', name: 'reset-password', component: ResetPassword, meta: { title: 'Nouveau mot de passe' } },
+  { path: '/reset-password', name: 'reset-password', component: ResetPassword, meta: { layout: 'auth', title: 'Nouveau mot de passe' } },
 ]
 
 export const router = createRouter({
@@ -73,6 +73,11 @@ router.beforeEach((to, _from, next) => {
     return
   }
   if (to.name === 'welcome' && authUser.value) {
+    next({ name: 'home' })
+    return
+  }
+  // Redirect authenticated users away from reset password page
+  if (to.name === 'reset-password' && authUser.value) {
     next({ name: 'home' })
     return
   }

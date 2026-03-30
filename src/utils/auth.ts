@@ -55,8 +55,16 @@ export async function signIn(email: string, password: string, remember = true) {
 }
 
 export async function signOut() {
+  // Clear mock auth
   localStorage.removeItem(CURRENT_KEY)
   sessionStorage.removeItem(CURRENT_KEY)
+  
+  // Clear real auth tokens
+  sessionStorage.removeItem('auth_token')
+  sessionStorage.removeItem('refresh_token')
+  sessionStorage.removeItem('alth_user')
+  
+  // Clear auth state
   authUser.value = null
 }
 
