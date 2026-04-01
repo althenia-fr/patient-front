@@ -18,6 +18,7 @@ export interface ProtocolAgendaData {
   durationWeeks: number
   sessionDurationMin: number
   startDate: string
+  sessionsDaily: number
   Protocol: ProtocolWeek[]
 }
 

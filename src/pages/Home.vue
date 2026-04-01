@@ -9,6 +9,7 @@ import { listMeasures } from '@/utils/measures'
 import { listSessions } from '@/utils/sessions'
 import { useProtocol } from '@/composables/useProtocol'
 import { useSessionTracking } from '@/composables/useSessionTracking'
+import { useGlobalTimer } from '@/composables/useGlobalTimer'
 import { protocolApi } from '@/services/api'
 import type { ProtocolAgendaData } from '@/types/protocol.types'
 import { formIdToRouteName, formIdToDisplayName } from '@/types/protocol.types'
@@ -33,6 +34,32 @@ const {
   createSessions,
   updateSession
 } = useSessionTracking()
+
+// Global timer for session management
+const { canStartSession } = useGlobalTimer()
+
+// Session management for multiple daily sessions
+const availableSessions = computed(() => {
+  if (!protocolAgenda.value) return []
+  
+  const sessionsDaily = protocolAgenda.value.sessionsDaily || 1
+  const today = new Date().toISOString().split('T')[0]
+  
+  // Get today's sessions
+  const todaySessions = trackedSessions.value.filter(session => session.date === today)
+  
+  const sessions = []
+  for (let i = 1; i <= sessionsDaily; i++) {
+    const session = todaySessions.find(s => s.sessionNumber === i)
+    sessions.push({
+      sessionNumber: i,
+      isCompleted: session ? session.sessionTimeRemaining <= 0 : false,
+      isAvailable: canStartSession(i)
+    })
+  }
+  
+  return sessions
+})
 
 // Fetch protocol agenda on component mount
 const fetchProtocolAgenda = async () => {
@@ -327,7 +354,30 @@ const tips = computed(() => {
         <div class="text-center text-lg font-semibold text-gray-800">{{ today }}</div>
       </div>
       <div class="mt-3 space-y-2">
-        <RouterLink :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
+        <!-- Multiple session buttons based on sessionsDaily -->
+        <template v-if="availableSessions.length > 1">
+          <RouterLink 
+            v-for="session in availableSessions" 
+            :key="session.sessionNumber"
+            :to="{ name: 'protocol-detail', params: { id: '1' }, query: { sessionNumber: session.sessionNumber } }"
+            class="block w-full"
+          >
+            <div 
+              class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none"
+              :class="{
+                'bg-brand-secondary text-white': session.isAvailable && !session.isCompleted,
+                'bg-gray-300 text-gray-500 cursor-not-allowed': !session.isAvailable || session.isCompleted
+              }"
+            >
+              {{ session.isCompleted ? `Séance ${session.sessionNumber} terminée` : 
+                 !session.isAvailable ? `Séance ${session.sessionNumber} non disponible` :
+                 `Commencer la séance ${session.sessionNumber}` }}
+            </div>
+          </RouterLink>
+        </template>
+        
+        <!-- Single session button (original behavior) -->
+        <RouterLink v-else :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
           <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none bg-brand-secondary text-white">Débuter une nouvelle séance</div>
         </RouterLink>
       </div>

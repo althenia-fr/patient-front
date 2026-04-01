@@ -19,12 +19,14 @@ export interface SessionTrackingItem {
   date: string
   sessionTimeRemaining: number
   sessionStatus?: string
+  sessionNumber?: number
 }
 
 // For POST requests (creating new sessions - no id yet)
 export interface SessionTrackingRequestItem {
   date: string
   sessionTimeRemaining: number
+  sessionNumber: number
 }
 
 export interface SessionTrackingPayload {
@@ -36,6 +38,7 @@ export interface SessionTrackingPayload {
 export interface UpdateSessionTrackingPayload {
   id: number
   sessionTimeRemaining: number
+  sessionNumber?: number
 }
 
 export const API_ENDPOINTS = {
