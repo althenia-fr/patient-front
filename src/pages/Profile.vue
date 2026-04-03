@@ -284,10 +284,27 @@ function refreshAttestations() { attestations.value = getAttestations() }
         <div v-else class="rounded-xl border border-gray-100 bg-white px-3 py-3 text-gray-600">
           Aucune attestation déposée pour le moment.
         </div>
-      </div>
+    </div>
+    </div>
+    <!-- Log Out Button -->
+    <div v-if="authUser" class="mt-12 pb-12">
+      <button 
+        @click="doLogout"
+        class="card flex w-full items-center justify-between !border-red-50 text-red-600 shadow-soft active:scale-[0.98] transition-all duration-200"
+      >
+        <div class="flex items-center gap-3">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-500">
+            <font-awesome-icon icon="right-from-bracket" class="text-xl text-red-500" />
+          </div>
+          <div>
+            <span class="block font-bold text-base text-left">Log out</span>
+            <span class="text-[10px] text-red-400 font-medium">Session sécurisée</span>
+          </div>
+        </div>
+        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-50 text-red-300">
+          <font-awesome-icon icon="chevron-right" class="text-xs" />
+        </div>
+      </button>
     </div>
   </section>
-  <div v-if="authUser" class="fixed bottom-24 left-0 right-0" style="padding: 0 16px 16px;">
-    <button class="w-full btn-secondary" @click="doLogout">Se déconnecter</button>
-  </div>
 </template>
