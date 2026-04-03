@@ -6,7 +6,7 @@ export interface Form {
 
 export interface ProtocolWeek {
   id: number
-  pecId: number
+  pecid: number
   patientUid: number
   weekNumber: number
   forms: Form[]

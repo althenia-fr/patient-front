@@ -30,7 +30,7 @@ export interface SessionTrackingRequestItem {
 }
 
 export interface SessionTrackingPayload {
-  pecId: number
+  pecid: number
   weekNumber: number
   sessions: SessionTrackingRequestItem[]
 }

@@ -70,12 +70,14 @@ const fetchProtocolAgenda = async () => {
     
     // After getting protocol agenda, fetch session tracking data
     if (protocolAgenda.value?.Protocol?.length > 0) {
-      const pecId = protocolAgenda.value.Protocol[0].pecId
-      try {
-        await fetchSessions(pecId)
-      } catch (sessionError) {
-        console.warn('Failed to fetch session tracking data:', sessionError)
-        // Don't fail the whole page if session tracking fails
+      const pecid = protocolAgenda.value.Protocol[0].pecid
+      if (pecid) {
+        try {
+          await fetchSessions(pecid)
+        } catch (sessionError) {
+          console.warn('Failed to fetch session tracking data:', sessionError)
+          // Don't fail the whole page if session tracking fails
+        }
       }
     }
     // Fetch completed forms to filter them from the agenda

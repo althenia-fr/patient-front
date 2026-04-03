@@ -13,11 +13,12 @@ export function useSessionTracking() {
   const sessionsCount = computed(() => sessions.value.length)
 
   // Get sessions for a specific PEC
-  const fetchSessions = async (pecId: number) => {
+  const fetchSessions = async (pecid: number) => {
+    if (!pecid) return
     try {
       loading.value = true
       error.value = null
-      sessions.value = await sessionTrackingApi.getSessionTracking(pecId)
+      sessions.value = await sessionTrackingApi.getSessionTracking(pecid)
       // console.log('Sessions fetched successfully:', sessions.value)
     } catch (err: any) {
       console.error('Failed to fetch sessions:', err)
