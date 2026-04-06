@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { saveResult } from '@/utils/questionnaireResults'
 import apiClient from '@/services/core/apiClient'
+import { getWeekInfo } from '@/utils/protocol'
 
 const router = useRouter()
 
@@ -88,8 +89,9 @@ const submitQuestionnaire = async () => {
     const patientId = user.uid || user.id || null
     const payload = {
       patientId: patientId,
-      formType: 'PG-I',
+      formType: 'PGI',
       date: data.value.date,
+      week: getWeekInfo().current,
       answers: { pgi_i: data.value.pgi_i },
       scores: { pgiScore: getNumericScore(data.value.pgi_i) },
     }

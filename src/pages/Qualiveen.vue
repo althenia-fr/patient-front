@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { saveResult } from '@/utils/questionnaireResults'
 import apiClient from '@/services/core/apiClient'
+import { getWeekInfo } from '@/utils/protocol'
 
 const router = useRouter()
 
@@ -172,6 +173,7 @@ const submitQuestionnaire = async () => {
       patientId: patientId,
       formType: 'Qualiveen',
       date: data.value.date,
+      week: getWeekInfo().current,
       answers: data.value.answers,
       scores: scores.value,
     }

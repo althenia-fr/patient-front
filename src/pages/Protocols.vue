@@ -8,6 +8,7 @@ import { getOnboarding } from '@/utils/onboarding'
 import { getProtocolAgenda, getQuestionnairesForWeek } from '@/utils/protocolAgenda'
 import { useProtocol } from '@/composables/useProtocol'
 import { protocolApi } from '@/services/api'
+import apiClient from '@/services/core/apiClient'
 import type { ProtocolAgendaData } from '@/types/protocol.types'
 import { formIdToRouteName, formIdToDisplayName } from '@/types/protocol.types'
 
@@ -15,12 +16,41 @@ const agendaOpen = ref(false)
 
 // Fetched protocol agenda from API
 const fetchedAgenda = ref<ProtocolAgendaData | null>(null)
+const completedForms = ref<string[]>([])
 
 const fetchAgenda = async () => {
   try {
     fetchedAgenda.value = await protocolApi.getProtocolAgenda()
+    await fetchCompletedForms()
   } catch (e) {
     console.error('Failed to fetch protocol agenda on Protocols page:', e)
+  }
+}
+
+const fetchCompletedForms = async () => {
+  try {
+    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const user = JSON.parse(userStr)
+    const patientId = user.uid || user.id || null
+    
+    const response = await apiClient.get('/formSubmission/list', {
+      params: { patientId }
+    })
+    const apiData = response.data?.data || response.data || []
+    
+    const currentWeekApiData = Array.isArray(apiData) 
+      ? apiData.find((w: any) => String(w.weekNumber) === String(currentWeek.value)) 
+      : null
+      
+    if (currentWeekApiData && currentWeekApiData.forms) {
+      completedForms.value = currentWeekApiData.forms
+        .filter((f: any) => f.submissions && f.submissions.length > 0)
+        .map((f: any) => String(f.formType).toUpperCase())
+    } else {
+      completedForms.value = []
+    }
+  } catch (e) {
+    console.error('Failed to fetch completed forms', e)
   }
 }
 
@@ -31,7 +61,24 @@ onMounted(() => {
 // Forms for the current week from the API
 const currentWeekFormsList = computed(() => {
   if (!fetchedAgenda.value) return []
-  return protocolApi.getCurrentWeekForms(fetchedAgenda.value, currentWeek.value)
+  const res = protocolApi.getCurrentWeekForms(fetchedAgenda.value, currentWeek.value)
+  
+  // Automatically hide forms that have already been submitted this week
+  return res.filter((form: string) => {
+    const displayName = formIdToDisplayName(form) || ''
+    const upperName = displayName.toUpperCase()
+    
+    const isCompleted = completedForms.value.some(completedType => {
+       if (upperName.includes('QUALIVEEN') && completedType.includes('QUALIVEEN')) return true
+       if (upperName.includes('SATISFACTION') && completedType.includes('SATISFACTION')) return true
+       if ((upperName.includes('PG') || upperName.includes('PGI')) && (completedType.includes('PG') || completedType.includes('PGI'))) return true
+       if ((upperName.includes('EVOLUTION') || upperName.includes('ÉVOLUTION') || upperName.includes('THERA')) && (completedType.includes('EVOLUTION') || completedType.includes('THERA') || completedType.includes('ÉVOLUTION'))) return true
+       if (upperName.includes('MICTIONNEL') && completedType.includes('MICTIONNEL')) return true
+       if (upperName.includes('USP') && completedType.includes('USP')) return true
+       return completedType === upperName
+    })
+    return !isCompleted
+  })
 })
 
 // Calculate current week
@@ -162,7 +209,7 @@ const protocolAgenda = computed(() => {
     for (let week = 1; week <= total; week++) {
       const match = protocolWeeks.find((pw) => pw.weekNumber === week)
       const questionnaires = match
-        ? match.forms.map((f) => formIdToDisplayName(f.formId))
+        ? match.forms.map((f) => formIdToDisplayName(f))
         : []
       items.push({ week, questionnaires })
     }
@@ -225,12 +272,12 @@ const history = [
         <div v-if="currentWeekFormsList.length > 0" class="grid gap-2">
           <RouterLink
             v-for="form in currentWeekFormsList"
-            :key="form.formId"
-            :to="{ name: formIdToRouteName(form.formId) || 'home' }"
+            :key="form"
+            :to="{ name: formIdToRouteName(form) || 'home' }"
             class="block"
           >
             <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold shadow-soft transition focus:outline-none bg-brand-primary text-white">
-              {{ formIdToDisplayName(form.formId) }}
+              {{ formIdToDisplayName(form) }}
             </div>
           </RouterLink>
         </div>

@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import apiClient from '@/services/core/apiClient'
 import { calculateMonthlyStats, calculateGlobalStats, getChartDataByWeek } from '@/utils/mictionnelStats'
+import { getWeekInfo, getProtocolStart } from '@/utils/protocol'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js'
 import { Chart } from 'vue-chartjs'
 
@@ -602,6 +603,7 @@ const saveDayData = async () => {
       patientId: patientId,
       formType: 'Mictionnel',
       date: currentDay.value.date,
+      week: getWeekInfo().current,
       answers: {
         mictions: currentDay.value.mictions.map(m => ({
           time: m.time,

@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { saveResult } from '@/utils/questionnaireResults'
 import apiClient from '@/services/core/apiClient'
+import { getWeekInfo } from '@/utils/protocol'
 
 const router = useRouter()
 
@@ -210,6 +211,7 @@ const submitQuestionnaire = async () => {
       patientId: patientId,
       formType: 'USP',
       date: data.value.date,
+      week: getWeekInfo().current,
       answers: {
         effort: data.value.effort,
         hyper: data.value.hyper,
@@ -235,11 +237,11 @@ const submitQuestionnaire = async () => {
 
 
 const updateAnswer = (section: 'effort' | 'hyper' | 'dysurie', questionId: string, value: number) => {
-  data.value[section][questionId as keyof typeof data.value[section]] = value
+  (data.value[section] as any)[questionId] = value
 }
 
 const getAnswer = (section: 'effort' | 'hyper' | 'dysurie', questionId: string): number | null => {
-  return data.value[section][questionId as keyof typeof data.value[section]]
+  return (data.value[section] as any)[questionId]
 }
 </script>
 

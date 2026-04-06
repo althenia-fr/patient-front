@@ -133,8 +133,8 @@ const currentWeekForms = computed(() => {
   let res = protocolApi.getCurrentWeekForms(protocolAgenda.value, currentWeek.value)
   
   // Automatically hide forms that have already been submitted this week
-  return res.filter((form: any) => {
-    const displayName = formIdToDisplayName(form.formId) || ''
+  return res.filter((form: string) => {
+    const displayName = formIdToDisplayName(form) || ''
     const upperName = displayName.toUpperCase()
     
     const isCompleted = completedForms.value.some(completedType => {
@@ -357,7 +357,7 @@ const tips = computed(() => {
       </div>
       <div class="mt-3 space-y-2">
         <!-- Multiple session buttons based on sessionsDaily -->
-        <template v-if="availableSessions.length > 1">
+        <div v-if="availableSessions.length > 1" class="space-y-2">
           <RouterLink 
             v-for="session in availableSessions" 
             :key="session.sessionNumber"
@@ -376,7 +376,7 @@ const tips = computed(() => {
                  `Commencer la séance ${session.sessionNumber}` }}
             </div>
           </RouterLink>
-        </template>
+        </div>
         
         <!-- Single session button (original behavior) -->
         <RouterLink v-else :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
@@ -404,22 +404,22 @@ const tips = computed(() => {
       
       <div class="mt-3 space-y-2">
         <!-- API-driven agenda forms -->
-        <template v-if="protocolAgenda && currentWeekForms.length > 0">
+        <div v-if="protocolAgenda && currentWeekForms.length > 0" class="space-y-2">
           <RouterLink 
             v-for="form in currentWeekForms" 
-            :key="form.formId"
-            :to="{ name: formIdToRouteName(form.formId) || 'usp' }" 
+            :key="form"
+            :to="{ name: formIdToRouteName(form) || 'usp' }" 
             class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer"
           >
             <p class="text-xs text-gray-600">
               <span class="text-gray-600">Merci de compléter le questionnaire </span>
-              <span class="font-semibold text-cyan-700">{{ formIdToDisplayName(form.formId) }}</span>
+              <span class="font-semibold text-cyan-700">{{ formIdToDisplayName(form) }}</span>
             </p>
           </RouterLink>
-        </template>
+        </div>
         
         <!-- Fallback to hardcoded logic if API data is not available -->
-        <template v-else-if="!protocolAgenda && !agendaLoading && !agendaError">
+        <div v-else-if="!protocolAgenda && !agendaLoading && !agendaError" class="space-y-2">
           <RouterLink v-if="currentWeek === 1" :to="{ name: 'usp' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
             <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">USP</span></p>
           </RouterLink>
@@ -438,7 +438,7 @@ const tips = computed(() => {
           <div v-if="protocolDuration && currentWeek === protocolDuration" class="rounded-lg bg-gray-50 p-3">
             <p class="text-sm font-semibold text-gray-800">Date de fin du protocole</p>
           </div>
-        </template>
+        </div>
         
         <!-- No items message -->
         <p v-if="(!protocolAgenda && currentWeekForms.length === 0) || (protocolAgenda && currentWeekForms.length === 0)" class="text-sm text-gray-500">
