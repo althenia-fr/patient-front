@@ -6,12 +6,12 @@ export default {
     extend: {
       colors: {
         brand: {
-          primary: '#b6a943',
-          secondary: '#2596be',
+          primary: '#be49bc',
+          secondary: '#6c5ce7',
           yellow: '#ffd54f',
           orange: '#ffab40',
           gray: '#636e72',
-          bg: '#e6e0ac',
+          bg: '#f8f4ff',
         },
       },
       fontFamily: {

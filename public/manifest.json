@@ -7,7 +7,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
-  "start_url": "/",
+  "start_url": "/signin",
   "icons": [
     {
       "src": "pwa-192x192.png",

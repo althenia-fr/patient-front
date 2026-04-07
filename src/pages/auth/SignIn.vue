@@ -6,10 +6,10 @@ import { authUser } from '@/utils/auth'
 
 const router = useRouter()
 const route = useRoute()
-const email = ref('')
-const password = ref('')
-const showPwd = ref(false)
-const remember = ref(false)
+const mobile = ref('')
+const year = ref('')
+const month = ref('')
+const day = ref('')
 const error = ref('')
 const loading = ref(false)
 
@@ -24,7 +24,12 @@ async function submit(e: Event) {
   error.value = ''
   loading.value = true
   try {
-    await authApi.login({ email: email.value, password: password.value })
+    await authApi.login({ 
+      mobile: mobile.value, 
+      year: year.value, 
+      month: month.value, 
+      day: day.value 
+    })
     const redirect = (route.query.redirect as string) || '/home'
     router.replace(redirect)
   } catch (err: any) {
@@ -35,61 +40,46 @@ async function submit(e: Event) {
 }
 </script>
 <template>
-  <section class="mx-auto max-w-md px-4 py-8">
-  <img
-    loading="lazy"
-    srcset="https://cdn.builder.io/api/v1/image/assets%2Ff2976922c6674ae58e827df6ab219826%2Ff0fb1518f04a4814bac7aeca947eaee6?width=100 100w, https://cdn.builder.io/api/v1/image/assets%2Ff2976922c6674ae58e827df6ab219826%2Ff0fb1518f04a4814bac7aeca947eaee6?width=200 200w, https://cdn.builder.io/api/v1/image/assets%2Ff2976922c6674ae58e827df6ab219826%2Ff0fb1518f04a4814bac7aeca947eaee6?width=400 400w, https://cdn.builder.io/api/v1/image/assets%2Ff2976922c6674ae58e827df6ab219826%2Ff0fb1518f04a4814bac7aeca947eaee6?width=800 800w, https://cdn.builder.io/api/v1/image/assets%2Ff2976922c6674ae58e827df6ab219826%2Ff0fb1518f04a4814bac7aeca947eaee6?width=1200 1200w, https://cdn.builder.io/api/v1/image/assets%2Ff2976922c6674ae58e827df6ab219826%2Ff0fb1518f04a4814bac7aeca947eaee6?width=1600 1600w"
-    src="https://cdn.builder.io/api/v1/image/assets%2Ff2976922c6674ae58e827df6ab219826%2Ff0fb1518f04a4814bac7aeca947eaee6?width=800"
-    alt="STIMEO+"
-    class="w-full object-contain mt-5"
-    style="aspect-ratio:3.24; min-width:20px; min-height:20px; overflow:hidden;"
-  />
-  <div class="mt-5" style="height:52px"></div>
-  <!-- Onglets Connexion / Inscription -->
-  <nav class="mx-auto mb-4 flex w-full max-w-sm rounded-full bg-gray-100 p-1">
-    <RouterLink :to="{ name: 'signin' }" class="flex-1 rounded-full py-2 text-center font-semibold"
-      :class="route.name==='signin' ? 'bg-brand-primary text-white shadow-soft' : 'text-gray-600'">Connexion</RouterLink>
-    <RouterLink :to="{ name: 'signup' }" class="flex-1 rounded-full py-2 text-center font-semibold"
-      :class="route.name==='signup' ? 'bg-brand-primary text-white shadow-soft' : 'text-gray-600'">Inscription</RouterLink>
-  </nav>
+  <section class="mx-auto max-w-sm px-4 py-8">
+  <div class="mb-10 text-center">
+    <h1 class="text-4xl font-bold tracking-tight text-brand-primary" style="font-family: 'Comfortaa', cursive;">
+      Althenia
+    </h1>
+  </div>
 
   <!-- Carte de connexion -->
-  <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-soft">
-    <h2 class="mb-4 text-center text-2xl font-extrabold">Se connecter</h2>
-    <form class="space-y-4" @submit="submit">
+  <div class="rounded-3xl border border-gray-100 bg-white p-8 shadow-xl">
+    <h2 class="mb-6 text-center text-2xl font-bold text-gray-800">Se connecter</h2>
+    <form class="space-y-5" @submit="submit">
       <div>
-        <label class="text-sm text-gray-700">Email</label>
-        <div class="relative mt-2">
+        <label class="block mb-1 text-sm font-medium text-gray-600">Numéro de mobile</label>
+        <div class="relative">
           <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M22 6 12 13 2 6"/></svg>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
           </span>
-          <input v-model="email" class="w-full rounded-xl border border-gray-200 p-3 pl-10" type="email" placeholder="votre@email.fr" required />
+          <input v-model="mobile" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 pl-11 focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="tel" placeholder="06 00 00 00 00" required />
         </div>
       </div>
+      
       <div>
-        <label class="text-sm text-gray-700">Mot de passe</label>
-        <div class="relative mt-2">
-          <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </span>
-          <input :type="showPwd ? 'text' : 'password'" v-model="password" class="w-full rounded-xl border border-gray-200 p-3 pl-10 pr-10" placeholder="••••••••" required />
-          <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" @click="showPwd=!showPwd" aria-label="Afficher le mot de passe">
-            <svg v-if="!showPwd" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-            <svg v-else class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.77 21.77 0 0 1-3.4 4.5"/><path d="M1 1l22 22"/></svg>
-          </button>
+        <label class="block mb-1 text-sm font-medium text-gray-600">Date de naissance</label>
+        <div class="grid grid-cols-3 gap-3">
+          <input v-model="day" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="JJ" maxlength="2" required />
+          <input v-model="month" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="MM" maxlength="2" required />
+          <input v-model="year" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="AAAA" maxlength="4" required />
         </div>
       </div>
-      <label class="mt-1 flex items-center gap-2 text-sm text-gray-700">
-        <input v-model="remember" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-brand-primary focus:ring-brand-primary" />
-        <span>Mémoriser ma connexion</span>
-      </label>
-      <button type="submit" class="btn-primary mt-2 w-full rounded-full py-3" :disabled="loading">{{ loading ? 'Connexion…' : 'Se connecter' }}</button>
-      <RouterLink to="/forgot" class="block text-center text-sm text-brand-primary">Mot de passe oublié ?</RouterLink>
-      <p v-if="error" class="text-center text-sm text-red-600">{{ error }}</p>
+
+      <button type="submit" class="btn-primary mt-4 w-full rounded-2xl py-4 text-lg font-semibold shadow-md active:scale-[0.98] transition-transform" :disabled="loading">
+        {{ loading ? 'Connexion…' : 'Continuer' }}
+      </button>
+      
+      <p v-if="error" class="mt-4 text-center text-sm font-medium text-red-500 animate-pulse">{{ error }}</p>
     </form>
   </div>
 
-  <p class="mx-auto mt-6 max-w-sm text-center text-xs text-gray-500">En vous connectant, vous acceptez nos <a href="#" class="text-brand-primary underline">conditions d’utilisation</a> et notre <a href="#" class="text-brand-primary underline">politique de confidentialité</a>.</p>
-
+  <p class="mx-auto mt-10 max-w-sm text-center text-xs text-gray-400">
+    En vous connectant, vous acceptez nos <a href="#" class="text-brand-primary hover:underline">conditions d’utilisation</a> et notre <a href="#" class="text-brand-primary hover:underline">politique de confidentialité</a>.
+  </p>
 </section>
 </template>

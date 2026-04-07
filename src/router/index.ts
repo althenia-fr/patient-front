@@ -25,6 +25,8 @@ import ChartResults from '@/pages/ChartResults.vue'
 import MictionnelCalendar from '@/pages/MictionnelCalendar.vue'
 import MictionnelResults from '@/pages/MictionnelResults.vue'
 import ProtocolResults from '@/pages/ProtocolResults.vue'
+import ChromeInstructions from '@/pages/ChromeInstructions.vue'
+import SafariInstructions from '@/pages/SafariInstructions.vue'
 
 const ResetPassword = () => import('../pages/ResetPassword.vue')
 
@@ -55,6 +57,8 @@ const routes: RouteRecordRaw[] = [
   { path: '/forgot', name: 'forgot', component: ForgotPassword, meta: { layout: 'auth' } },
   { path: '/consent', name: 'consent', component: Consent, meta: { layout: 'auth' } },
   { path: '/reset-password', name: 'reset-password', component: ResetPassword, meta: { layout: 'auth', title: 'Nouveau mot de passe' } },
+  { path: '/chrome', name: 'chrome', component: ChromeInstructions, meta: { layout: 'auth' } },
+  { path: '/safari', name: 'safari', component: SafariInstructions, meta: { layout: 'auth' } },
 ]
 
 export const router = createRouter({
