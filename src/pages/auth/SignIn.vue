@@ -24,7 +24,7 @@ async function submit(e: Event) {
   error.value = ''
   loading.value = true
   try {
-    await authApi.login({ email: email.value, password: password.value })
+    await authApi.login({ email: email.value, password: password.value , app:'patient'})
     const redirect = (route.query.redirect as string) || '/home'
     router.replace(redirect)
   } catch (err: any) {

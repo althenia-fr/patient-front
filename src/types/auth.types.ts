@@ -28,6 +28,7 @@ export interface SignUpRequest {
 export interface LoginRequest {
     email: string
     password: string
+    app: string
 }
 
 export interface PasswordResetRequest {

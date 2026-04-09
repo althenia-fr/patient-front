@@ -50,7 +50,7 @@ export const protocolApi = {
    * @returns Form[] - Forms for the current week
    */
   getCurrentWeekForms(agendaData: ProtocolAgendaData, currentWeek: number): Form[] {
-    const currentWeekData = agendaData.Protocol.find(week => week.weekNumber === currentWeek)
+    const currentWeekData = agendaData.protocol.find(week => week.weekNumber === currentWeek)
     return currentWeekData?.forms || []
   },
 
@@ -61,7 +61,7 @@ export const protocolApi = {
    * @returns Array<{week: number, forms: Form[]}> - Upcoming forms with week numbers
    */
   getUpcomingForms(agendaData: ProtocolAgendaData, currentWeek: number): Array<{week: number, forms: Form[]}> {
-    return agendaData.Protocol
+    return agendaData.protocol
       .filter(week => week.weekNumber > currentWeek)
       .map(week => ({
         week: week.weekNumber,

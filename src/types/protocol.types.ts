@@ -18,7 +18,7 @@ export interface ProtocolAgendaData {
   durationWeeks: number
   sessionDurationMin: number
   startDate: string
-  Protocol: ProtocolWeek[]
+  protocol: ProtocolWeek[]
 }
 
 export interface ProtocolAgendaResponse extends ApiResponse<ProtocolAgendaData> {}
