@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 
 import Home from '@/pages/Home.vue'
 import Welcome from '@/pages/Welcome.vue'
+import Splash from '@/pages/preinstall/Splash.vue'
 import Protocols from '@/pages/Protocols.vue'
 import ProtocolDetail from '@/pages/ProtocolDetail.vue'
 import Profile from '@/pages/Profile.vue'
@@ -38,7 +39,8 @@ const unauth = (to: any, from: any, next: any) => {
 }
 
 const routes: RouteRecordRaw[] = [
-  { path: '/', name: 'welcome', component: Welcome, meta: { layout: 'auth' } },
+  { path: '/', name: 'splash', component: Splash, meta: { layout: 'auth' } },
+  { path: '/welcome', name: 'welcome', component: Welcome, meta: { layout: 'auth' } },
   { path: '/home', name: 'home', component: Home, meta: { requiresAuth: true } },
   { path: '/protocols', name: 'protocols', component: Protocols, meta: { requiresAuth: true } },
   { path: '/protocols/:id', name: 'protocol-detail', component: ProtocolDetail, meta: { requiresAuth: true } },
@@ -71,6 +73,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/preinstall/Safari.vue'),
     meta: {
       isAuthenticated: false,
+      layout: 'auth',
     }
   },
   {
@@ -80,6 +83,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/preinstall/Chrome.vue'),
     meta: {
       isAuthenticated: false,
+      layout: 'auth',
     }
   },
 ]
@@ -98,7 +102,7 @@ router.beforeEach((to, _from, next) => {
     next({ name: 'signin', query: { redirect: to.fullPath } })
     return
   }
-  if (to.name === 'welcome' && authUser.value) {
+  if ((to.name === 'welcome' || to.name === 'splash') && authUser.value) {
     next({ name: 'home' })
     return
   }
