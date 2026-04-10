@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 
 import Home from '@/pages/Home.vue'
 import Welcome from '@/pages/Welcome.vue'
+import Splash from '@/pages/preinstall/Splash.vue'
 import Protocols from '@/pages/Protocols.vue'
 import ProtocolDetail from '@/pages/ProtocolDetail.vue'
 import Profile from '@/pages/Profile.vue'
@@ -25,11 +26,21 @@ import ChartResults from '@/pages/ChartResults.vue'
 import MictionnelCalendar from '@/pages/MictionnelCalendar.vue'
 import MictionnelResults from '@/pages/MictionnelResults.vue'
 import ProtocolResults from '@/pages/ProtocolResults.vue'
+import { authUser } from '@/utils/auth'
 
 const ResetPassword = () => import('../pages/ResetPassword.vue')
 
+const unauth = (to: any, from: any, next: any) => {
+  if (authUser.value) {
+    next({ name: 'home' })
+  } else {
+    next()
+  }
+}
+
 const routes: RouteRecordRaw[] = [
-  { path: '/', name: 'welcome', component: Welcome, meta: { layout: 'auth' } },
+  { path: '/', name: 'splash', component: Splash, meta: { layout: 'auth' } },
+  { path: '/welcome', name: 'welcome', component: Welcome, meta: { layout: 'auth' } },
   { path: '/home', name: 'home', component: Home, meta: { requiresAuth: true } },
   { path: '/protocols', name: 'protocols', component: Protocols, meta: { requiresAuth: true } },
   { path: '/protocols/:id', name: 'protocol-detail', component: ProtocolDetail, meta: { requiresAuth: true } },
@@ -55,6 +66,26 @@ const routes: RouteRecordRaw[] = [
   { path: '/forgot', name: 'forgot', component: ForgotPassword, meta: { layout: 'auth' } },
   { path: '/consent', name: 'consent', component: Consent, meta: { layout: 'auth' } },
   { path: '/reset-password', name: 'reset-password', component: ResetPassword, meta: { layout: 'auth', title: 'Nouveau mot de passe' } },
+  {
+    path: '/safari',
+    name: 'safari',
+    beforeEnter : unauth,
+    component: () => import('@/pages/preinstall/Safari.vue'),
+    meta: {
+      isAuthenticated: false,
+      layout: 'auth',
+    }
+  },
+  {
+    path: '/chrome',
+    name: 'chrome',
+    beforeEnter : unauth,
+    component: () => import('@/pages/preinstall/Chrome.vue'),
+    meta: {
+      isAuthenticated: false,
+      layout: 'auth',
+    }
+  },
 ]
 
 export const router = createRouter({
@@ -65,14 +96,13 @@ export const router = createRouter({
   },
 })
 
-import { authUser } from '@/utils/auth'
 
 router.beforeEach((to, _from, next) => {
   if (to.meta && (to.meta as any).requiresAuth && !authUser.value) {
     next({ name: 'signin', query: { redirect: to.fullPath } })
     return
   }
-  if (to.name === 'welcome' && authUser.value) {
+  if ((to.name === 'welcome' || to.name === 'splash') && authUser.value) {
     next({ name: 'home' })
     return
   }
