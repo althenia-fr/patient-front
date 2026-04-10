@@ -90,8 +90,8 @@ export function useGlobalTimer() {
     
     // Fetch existing sessions to check for resumable sessions
     try {
-      if (protocolAgenda.Protocol?.length > 0) {
-        const pecid = protocolAgenda.Protocol[0].pecid
+      if (protocolAgenda.protocol?.length > 0) {
+        const pecid = protocolAgenda.protocol[0].pecid
         await fetchSessions(pecid)
         
         // Check if there's an existing session for today
@@ -131,7 +131,7 @@ export function useGlobalTimer() {
         console.log('Resuming existing session:', globalState.sessionId.value)
       } else {
         // Create new session tracking entry
-        const pecid = globalState.protocolAgenda.value.Protocol[0].pecid
+        const pecid = globalState.protocolAgenda.value.protocol[0].pecid
         const currentWeek = Math.ceil(
           (Date.now() - new Date(globalState.protocolAgenda.value.startDate).getTime()) / 
           (7 * 24 * 60 * 60 * 1000)
