@@ -6,6 +6,11 @@ import { initAuth, signUp } from './utils/auth'
 import { saveOnboarding } from './utils/onboarding'
 import { startScheduler } from './utils/reminders'
 import { getDailyCoachMessage } from './utils/coach'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faRightFromBracket, faChevronRight } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faRightFromBracket, faChevronRight)
 
 const saved = localStorage.getItem('theme')
 if (saved === 'dark') {
@@ -94,4 +99,7 @@ initAuth()
 startScheduler(() => {
   try { new Notification('Coaching quotidien', { body: getDailyCoachMessage() }) } catch {}
 })
-createApp(App).use(router).mount('#app')
+const app = createApp(App)
+app.component('font-awesome-icon', FontAwesomeIcon)
+app.use(router)
+app.mount('#app')

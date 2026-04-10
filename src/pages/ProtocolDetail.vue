@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import Timer from '@/components/Timer.vue'
 import GamificationModal from '@/components/GamificationModal.vue'
 import { addPoints, ACTION_POINTS } from '@/utils/gamification'
@@ -13,6 +13,13 @@ import type { ProtocolAgendaData } from '@/types/protocol.types'
 
 // Protocol agenda state
 const protocolAgenda = ref<ProtocolAgendaData | null>(null)
+
+// Route and session number handling
+const route = useRoute()
+const router = useRouter()
+const sessionNumber = computed(() => {
+  return Number(route.query.sessionNumber) || 1
+})
 
 // Global timer state
 const {
@@ -62,7 +69,6 @@ watch(sessionDurationMinutes, () => {
   steps.value[2].label = `Lancer la séance TENS – ${sessionDurationMinutes.value} min`
 })
 
-const router = useRouter()
 function compositeProgress() {
   const stepsRatio = steps.value.length ? steps.value.filter(s=>s.done).length / steps.value.length : 0
   const timeRatio = Math.min(1, lastElapsed.value / sessionDurationSeconds.value)
@@ -136,7 +142,7 @@ onMounted(() => {
     </transition>
   </Teleport>
   <section class="mx-auto max-w-md px-4 py-6">
-    <h2 class="text-xl font-bold text-center">Protocole TENS {{ specialty }}</h2>
+    <h2 class="text-xl font-bold text-center">Protocole TENS {{ specialty }} - Séance {{ sessionNumber }}</h2>
     <div class="flex flex-col relative mt-5 h-[30px]"></div>
     <div class="mt-2"></div>
 
@@ -156,7 +162,7 @@ onMounted(() => {
       <!-- Global Timer Controls (if needed for larger interface) -->
       <div class="mt-4 flex justify-center gap-4">
         <button
-          @click="toggleTimer"
+          @click="toggleTimer(sessionNumber)"
           :class="[
             'px-6 py-2 rounded-full font-semibold transition-colors',
             isRunning 
@@ -164,7 +170,7 @@ onMounted(() => {
               : 'bg-green-500 text-white hover:bg-green-600'
           ]"
         >
-          {{ isRunning ? 'Pause' : canResumeSession ? 'Reprendre la session' : 'Démarrer la session' }}
+          {{ isRunning ? 'Pause' : canResumeSession ? 'Reprendre la session' : `Démarrer la séance ${sessionNumber.value}` }}
         </button>
         
         <!-- <button

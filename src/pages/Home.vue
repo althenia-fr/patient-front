@@ -9,6 +9,7 @@ import { listMeasures } from '@/utils/measures'
 import { listSessions } from '@/utils/sessions'
 import { useProtocol } from '@/composables/useProtocol'
 import { useSessionTracking } from '@/composables/useSessionTracking'
+import { useGlobalTimer } from '@/composables/useGlobalTimer'
 import { protocolApi } from '@/services/api'
 import type { ProtocolAgendaData } from '@/types/protocol.types'
 import { formIdToRouteName, formIdToDisplayName } from '@/types/protocol.types'
@@ -34,6 +35,32 @@ const {
   updateSession
 } = useSessionTracking()
 
+// Global timer for session management
+const { canStartSession } = useGlobalTimer()
+
+// Session management for multiple daily sessions
+const availableSessions = computed(() => {
+  if (!protocolAgenda.value) return []
+  
+  const sessionsDaily = protocolAgenda.value.sessionsDaily || 1
+  const today = new Date().toISOString().split('T')[0]
+  
+  // Get today's sessions
+  const todaySessions = trackedSessions.value.filter(session => session.date === today)
+  
+  const sessions = []
+  for (let i = 1; i <= sessionsDaily; i++) {
+    const session = todaySessions.find(s => s.sessionNumber === i)
+    sessions.push({
+      sessionNumber: i,
+      isCompleted: session ? session.sessionTimeRemaining <= 0 : false,
+      isAvailable: canStartSession(i)
+    })
+  }
+  
+  return sessions
+})
+
 // Fetch protocol agenda on component mount
 const fetchProtocolAgenda = async () => {
   try {
@@ -43,12 +70,14 @@ const fetchProtocolAgenda = async () => {
     
     // After getting protocol agenda, fetch session tracking data
     if (protocolAgenda.value?.Protocol?.length > 0) {
-      const pecId = protocolAgenda.value.Protocol[0].pecId
-      try {
-        await fetchSessions(pecId)
-      } catch (sessionError) {
-        console.warn('Failed to fetch session tracking data:', sessionError)
-        // Don't fail the whole page if session tracking fails
+      const pecid = protocolAgenda.value.Protocol[0].pecid
+      if (pecid) {
+        try {
+          await fetchSessions(pecid)
+        } catch (sessionError) {
+          console.warn('Failed to fetch session tracking data:', sessionError)
+          // Don't fail the whole page if session tracking fails
+        }
       }
     }
     // Fetch completed forms to filter them from the agenda
@@ -104,8 +133,8 @@ const currentWeekForms = computed(() => {
   let res = protocolApi.getCurrentWeekForms(protocolAgenda.value, currentWeek.value)
   
   // Automatically hide forms that have already been submitted this week
-  return res.filter((form: any) => {
-    const displayName = formIdToDisplayName(form.formId) || ''
+  return res.filter((form: string) => {
+    const displayName = formIdToDisplayName(form) || ''
     const upperName = displayName.toUpperCase()
     
     const isCompleted = completedForms.value.some(completedType => {
@@ -327,7 +356,30 @@ const tips = computed(() => {
         <div class="text-center text-lg font-semibold text-gray-800">{{ today }}</div>
       </div>
       <div class="mt-3 space-y-2">
-        <RouterLink :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
+        <!-- Multiple session buttons based on sessionsDaily -->
+        <div v-if="availableSessions.length > 1" class="space-y-2">
+          <RouterLink 
+            v-for="session in availableSessions" 
+            :key="session.sessionNumber"
+            :to="{ name: 'protocol-detail', params: { id: '1' }, query: { sessionNumber: session.sessionNumber } }"
+            class="block w-full"
+          >
+            <div 
+              class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none"
+              :class="{
+                'bg-brand-secondary text-white': session.isAvailable && !session.isCompleted,
+                'bg-gray-300 text-gray-500 cursor-not-allowed': !session.isAvailable || session.isCompleted
+              }"
+            >
+              {{ session.isCompleted ? `Séance ${session.sessionNumber} terminée` : 
+                 !session.isAvailable ? `Séance ${session.sessionNumber} non disponible` :
+                 `Commencer la séance ${session.sessionNumber}` }}
+            </div>
+          </RouterLink>
+        </div>
+        
+        <!-- Single session button (original behavior) -->
+        <RouterLink v-else :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
           <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none bg-brand-secondary text-white">Débuter une nouvelle séance</div>
         </RouterLink>
       </div>
@@ -352,22 +404,22 @@ const tips = computed(() => {
       
       <div class="mt-3 space-y-2">
         <!-- API-driven agenda forms -->
-        <template v-if="protocolAgenda && currentWeekForms.length > 0">
+        <div v-if="protocolAgenda && currentWeekForms.length > 0" class="space-y-2">
           <RouterLink 
             v-for="form in currentWeekForms" 
-            :key="form.formId"
-            :to="{ name: formIdToRouteName(form.formId) || 'usp' }" 
+            :key="form"
+            :to="{ name: formIdToRouteName(form) || 'usp' }" 
             class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer"
           >
             <p class="text-xs text-gray-600">
               <span class="text-gray-600">Merci de compléter le questionnaire </span>
-              <span class="font-semibold text-cyan-700">{{ formIdToDisplayName(form.formId) }}</span>
+              <span class="font-semibold text-cyan-700">{{ formIdToDisplayName(form) }}</span>
             </p>
           </RouterLink>
-        </template>
+        </div>
         
         <!-- Fallback to hardcoded logic if API data is not available -->
-        <template v-else-if="!protocolAgenda && !agendaLoading && !agendaError">
+        <div v-else-if="!protocolAgenda && !agendaLoading && !agendaError" class="space-y-2">
           <RouterLink v-if="currentWeek === 1" :to="{ name: 'usp' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
             <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">USP</span></p>
           </RouterLink>
@@ -386,7 +438,7 @@ const tips = computed(() => {
           <div v-if="protocolDuration && currentWeek === protocolDuration" class="rounded-lg bg-gray-50 p-3">
             <p class="text-sm font-semibold text-gray-800">Date de fin du protocole</p>
           </div>
-        </template>
+        </div>
         
         <!-- No items message -->
         <p v-if="(!protocolAgenda && currentWeekForms.length === 0) || (protocolAgenda && currentWeekForms.length === 0)" class="text-sm text-gray-500">

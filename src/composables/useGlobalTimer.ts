@@ -17,7 +17,7 @@ const globalState = {
 }
 
 export function useGlobalTimer() {
-  const { createSessions, updateSession, fetchSessions, getSessionByDate } = useSessionTracking()
+  const { createSessions, updateSession, fetchSessions, getSessionByDate, sessions } = useSessionTracking()
 
   // Computed properties
   const isRunning = computed(() => globalState.running.value)
@@ -47,6 +47,29 @@ export function useGlobalTimer() {
     return existingSession !== undefined && existingSession.sessionTimeRemaining > 0
   })
 
+  // Check if a specific session number can be started
+  const canStartSession = (sessionNumber: number) => {
+    if (!globalState.protocolAgenda.value) return false
+    
+    const today = new Date().toISOString().split('T')[0]
+    const todaySessions = sessions.value.filter(session => session.date === today)
+    
+    // Session 1 can always be started if not completed
+    if (sessionNumber === 1) {
+      const session1 = todaySessions.find(s => s.sessionNumber === 1)
+      return !session1 || session1.sessionTimeRemaining > 0
+    }
+    
+    // For session 2+, check if previous session is completed
+    const previousSession = todaySessions.find(s => s.sessionNumber === sessionNumber - 1)
+    const currentSession = todaySessions.find(s => s.sessionNumber === sessionNumber)
+    
+    const isPreviousCompleted = previousSession && previousSession.sessionTimeRemaining <= 0
+    const isCurrentCompleted = currentSession && currentSession.sessionTimeRemaining <= 0
+    
+    return isPreviousCompleted && !isCurrentCompleted
+  }
+
   // Initialize timer with protocol agenda and check for existing sessions
   const initializeTimer = async (protocolAgenda: ProtocolAgendaData, sessionDurationMinutes: number, forceReinitialize = false) => {
     // Don't reinitialize if timer is already running and we're not forcing it
@@ -68,8 +91,8 @@ export function useGlobalTimer() {
     // Fetch existing sessions to check for resumable sessions
     try {
       if (protocolAgenda.Protocol?.length > 0) {
-        const pecId = protocolAgenda.Protocol[0].pecId
-        await fetchSessions(pecId)
+        const pecid = protocolAgenda.Protocol[0].pecid
+        await fetchSessions(pecid)
         
         // Check if there's an existing session for today
         const today = new Date().toISOString().split('T')[0]
@@ -93,7 +116,7 @@ export function useGlobalTimer() {
   }
 
   // Start timer (create new or resume existing session)
-  const startTimer = async () => {
+  const startTimer = async (sessionNumber: number = 1) => {
     if (!globalState.isInitialized || !globalState.protocolAgenda.value) {
       console.error('Timer not initialized')
       return
@@ -108,19 +131,20 @@ export function useGlobalTimer() {
         console.log('Resuming existing session:', globalState.sessionId.value)
       } else {
         // Create new session tracking entry
-        const pecId = globalState.protocolAgenda.value.Protocol[0].pecId
+        const pecid = globalState.protocolAgenda.value.Protocol[0].pecid
         const currentWeek = Math.ceil(
           (Date.now() - new Date(globalState.protocolAgenda.value.startDate).getTime()) / 
           (7 * 24 * 60 * 60 * 1000)
         )
         
         const payload = {
-          pecId,
+          pecid,
           weekNumber: currentWeek,
           sessions: [
             {
               date: new Date().toISOString().split('T')[0],
-              sessionTimeRemaining: Math.round((globalState.totalDuration.value / 60) * 100) / 100
+              sessionTimeRemaining: Math.round((globalState.totalDuration.value / 60) * 100) / 100,
+              sessionNumber
             }
           ]
         }
@@ -256,9 +280,9 @@ export function useGlobalTimer() {
   }
 
   // Toggle between start/pause and resume
-  const toggleTimer = async () => {
+  const toggleTimer = async (sessionNumber: number = 1) => {
     if (!globalState.sessionId.value) {
-      await startTimer()
+      await startTimer(sessionNumber)
     } else if (globalState.running.value) {
       await pauseTimer()
     } else {
@@ -308,5 +332,6 @@ export function useGlobalTimer() {
     resetTimer,
     toggleTimer,
     cleanup,
+    canStartSession,
   }
 }

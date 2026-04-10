@@ -1,15 +1,11 @@
 import type { ApiResponse } from './api.types'
 
-export interface Form {
-  formId: string
-}
-
 export interface ProtocolWeek {
   id: number
-  pecId: number
+  pecid: number
   patientUid: number
   weekNumber: number
-  forms: Form[]
+  forms: string[]
   weekStartDate: string
   weekEndDate: string
 }
@@ -18,7 +14,8 @@ export interface ProtocolAgendaData {
   durationWeeks: number
   sessionDurationMin: number
   startDate: string
-  Protocol: ProtocolWeek[]
+  sessionsDaily: number
+  protocol: ProtocolWeek[]
 }
 
 export interface ProtocolAgendaResponse extends ApiResponse<ProtocolAgendaData> {}
@@ -30,8 +27,8 @@ export const formIdToRouteName = (formId: string): string => {
     'QUALIVEEN': 'qualiveen',
     'SATISFACTION': 'satisfaction',
     'PGI': 'pgi_i',
-    'EVOLUTION_THERAPEUTIQUE': 'evaluation-evolution',
-    'VOIDING_CALENDAR': 'mictionnel-calendar'
+    'EVOLUTION_THERAPEUTIQUE': 'evaluation_evolution',
+    'VOIDING_CALENDAR': 'mictionnel'
   }
   return routeMap[formId] || 'home'
 }
