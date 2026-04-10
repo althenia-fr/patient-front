@@ -8,6 +8,8 @@ import type {
   formIdToRouteName,
   formIdToDisplayName,
 } from '@/types/protocol.types'
+import { setProtocolStart } from '@/utils/protocol'
+import { saveOnboarding } from '@/utils/onboarding'
 
 export const protocolApi = {
   /**
@@ -23,6 +25,11 @@ export const protocolApi = {
       // console.log('response', response);
 
       if (response.data.success && response.data.data) {
+        if (response.data.data.startDate) {
+          const apiStartDate = new Date(response.data.data.startDate)
+          setProtocolStart(apiStartDate)
+          saveOnboarding({ protocolStartDate: apiStartDate.toISOString() })
+        }
         return response.data.data
       }
 
@@ -49,7 +56,9 @@ export const protocolApi = {
    * @returns string[] - Forms for the current week
    */
   getCurrentWeekForms(agendaData: ProtocolAgendaData, currentWeek: number): string[] {
-    const currentWeekData = agendaData.Protocol.find(week => week.weekNumber === currentWeek)
+    const protocol = agendaData?.protocol
+    if (!Array.isArray(protocol)) return []
+    const currentWeekData = protocol.find(week => week.weekNumber === currentWeek)
     return currentWeekData?.forms || []
   },
 
@@ -60,7 +69,9 @@ export const protocolApi = {
    * @returns Array<{week: number, forms: string[]}> - Upcoming forms with week numbers
    */
   getUpcomingForms(agendaData: ProtocolAgendaData, currentWeek: number): Array<{week: number, forms: string[]}> {
-    return agendaData.Protocol
+    const protocol = agendaData?.protocol
+    if (!Array.isArray(protocol)) return []
+    return protocol
       .filter(week => week.weekNumber > currentWeek)
       .map(week => ({
         week: week.weekNumber,

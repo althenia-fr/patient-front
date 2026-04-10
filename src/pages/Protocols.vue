@@ -81,14 +81,14 @@ const currentWeekFormsList = computed(() => {
   })
 })
 
-// Calculate current week
+// Calculate current week — prefer API startDate when agenda is loaded
 const currentWeek = computed(() => {
-  const start = getProtocolStart()
+  const start = fetchedAgenda.value?.startDate ? new Date(fetchedAgenda.value.startDate) : getProtocolStart()
   const now = new Date()
   const msPerDay = 24 * 60 * 60 * 1000
   const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime()
   const todayDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
-  const daysElapsed = Math.floor((todayDay - startDay) / msPerDay)
+  const daysElapsed = Math.max(0, Math.floor((todayDay - startDay) / msPerDay))
   return Math.floor(daysElapsed / 7) + 1
 })
 
@@ -204,14 +204,16 @@ const protocolAgenda = computed(() => {
   if (fetchedAgenda.value) {
     // Build agenda dynamically from the API response
     const total = fetchedAgenda.value.durationWeeks
-    const protocolWeeks = fetchedAgenda.value.Protocol
+    const protocolWeeks = fetchedAgenda.value.protocol
     const items = []
-    for (let week = 1; week <= total; week++) {
-      const match = protocolWeeks.find((pw) => pw.weekNumber === week)
-      const questionnaires = match
-        ? match.forms.map((f) => formIdToDisplayName(f))
-        : []
-      items.push({ week, questionnaires })
+    if (Array.isArray(protocolWeeks)) {
+      for (let week = 1; week <= total; week++) {
+        const match = protocolWeeks.find((pw) => pw.weekNumber === week)
+        const questionnaires = match
+          ? match.forms.map((f) => formIdToDisplayName(f))
+          : []
+        items.push({ week, questionnaires })
+      }
     }
     return items
   }
