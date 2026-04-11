@@ -9,10 +9,10 @@ import { authUser } from '@/utils/auth'
 import { getOnboarding } from '@/utils/onboarding'
 import { protocolApi } from '@/services/api'
 import { useGlobalTimer } from '@/composables/useGlobalTimer'
-import type { ProtocolAgendaData } from '@/types/protocol.types'
+import type { ProtocolAgenda } from '@/types/protocol.types'
 
 // Protocol agenda state
-const protocolAgenda = ref<ProtocolAgendaData | null>(null)
+const protocolAgenda = ref<ProtocolAgenda | null>(null)
 
 // Global timer state
 const {
@@ -32,7 +32,7 @@ const {
 const fetchProtocolAgenda = async () => {
   try {
     protocolAgenda.value = await protocolApi.getProtocolAgenda()
-    
+
     // Initialize global timer with session duration
     if (protocolAgenda.value) {
       const sessionDuration = protocolAgenda.value?.sessionDurationMin || getOnboarding()?.sessionDuration || 20
@@ -71,7 +71,7 @@ function compositeProgress() {
   return pct
 }
 
-const firstName = computed(() => (authUser.value?.user_metadata?.firstName || (authUser.value?.email||'').split('@')[0] || 'Utilisateur'))
+const firstname = computed(() => (authUser.value?.user_metadata?.firstname || (authUser.value?.email||'').split('@')[0] || 'Utilisateur'))
 const showCongrats = ref(false)
 const congratsMsg = ref('')
 
@@ -143,30 +143,30 @@ onMounted(() => {
 
     <!-- Timer card -->
     <div class="mt-4 rounded-xl border border-gray-100 bg-white p-5 shadow-soft">
-      <Timer 
-        :duration-sec="totalTime" 
-        :size="220" 
-        :stroke="12" 
-        :can-start="true" 
+      <Timer
+        :duration-sec="totalTime"
+        :size="220"
+        :stroke="12"
+        :can-start="true"
         :remaining-time="remainingTime"
         :is-running="isRunning"
         @finished="onFinished"
       />
-      
+
       <!-- Global Timer Controls (if needed for larger interface) -->
       <div class="mt-4 flex justify-center gap-4">
         <button
           @click="toggleTimer"
           :class="[
             'px-6 py-2 rounded-full font-semibold transition-colors',
-            isRunning 
-              ? 'bg-yellow-500 text-white hover:bg-yellow-600' 
+            isRunning
+              ? 'bg-yellow-500 text-white hover:bg-yellow-600'
               : 'bg-green-500 text-white hover:bg-green-600'
           ]"
         >
           {{ isRunning ? 'Pause' : canResumeSession ? 'Reprendre la session' : 'Démarrer la session' }}
         </button>
-        
+
         <!-- <button
           v-if="hasActiveSession"
           @click="endTimer"

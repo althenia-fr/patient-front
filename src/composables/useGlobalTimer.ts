@@ -1,6 +1,6 @@
 import { ref, computed, onUnmounted, watch } from 'vue'
 import { useSessionTracking } from './useSessionTracking'
-import type { ProtocolAgendaData } from '@/types/protocol.types'
+import type { ProtocolAgenda } from '@/types/protocol.types'
 
 // Global timer state (singleton-like)
 const globalState = {
@@ -9,7 +9,7 @@ const globalState = {
   remaining: ref(0),
   totalDuration: ref(0),
   sessionId: ref<number | null>(null),
-  protocolAgenda: ref<ProtocolAgendaData | null>(null),
+  protocolAgenda: ref<ProtocolAgenda | null>(null),
   interval: ref<number | null>(null),
   startTime: ref<number | null>(null),
   pausedTime: ref(0), // Total time spent paused
@@ -48,7 +48,7 @@ export function useGlobalTimer() {
   })
 
   // Initialize timer with protocol agenda and check for existing sessions
-  const initializeTimer = async (protocolAgenda: ProtocolAgendaData, sessionDurationMinutes: number, forceReinitialize = false) => {
+  const initializeTimer = async (protocolAgenda: ProtocolAgenda, sessionDurationMinutes: number, forceReinitialize = false) => {
     // Don't reinitialize if timer is already running and we're not forcing it
     if (globalState.isInitialized && globalState.running.value && !forceReinitialize) {
       console.log('Timer already running, skipping reinitialization')

@@ -8,13 +8,13 @@ import { getOnboarding } from '@/utils/onboarding'
 import { getProtocolAgenda, getQuestionnairesForWeek } from '@/utils/protocolAgenda'
 import { useProtocol } from '@/composables/useProtocol'
 import { protocolApi } from '@/services/api'
-import type { ProtocolAgendaData } from '@/types/protocol.types'
+import type { ProtocolAgenda } from '@/types/protocol.types'
 import { formIdToRouteName, formIdToDisplayName } from '@/types/protocol.types'
 
 const agendaOpen = ref(false)
 
 // Fetched protocol agenda from API
-const fetchedAgenda = ref<ProtocolAgendaData | null>(null)
+const fetchedAgenda = ref<ProtocolAgenda | null>(null)
 
 const fetchAgenda = async () => {
   try {

@@ -34,7 +34,10 @@ async function submit(e: Event) {
     const redirect = (route.query.redirect as string) || '/home'
     router.replace(redirect)
   } catch (err: any) {
-    error.value = err?.message || 'Échec de connexion'
+
+      if(err.message==='INVALID_CREDENTIALS') error.value = 'Mauvais identifiants'
+      else error.value = err?.message || 'Échec de connexion'
+
   } finally {
     loading.value = false
   }
@@ -52,7 +55,7 @@ async function submit(e: Event) {
 
   <!-- Carte de connexion -->
   <div class="rounded-3xl border border-gray-100 bg-white p-8 shadow-xl">
-    <h2 class="mb-6 text-center text-2xl font-bold text-gray-800">Se connecter</h2>
+    <h2 class="mb-6 text-center text-2xl font-bold text-gray-800">connexion</h2>
     <form class="space-y-5" @submit="submit">
       <div>
         <label class="block mb-1 text-sm font-medium text-gray-600">Numéro de mobile</label>

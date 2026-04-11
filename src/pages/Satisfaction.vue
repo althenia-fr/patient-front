@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { saveResult } from '@/utils/questionnaireResults'
 import apiClient from '@/services/core/apiClient'
+import {STORAGE_KEYS} from "@/types/api.types.ts";
 
 const router = useRouter()
 
@@ -83,7 +84,7 @@ const submitQuestionnaire = async () => {
   loading.value = true
 
   try {
-    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const userStr = sessionStorage.getItem(STORAGE_KEYS.ALTH_USER) || '{}'
     const user = JSON.parse(userStr)
     const patientId = user.uid || user.id || null
     const payload = {

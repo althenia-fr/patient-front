@@ -22,7 +22,7 @@ import Button from '@/components/Button.vue'
     <!-- Foreground content -->
     <div class="relative z-10 flex min-h-[100svh] min-h-screen flex-col pt-safe">
       <div class="mt-auto px-4 pb-28 pb-safe">
-        <RouterLink :to="{ name: 'signin' }" class="block w-full">
+        <RouterLink :to="{ name: 'login' }" class="block w-full">
           <Button variant="primary" class="w-full rounded-full py-4 text-base">Démarrer</Button>
         </RouterLink>
         <!-- Handle indicator -->

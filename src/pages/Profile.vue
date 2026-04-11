@@ -6,11 +6,11 @@ import { getOnboarding, saveOnboarding } from '@/utils/onboarding'
 import { getAttestations, getMethod, setMethod } from '@/utils/caution'
 import { useProtocol } from '@/composables/useProtocol'
 const router = useRouter()
-async function doLogout(){ await signOut(); router.replace({ name: 'signin' }) }
+async function doLogout(){ await signOut(); router.replace({ name: 'login' }) }
 
 
 const user = authUser
-const fullName = computed(() => `${user.value?.user_metadata?.firstName || 'Marie'} ${user.value?.user_metadata?.lastName || 'DUPONT'}`)
+const fullName = computed(() => `${user.value?.user_metadata?.firstname || 'Marie'} ${user.value?.user_metadata?.lastName || 'DUPONT'}`)
 const email = computed(() => user.value?.email || 'marie.dupont@email.fr')
 const phone = computed(() => user.value?.user_metadata?.phone || '06 12 34 56 78')
 
@@ -91,7 +91,7 @@ function refreshAttestations() { attestations.value = getAttestations() }
     <div class="card">
       <div class="flex items-center justify-between cursor-pointer" @click="personalInfoOpen = !personalInfoOpen">
         <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-          <svg class="h-4 w-4 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M6 21a6 6 0 0 1 12 0"/></svg>
+          <font-awesome-icon icon="fa-regular fa-user"/>
           Informations personnelles
         </div>
         <svg v-if="personalInfoOpen" viewBox="0 0 24 24" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2">
@@ -125,7 +125,7 @@ function refreshAttestations() { attestations.value = getAttestations() }
     <div class="card mt-4">
       <div class="flex items-center justify-between cursor-pointer" @click="protocolOpen = !protocolOpen">
         <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-          <svg class="h-4 w-4 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <font-awesome-icon icon="fa-regular fa-calendar"/>
           Protocole
         </div>
         <svg v-if="protocolOpen" viewBox="0 0 24 24" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2">
@@ -225,12 +225,12 @@ function refreshAttestations() { attestations.value = getAttestations() }
       </div>
     </div>
 
-    <!-- Matériel TENS -->
+    <!-- Matériel -->
     <div class="card mt-4">
       <div class="flex items-center justify-between cursor-pointer" @click="tensMaterialOpen = !tensMaterialOpen">
         <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-          <svg class="h-4 w-4 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Matériel TENS
+          <font-awesome-icon icon="fa-solid fa-kit-medical"/>
+          Dispositif Médical
         </div>
         <svg v-if="tensMaterialOpen" viewBox="0 0 24 24" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="18 15 12 9 6 15"></polyline>
@@ -255,7 +255,7 @@ function refreshAttestations() { attestations.value = getAttestations() }
     <div class="card mt-4">
       <div class="flex items-center justify-between cursor-pointer" @click="documentsOpen = !documentsOpen">
         <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-          <svg class="h-4 w-4 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
+          <font-awesome-icon icon="fa-regular fa-folder"/>
           <p>Documents</p>
         </div>
         <svg v-if="documentsOpen" viewBox="0 0 24 24" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2">
@@ -286,8 +286,16 @@ function refreshAttestations() { attestations.value = getAttestations() }
         </div>
       </div>
     </div>
+
+    <div class="card mt-4"  @click="doLogout">
+      <div class="flex items-center justify-between cursor-pointer">
+        <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
+          <font-awesome-icon icon="fa-solid fa-right-from-bracket"/>
+          <p>Déconnexion</p>
+        </div>
+       </div>
+    </div>
+
   </section>
-  <div v-if="authUser" class="fixed bottom-24 left-0 right-0" style="padding: 0 16px 16px;">
-    <button class="w-full btn-secondary" @click="doLogout">Se déconnecter</button>
-  </div>
+
 </template>

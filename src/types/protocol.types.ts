@@ -1,5 +1,3 @@
-import type { ApiResponse } from './api.types'
-
 export interface Form {
   formId: string
 }
@@ -14,14 +12,12 @@ export interface ProtocolWeek {
   weekEndDate: string
 }
 
-export interface ProtocolAgendaData {
+export interface ProtocolAgenda {
   durationWeeks: number
   sessionDurationMin: number
   startDate: string
   protocol: ProtocolWeek[]
 }
-
-export interface ProtocolAgendaResponse extends ApiResponse<ProtocolAgendaData> {}
 
 // Helper function to convert form ID to route name
 export const formIdToRouteName = (formId: string): string => {

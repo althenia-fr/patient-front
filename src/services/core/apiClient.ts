@@ -2,9 +2,9 @@ import axios, { type AxiosInstance, type AxiosError } from 'axios'
 import { logError } from '@/utils/apiErrorHandler'
 import { clearAuthState } from '@/utils/auth.utils'
 import { API_ENDPOINTS, STORAGE_KEYS } from '@/types/api.types'
-import type { RefreshTokenResponse } from '@/types/auth.types'
+import type {AuthData} from '@/types/auth.types'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://shamanic-oneiric-kourtney.ngrok-free.dev'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -44,43 +44,26 @@ const processQueue = (error: any = null) => {
 }
 
 // Separate refresh token function to avoid circular dependency
-export const refreshToken = async (): Promise<RefreshTokenResponse> => {
+export const refreshToken = async (): Promise<AuthData> => {
   try {
+
     const refreshToken = sessionStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+    if (!refreshToken)  throw new Error('No refresh token available')
 
-    if (!refreshToken) {
-      throw new Error('No refresh token available')
-    }
+    const response = await apiClient.post<AuthData>(API_ENDPOINTS.AUTH.REFRESH_TOKEN, {refreshToken,})
 
-    const response = await apiClient.post<RefreshTokenResponse>(API_ENDPOINTS.AUTH.REFRESH_TOKEN, {
-      refreshToken,
-    })
+    if (response.data && response.data.accessToken)  sessionStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.data.accessToken)
+    if (response.data && response.data.refreshToken)  sessionStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.data.refreshToken)
+    if (response.data && response.data.userData) sessionStorage.setItem(STORAGE_KEYS.ALTH_USER,JSON.stringify(response.data.userData))
 
-    if (response.data.success && response.data.data?.accessToken) {
-      sessionStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.data.data.accessToken)
+    return response.data
 
-      if (response.data.data.refreshToken) {
-        sessionStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.data.data.refreshToken)
-      }
-
-      // Store user data
-      if (response?.data?.data?.userData) {
-        sessionStorage.setItem(
-          STORAGE_KEYS.ALTH_USER,
-          JSON.stringify(response?.data?.data?.userData),
-        )
-      }
-
-      return response.data
-    }
-
-    throw new Error('Token refresh failed')
   } catch (error: any) {
     logError('RefreshToken', error)
 
-    // Clear tokens on refresh failure
     sessionStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
     sessionStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
+    sessionStorage.removeItem(STORAGE_KEYS.ALTH_USER)
 
     throw error
   }
@@ -90,7 +73,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest: any = error.config
-    const publicRoutes = ['/auth', '/reset-password', '/reset-password-error', '/signin', '/signup', '/forgot', '/consent']
+    const publicRoutes = ['/auth', '/reset-password', '/reset-password-error', '/login', '/signup', '/forgot', '/consent']
     const isPublicRoute = publicRoutes.some((route) => window.location.pathname.startsWith(route)) || window.location.pathname === '/reset-password'
 
     // Don't try to refresh for public routes or refresh-token endpoint itself
@@ -130,7 +113,7 @@ apiClient.interceptors.response.use(
         processQueue(refreshError)
         isRefreshing = false
         clearAuthState()
-        window.location.href = '/signin'
+        window.location.href = '/login'
         return Promise.reject(refreshError)
       }
     }

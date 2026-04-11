@@ -1,13 +1,13 @@
 {
-  "name": "Althenia Patient",
-  "short_name": "Althenia",
+  "name": "Stimeo+",
+  "short_name": "Stimeo+",
   "description": "Application patient pour le suivi des protocoles thérapeutiques",
   "theme_color": "#3b82f6",
   "background_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
-  "start_url": "/signin",
+  "start_url": "/login",
   "icons": [
     {
       "src": "pwa-192x192.png",

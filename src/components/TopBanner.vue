@@ -2,24 +2,23 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { authUser } from '@/utils/auth'
 import { getWeekInfo } from '@/utils/protocol'
-import { getPoints, getMaxPoints } from '@/utils/gamification'
 import { getOnboarding } from '@/utils/onboarding'
 import { protocolApi } from '@/services/api'
 import { useGlobalTimer } from '@/composables/useGlobalTimer'
 import GlobalTimer from '@/components/GlobalTimer.vue'
-import type { ProtocolAgendaData } from '@/types/protocol.types'
+import type { ProtocolAgenda } from '@/types/protocol.types'
+import router from "@/router";
 
-const firstName = computed(() => {
-  const meta = authUser.value?.user_metadata || {}
-  if (meta.firstName && String(meta.firstName).trim()) return String(meta.firstName)
-  const email = authUser.value?.email || ''
-  const raw = email.split('@')[0] || 'utilisateur'
-  const base = raw.split(/[._-]/)[0] || raw
-  return base.charAt(0).toUpperCase() + base.slice(1)
+const firstname = computed(() => {
+
+  if(!authUser || !authUser.value || !authUser.value.user_metadata) router.replace({ name: 'login' })
+
+  const firstname = authUser.value.user_metadata.firstname;
+  return firstname.charAt(0).toUpperCase() + firstname.slice(1).toLowerCase()
 })
 
 // Protocol agenda state
-const protocolAgenda = ref<ProtocolAgendaData | null>(null)
+const protocolAgenda = ref<ProtocolAgenda | null>(null)
 const agendaLoading = ref(false)
 
 // Global timer
@@ -30,26 +29,22 @@ const fetchProtocolAgenda = async () => {
   try {
     agendaLoading.value = true
     protocolAgenda.value = await protocolApi.getProtocolAgenda()
-    
+
     // Initialize timer to check for existing sessions
     if (protocolAgenda.value) {
       const sessionDuration = protocolAgenda.value?.sessionDurationMin || getOnboarding()?.sessionDuration || 20
       await initializeTimer(protocolAgenda.value, sessionDuration)
     }
   } catch (error) {
-    console.error('Failed to fetch protocol agenda in TopBanner:', error)
-    // Continue with fallback data if API fails
+    //do nothing, error logged by Home page
   } finally {
     agendaLoading.value = false
   }
 }
 
 const week = computed(() => {
-  if (protocolAgenda.value) {
-    return getWeekInfo(protocolAgenda.value)
-  }
-  // Fallback to onboarding data
-  return getWeekInfo()
+
+  return getWeekInfo(protocolAgenda.value)
 })
 
 // const protocolDuration = computed(() => {
@@ -71,7 +66,7 @@ onMounted(() => {
   if (authUser.value) {
     fetchProtocolAgenda()
   }
-  
+
   const readUnread = () => {
     const v = Number(localStorage.getItem('unread_notifications') || '0')
     unread.value = Number.isNaN(v) ? 0 : v
@@ -94,8 +89,8 @@ onMounted(() => {
             <span v-if="unread>0" class="absolute -top-1 -right-1 grid h-5 min-w-[1.25rem] place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{{ unread }}</span>
           </RouterLink>
           <div>
-            <div class="text-base font-bold whitespace-nowrap">Bonjour, {{ firstName }}</div>
-            <span class="inline-flex items-center gap-2 rounded-full bg-brand-secondary/30 px-3 py-1 text-xs font-semibold text-gray-700 whitespace-nowrap">
+            <div class="text-base font-bold whitespace-nowrap">Bonjour, {{ firstname }}</div>
+            <span v-if="week" class="inline-flex items-center gap-2 rounded-full bg-brand-secondary/30 px-3 py-1 text-xs font-semibold text-gray-700 whitespace-nowrap">
               <!-- <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> -->
               Semaine {{ week.current }}/{{ week.total }}
             </span>
