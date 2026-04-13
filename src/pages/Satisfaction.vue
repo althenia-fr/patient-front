@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { saveResult } from '@/utils/questionnaireResults'
 import apiClient from '@/services/core/apiClient'
+import { getWeekInfo } from '@/utils/protocol'
 import {STORAGE_KEYS} from "@/types/api.types.ts";
 
 const router = useRouter()
@@ -91,13 +92,14 @@ const submitQuestionnaire = async () => {
       patientId: patientId,
       formType: 'Satisfaction',
       date: data.value.date,
+      week: getWeekInfo().current,
       answers: { satisfaction: data.value.satisfaction },
       scores: { satisfactionScore: getNumericScore(data.value.satisfaction) },
     }
 
     saveResult('Satisfaction', payload)
 
-    const response = await apiClient.post('/formSubmission/add', payload).catch(() => null)
+    const response = await apiClient.post('/formSubmission/add', payload)
 
     successMessage.value = 'Votre réponse a été enregistrée'
     setTimeout(() => {

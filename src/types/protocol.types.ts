@@ -4,10 +4,10 @@ export interface Form {
 
 export interface ProtocolWeek {
   id: number
-  pecId: number
+  pecid: number
   patientUid: number
   weekNumber: number
-  forms: Form[]
+  forms: string[]
   weekStartDate: string
   weekEndDate: string
 }
@@ -16,6 +16,7 @@ export interface ProtocolAgenda {
   durationWeeks: number
   sessionDurationMin: number
   startDate: string
+  sessionsDaily: number
   protocol: ProtocolWeek[]
 }
 
@@ -26,8 +27,8 @@ export const formIdToRouteName = (formId: string): string => {
     'QUALIVEEN': 'qualiveen',
     'SATISFACTION': 'satisfaction',
     'PGI': 'pgi_i',
-    'EVOLUTION_THERAPEUTIQUE': 'evaluation-evolution',
-    'VOIDING_CALENDAR': 'mictionnel-calendar'
+    'EVOLUTION_THERAPEUTIQUE': 'evaluation_evolution',
+    'VOIDING_CALENDAR': 'mictionnel'
   }
   return routeMap[formId] || 'home'
 }

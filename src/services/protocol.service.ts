@@ -1,15 +1,11 @@
 import apiClient from './core/apiClient'
 import { API_ENDPOINTS } from '@/types/api.types'
-import {createApiError, logError, isNetworkError, prettyPrintErrorMsg} from '@/utils/apiErrorHandler'
+import { prettyPrintErrorMsg } from '@/utils/apiErrorHandler'
 import type {
   ProtocolAgenda,
-  Form,
-
 } from '@/types/protocol.types'
 
 export const protocolApi = {
-
-
   async getProtocolAgenda(): Promise<ProtocolAgenda> {
     try {
       const response = await apiClient.get<ProtocolAgenda>(
@@ -17,8 +13,6 @@ export const protocolApi = {
       )
 
       return response.data;
-
-
     } catch (error: any) {
       let errorMsg = prettyPrintErrorMsg(error.response)
       throw new Error(errorMsg)
@@ -29,10 +23,12 @@ export const protocolApi = {
    * Get forms for the current week
    * @param agendaData - The protocol agenda data
    * @param currentWeek - The current week number
-   * @returns Form[] - Forms for the current week
+   * @returns string[] - Forms for the current week
    */
-  getCurrentWeekForms(agendaData: ProtocolAgenda, currentWeek: number): Form[] {
-    const currentWeekData = agendaData.protocol.find(week => week.weekNumber === currentWeek)
+  getCurrentWeekForms(agendaData: ProtocolAgenda, currentWeek: number): string[] {
+    const protocol = agendaData?.protocol
+    if (!Array.isArray(protocol)) return []
+    const currentWeekData = protocol.find(week => week.weekNumber === currentWeek)
     return currentWeekData?.forms || []
   },
 
@@ -40,10 +36,12 @@ export const protocolApi = {
    * Get all upcoming forms
    * @param agendaData - The protocol agenda data
    * @param currentWeek - The current week number
-   * @returns Array<{week: number, forms: Form[]}> - Upcoming forms with week numbers
+   * @returns Array<{week: number, forms: string[]}> - Upcoming forms with week numbers
    */
-  getUpcomingForms(agendaData: ProtocolAgenda, currentWeek: number): Array<{week: number, forms: Form[]}> {
-    return agendaData.protocol
+  getUpcomingForms(agendaData: ProtocolAgenda, currentWeek: number): Array<{ week: number, forms: string[] }> {
+    const protocol = agendaData?.protocol
+    if (!Array.isArray(protocol)) return []
+    return protocol
       .filter(week => week.weekNumber > currentWeek)
       .map(week => ({
         week: week.weekNumber,

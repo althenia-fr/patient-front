@@ -5,23 +5,22 @@ import router from './router'
 import { initAuth } from './utils/auth'
 import { startScheduler } from './utils/reminders'
 import { getDailyCoachMessage } from './utils/coach'
-
 import { library } from '@fortawesome/fontawesome-svg-core'
-
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-
-import { faUsers,faHandHoldingMedical, faHouse, faBed, faFileMedical, faGear, faTrashCan, faMagnifyingGlass, faPlus,
-  faCirclePlus, faEye, faEyeSlash,faFilePdf,faFile, faPencil, faRightFromBracket, faKitMedical,
+import {
+  faUsers, faHandHoldingMedical, faHouse, faBed, faFileMedical, faGear, faTrashCan, faMagnifyingGlass, faPlus,
+  faCirclePlus, faEye, faEyeSlash, faFilePdf, faFile, faPencil, faRightFromBracket, faKitMedical, faChevronRight
 } from '@fortawesome/free-solid-svg-icons'
 
-import {faUser,faCalendar,faFolder
+import {
+  faUser, faCalendar, faFolder
 } from '@fortawesome/free-regular-svg-icons'
 
 library.add(
-    faUser,faCalendar,faFolder,
+  faUser, faCalendar, faFolder,
 
-    faUsers, faHandHoldingMedical, faHouse, faBed, faFileMedical,faGear, faTrashCan, faPlus, faMagnifyingGlass,
-    faCirclePlus, faEye, faEyeSlash, faFilePdf, faFile, faPencil, faRightFromBracket, faKitMedical
+  faUsers, faHandHoldingMedical, faHouse, faBed, faFileMedical, faGear, faTrashCan, faPlus, faMagnifyingGlass,
+  faCirclePlus, faEye, faEyeSlash, faFilePdf, faFile, faPencil, faRightFromBracket, faKitMedical, faChevronRight
 )
 
 const saved = localStorage.getItem('theme')
@@ -37,12 +36,10 @@ if (saved === 'dark') {
 // }
 
 initAuth()
-
 startScheduler(() => {
   try { new Notification('Coaching quotidien', { body: getDailyCoachMessage() }) } catch {}
 })
-
-createApp(App)
-  .use(router)
-  .component('font-awesome-icon', FontAwesomeIcon)
-  .mount('#app')
+const app = createApp(App)
+app.component('font-awesome-icon', FontAwesomeIcon)
+app.use(router)
+app.mount('#app')

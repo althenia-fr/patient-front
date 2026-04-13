@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { saveResult } from '@/utils/questionnaireResults'
 import apiClient from '@/services/core/apiClient'
+import { getWeekInfo } from '@/utils/protocol'
 import {STORAGE_KEYS} from "@/types/api.types.ts";
 
 const router = useRouter()
@@ -152,12 +153,12 @@ const calculateScores = (): Scores => {
   const e = data.value.effort
   const h = data.value.hyper
   const d = data.value.dysurie
-
+  
   const effort = (e.q1 ?? 0) + (e.q2 ?? 0) + (e.q3 ?? 0)
   const hyper = (h.q1 ?? 0) + (h.q2 ?? 0) + (h.q3 ?? 0) + (h.q4 ?? 0) + (h.q5 ?? 0) + (h.q6 ?? 0) + (h.q7 ?? 0)
   const dysurie = (d.q1 ?? 0) + (d.q2 ?? 0) + (d.q3 ?? 0)
   const total = effort + hyper + dysurie
-
+  
   return { effort, hyper, dysurie, total }
 }
 
@@ -198,11 +199,11 @@ const goPrev = () => {
 
 const submitQuestionnaire = async () => {
   if (!allAnswersProvided.value) return
-
+  
   errorMessage.value = ''
   successMessage.value = ''
   loading.value = true
-
+  
   try {
     const userStr = sessionStorage.getItem(STORAGE_KEYS.ALTH_USER) || '{}'
     const user = JSON.parse(userStr)
@@ -211,6 +212,7 @@ const submitQuestionnaire = async () => {
       patientId: patientId,
       formType: 'USP',
       date: data.value.date,
+      week: getWeekInfo().current,
       answers: {
         effort: data.value.effort,
         hyper: data.value.hyper,
@@ -221,8 +223,8 @@ const submitQuestionnaire = async () => {
 
     saveResult('USP', payload)
 
-    const response = await apiClient.post('/formSubmission/add', payload).catch(() => null)
-
+    const response = await apiClient.post('/formSubmission/add', payload)
+    
     successMessage.value = 'Questionnaire envoyé avec succès !'
     setTimeout(() => {
       router.push({ name: 'questionnaire-results' })
@@ -236,11 +238,11 @@ const submitQuestionnaire = async () => {
 
 
 const updateAnswer = (section: 'effort' | 'hyper' | 'dysurie', questionId: string, value: number) => {
-  data.value[section][questionId as keyof typeof data.value[section]] = value
+  (data.value[section] as any)[questionId] = value
 }
 
 const getAnswer = (section: 'effort' | 'hyper' | 'dysurie', questionId: string): number | null => {
-  return data.value[section][questionId as keyof typeof data.value[section]]
+  return (data.value[section] as any)[questionId]
 }
 </script>
 
@@ -292,7 +294,7 @@ const getAnswer = (section: 'effort' | 'hyper' | 'dysurie', questionId: string):
       <!-- Partie I — Incontinence à l'effort -->
       <div v-if="currentScreen === 'partie-i'" class="space-y-4">
         <h2 class="text-lg font-extrabold">Partie I — Incontinence à l'effort</h2>
-
+        
         <div v-for="question in partieIQuestions" :key="question.id" class="space-y-2 rounded-lg border border-gray-100 bg-white p-4 shadow-soft">
           <h3 class="font-semibold text-sm text-gray-800">{{ question.text }}</h3>
           <div class="space-y-1">
@@ -315,7 +317,7 @@ const getAnswer = (section: 'effort' | 'hyper' | 'dysurie', questionId: string):
       <div v-if="currentScreen === 'partie-ii-a'" class="space-y-4">
         <h2 class="text-lg font-extrabold">Partie II — Hyperactivité vésicale</h2>
         <p class="text-xs text-gray-600">Questions 1 à 3</p>
-
+        
         <div v-for="question in partieIIQuestions.slice(0, 3)" :key="question.id" class="space-y-2 rounded-lg border border-gray-100 bg-white p-4 shadow-soft">
           <h3 class="font-semibold text-sm text-gray-800">{{ question.text }}</h3>
           <div class="space-y-1">
@@ -338,7 +340,7 @@ const getAnswer = (section: 'effort' | 'hyper' | 'dysurie', questionId: string):
       <div v-if="currentScreen === 'partie-ii-b'" class="space-y-4">
         <h2 class="text-lg font-extrabold">Partie II — Hyperactivité vésicale</h2>
         <p class="text-xs text-gray-600">Questions 4 à 6</p>
-
+        
         <div v-for="question in partieIIQuestions.slice(3, 6)" :key="question.id" class="space-y-2 rounded-lg border border-gray-100 bg-white p-4 shadow-soft">
           <h3 class="font-semibold text-sm text-gray-800">{{ question.text }}</h3>
           <div class="space-y-1">
@@ -361,7 +363,7 @@ const getAnswer = (section: 'effort' | 'hyper' | 'dysurie', questionId: string):
       <div v-if="currentScreen === 'partie-ii-c'" class="space-y-4">
         <h2 class="text-lg font-extrabold">Partie II — Hyperactivité vésicale</h2>
         <p class="text-xs text-gray-600">Question 7</p>
-
+        
         <div v-for="question in partieIIQuestions.slice(6)" :key="question.id" class="space-y-2 rounded-lg border border-gray-100 bg-white p-4 shadow-soft">
           <h3 class="font-semibold text-sm text-gray-800">{{ question.text }}</h3>
           <div class="space-y-1">
@@ -383,7 +385,7 @@ const getAnswer = (section: 'effort' | 'hyper' | 'dysurie', questionId: string):
       <!-- Partie III — Dysurie -->
       <div v-if="currentScreen === 'partie-iii'" class="space-y-4">
         <h2 class="text-lg font-extrabold">Partie III — Dysurie</h2>
-
+        
         <div v-for="question in partieIIIQuestions" :key="question.id" class="space-y-2 rounded-lg border border-gray-100 bg-white p-4 shadow-soft">
           <h3 class="font-semibold text-sm text-gray-800">{{ question.text }}</h3>
           <div class="space-y-1">
@@ -405,7 +407,7 @@ const getAnswer = (section: 'effort' | 'hyper' | 'dysurie', questionId: string):
       <!-- Results & Submission Screen -->
       <div v-if="currentScreen === 'results'" class="space-y-4">
         <h2 class="text-lg font-extrabold">Résultats</h2>
-
+        
         <div v-if="errorMessage" class="rounded-lg bg-red-50 border border-red-200 p-3">
           <p class="text-xs text-red-800">{{ errorMessage }}</p>
         </div>

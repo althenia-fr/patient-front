@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { saveResult } from '@/utils/questionnaireResults'
 import apiClient from '@/services/core/apiClient'
+import { getWeekInfo } from '@/utils/protocol'
 
 const router = useRouter()
 
@@ -96,6 +97,7 @@ const submitQuestionnaire = async () => {
       patientId: patientId,
       formType: 'Evolution Thérapeutique',
       date: data.value.date,
+      week: getWeekInfo().current,
       answers: {
         urgenturies: data.value.urgenturies,
         mictions_nocturnes: data.value.mictions_nocturnes,
@@ -107,7 +109,7 @@ const submitQuestionnaire = async () => {
 
     saveResult('Evolution Thérapeutique', payload)
 
-    const response = await apiClient.post('/formSubmission/add', payload).catch(() => null)
+    const response = await apiClient.post('/formSubmission/add', payload)
 
     successMessage.value = 'Questionnaire envoyé avec succès !'
     setTimeout(() => {

@@ -16,13 +16,19 @@ export interface UpdateSessionTrackingResponse extends ApiResponse<SessionTracki
 export const sessionTrackingApi = {
   /**
    * Get session tracking data for a specific PEC
-   * @param pecId - The PEC ID
+   * @param pecid - The PEC ID
    * @returns Promise<SessionTrackingItem[]> - Array of session tracking items
    */
-  async getSessionTracking(pecId: number): Promise<SessionTrackingItem[]> {
+  async getSessionTracking(pecid: number): Promise<SessionTrackingItem[]> {
+    if (!pecid || isNaN(Number(pecid))) {
+      // console.warn('getSessionTracking: pecid is missing or invalid:', pecid)
+      return []
+    }
+
     try {
       const response = await apiClient.get<GetSessionTrackingResponse>(
-        `${API_ENDPOINTS.SESSION_TRACKING.GET_SESSIONS}?pecId=${pecId}`,
+        API_ENDPOINTS.SESSION_TRACKING.GET_SESSIONS,
+        { params: { pecid } }
       )
 
       // console.log('getSessionTracking response:', response);

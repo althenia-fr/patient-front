@@ -16,7 +16,7 @@ export function setProtocolStart(date: Date) {
 }
 
 export function getWeekInfo(protocolAgenda?: ProtocolAgenda) {
-  // If protocolAgenda is provided, use it; otherwise fall back to onboarding data
+  // If protocolAgenda is provided, use it; otherwise fall back to local date
   if (protocolAgenda) {
     const total = protocolAgenda.durationWeeks
     const startDate = new Date(protocolAgenda.startDate)
@@ -28,5 +28,15 @@ export function getWeekInfo(protocolAgenda?: ProtocolAgenda) {
     const current = Math.min(total, Math.max(1, Math.floor(days / 7) + 1))
     return { current, total }
   }
-  else return null
+  
+  // Fallback
+  const startDate = getProtocolStart()
+  const total = getOnboarding()?.protocolDuration || 13
+  const today = new Date()
+  const msPerDay = 24 * 60 * 60 * 1000
+  const startDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime()
+  const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
+  const days = Math.max(0, Math.floor((todayDay - startDay) / msPerDay))
+  const current = Math.min(total, Math.max(1, Math.floor(days / 7) + 1))
+  return { current, total }
 }
