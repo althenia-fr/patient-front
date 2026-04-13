@@ -144,6 +144,5 @@ watch(year, (newVal) => {
     <br/>
     v.{{ version }}
   </p>
-    {{authUser}}
 </section>
 </template>

@@ -8,6 +8,7 @@ import { useProtocol } from '@/composables/useProtocol'
 const router = useRouter()
 async function doLogout(){ await signOut(); router.replace({ name: 'login' }) }
 
+const version = ref('v.'+import.meta.env.VITE_APP_VERSION || 'v.dev');
 
 const user = authUser
 const fullName = computed(() => `${user.value?.user_metadata?.firstname || 'Marie'} ${user.value?.user_metadata?.lastName || 'DUPONT'}`)
@@ -26,7 +27,7 @@ const protocolStartDate = computed(() => {
 
 const { protocolDuration, checkupDate } = useProtocol()
 
-const todayDate = computed(() => new Date().toLocaleDateString('fr-FR'))
+
 
 const sessionCount = ref<number>(getOnboarding()?.sessionCount || 1)
 const sessionDuration = ref<string>(String(getOnboarding()?.sessionDuration || 20))
@@ -34,6 +35,20 @@ const evaluationEvolutionFrequency = ref<string>(getOnboarding()?.evaluationEvol
 const evaluationEvolutionStartWeek = ref<number>(getOnboarding()?.evaluationEvolutionStartWeek || 4)
 const protocolExtension = ref<number>(getOnboarding()?.protocolExtension || 0)
 const deviceSleepDate = ref<string>(getOnboarding()?.deviceSleepDate || '')
+
+let lock = false
+function reloadSoftware()
+{
+  if(!lock)
+  {
+    lock=true;
+    version.value = 'telechargement en cours...'
+    setTimeout(() => {
+      window.location.reload();
+    }, 3000);
+  }
+}
+
 
 watch(sessionCount, (val) => {
   const onb = getOnboarding()
@@ -286,6 +301,23 @@ function refreshAttestations() { attestations.value = getAttestations() }
         </div>
     </div>
     </div>
+
+
+
+
+    <div class="card mt-4">
+      <div class="flex items-center justify-between cursor-pointer" @click="reloadSoftware">
+        <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
+          <font-awesome-icon icon="fa-solid fa-microchip"/>
+          <p>Mettre à jour</p>
+        </div>
+        <div class="text-gray-400">
+          {{version}}
+        </div>
+      </div>
+    </div>
+
+
     <!-- Log Out Button -->
     <div v-if="authUser" class="mt-12 pb-12">
       <button
@@ -299,9 +331,6 @@ function refreshAttestations() { attestations.value = getAttestations() }
           <div>
             <span class="block font-bold text-base text-left">Log out</span>
           </div>
-        </div>
-        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-50 text-red-300">
-          <font-awesome-icon icon="chevron-right" class="text-xs" />
         </div>
       </button>
     </div>
