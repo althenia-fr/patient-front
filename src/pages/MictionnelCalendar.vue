@@ -297,9 +297,9 @@ const saveToDayResults = (dayData: DayData) => {
 const initializeCalendar = () => {
   const start = getProtocolStart()
   const startDate = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 28)
-  
+
   calendarData.value.months = []
-  
+
   for (let m = 0; m < 3; m++) {
     const monthDate = new Date(startDate.getFullYear(), startDate.getMonth() + m, 1)
     const month: MonthData = {
@@ -307,7 +307,7 @@ const initializeCalendar = () => {
       year: monthDate.getFullYear(),
       days: [],
     }
-    
+
     for (let d = 0; d < 4; d++) {
       const dayDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1 + d)
       month.days.push({
@@ -319,7 +319,7 @@ const initializeCalendar = () => {
         totalLeaks: 0,
       })
     }
-    
+
     calendarData.value.months.push(month)
   }
 }
@@ -335,7 +335,7 @@ const stats = computed(() => {
   let totalLeaks = 0
   let totalHydric = 0
   let dayCount = 0
-  
+
   calendarData.value.months.forEach(month => {
     month.days.forEach(day => {
       const dayHydricTotal = day.hydricIntakes.reduce((sum, h) => sum + h.quantity, 0)
@@ -348,12 +348,12 @@ const stats = computed(() => {
       }
     })
   })
-  
+
   const avgMictionsPerDay = dayCount > 0 ? Math.round((allMictions.length / dayCount) * 10) / 10 : 0
   const avgVolumePerMiction = allMictions.length > 0 ? Math.round((totalUrine / allMictions.length) * 10) / 10 : 0
   const avgLeaksPerDay = dayCount > 0 ? Math.round((totalLeaks / dayCount) * 10) / 10 : 0
   const avgHydricPerDay = dayCount > 0 ? Math.round((totalHydric / dayCount) * 10) / 10 : 0
-  
+
   return {
     avgMictionsPerDay,
     avgVolumePerMiction,
@@ -572,31 +572,31 @@ const calculateDayTotals = () => {
 
 const saveDayData = async () => {
   if (!currentDay.value) return
-  
+
   if (currentDay.value.mictions.length === 0) {
     errorMessage.value = 'Veuillez ajouter au moins une miction'
     return
   }
-  
+
   const hasNegativeHydric = currentDay.value.hydricIntakes.some(h => h.quantity < 0)
   if (hasNegativeHydric) {
     errorMessage.value = 'L\'apport hydrique ne peut pas être négatif'
     return
   }
-  
+
   for (const miction of currentDay.value.mictions) {
     if (miction.volume < 0) {
       errorMessage.value = 'Les volumes ne peuvent pas être négatifs'
       return
     }
   }
-  
+
   errorMessage.value = ''
   successMessage.value = ''
   loading.value = true
-  
+
   try {
-    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const userStr = localStorage.getItem('alth_user') || '{}'
     const user = JSON.parse(userStr)
     const patientId = user.uid || user.id || null
     const payload = {
@@ -631,9 +631,9 @@ const saveDayData = async () => {
         totalLeaks: currentDay.value.totalLeaks,
       }
     }
-    
+
     await apiClient.post('/formSubmission/add', payload)
-    
+
     // Save to local results
     if (currentDay.value) {
       saveToDayResults({
@@ -721,7 +721,7 @@ onMounted(() => {
       <div class="space-y-4">
         <div v-for="(month, monthIdx) in calendarData.months" :key="monthIdx" class="rounded-xl border border-gray-100 bg-white p-4">
           <h3 class="font-semibold text-gray-800 mb-3">{{ getMonthName(month.month) }} {{ month.year }}</h3>
-          
+
           <div class="space-y-2">
             <div v-for="(day, dayIdx) in month.days" :key="dayIdx" class="p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer hover:bg-gray-100 transition" @click="goToDailyEntry(monthIdx, dayIdx)">
               <div class="flex items-center justify-between mb-2">

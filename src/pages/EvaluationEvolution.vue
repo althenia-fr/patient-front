@@ -90,7 +90,7 @@ const submitQuestionnaire = async () => {
   loading.value = true
 
   try {
-    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const userStr = localStorage.getItem('alth_user') || '{}'
     const user = JSON.parse(userStr)
     const patientId = user.uid || user.id || null
     const payload = {

@@ -17,7 +17,7 @@ const apiClient: AxiosInstance = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -47,23 +47,23 @@ const processQueue = (error: any = null) => {
 export const refreshToken = async (): Promise<AuthData> => {
   try {
 
-    const refreshToken = sessionStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+    const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
     if (!refreshToken)  throw new Error('No refresh token available')
 
     const response = await apiClient.post<AuthData>(API_ENDPOINTS.AUTH.REFRESH_TOKEN, {refreshToken,})
 
-    if (response.data && response.data.accessToken)  sessionStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.data.accessToken)
-    if (response.data && response.data.refreshToken)  sessionStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.data.refreshToken)
-    if (response.data && response.data.userData) sessionStorage.setItem(STORAGE_KEYS.ALTH_USER,JSON.stringify(response.data.userData))
+    if (response.data && response.data.accessToken)  localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.data.accessToken)
+    if (response.data && response.data.refreshToken)  localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.data.refreshToken)
+    if (response.data && response.data.userData) localStorage.setItem(STORAGE_KEYS.ALTH_USER,JSON.stringify(response.data.userData))
 
     return response.data
 
   } catch (error: any) {
     logError('RefreshToken', error)
 
-    sessionStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
-    sessionStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
-    sessionStorage.removeItem(STORAGE_KEYS.ALTH_USER)
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
+    localStorage.removeItem(STORAGE_KEYS.ALTH_USER)
 
     throw error
   }

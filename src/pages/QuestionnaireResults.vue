@@ -36,34 +36,34 @@ function normalizeFormType(type: string): string {
 
 async function refreshResults() {
   try {
-    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const userStr = localStorage.getItem('alth_user') || '{}'
     const user = JSON.parse(userStr)
     const patientId = user.uid || user.id || null
-    
+
     const response = await apiClient.get('/formSubmission/list', {
       params: { patientId }
     })
-    
+
     const apiData = response.data?.data || response.data || []
     apiRawWeeks.value = Array.isArray(apiData) ? apiData : []
     const flatResults: QuestionnaireResult[] = []
-    
+
     if (Array.isArray(apiData)) {
       apiData.forEach((weekGroup: any) => {
         const weekNum = weekGroup.weekNumber
         const forms = weekGroup.forms || []
-        
+
         forms.forEach((formGroup: any) => {
           const type = normalizeFormType(formGroup.formType)
           const submissions = formGroup.submissions || []
-          
+
           submissions.forEach((sub: any) => {
             // Reconstruct the flat 'data' object the frontend expects
             const dataObj = {
                ...(sub.answers || {}),
                scores: sub.scores || {}
             }
-            
+
             flatResults.push({
               id: String(sub.id || Math.random()),
               questionnaireName: type,
@@ -75,7 +75,7 @@ async function refreshResults() {
           })
         })
       })
-      
+
       results.value = flatResults
     } else {
       results.value = []
@@ -84,7 +84,7 @@ async function refreshResults() {
     console.error('Failed to fetch external results:', err)
     results.value = []
   }
-  
+
   chartData.value = getChartDataByWeek(results.value)
 }
 

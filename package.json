@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "run-p \"build-only {@}\" --",
+    "build": "VITE_APP_VERSION=$(date +%Y%m%d.%H%M) run-p \"build-only {@}\" --",
     "preview": "vite preview",
     "test:unit": "vitest",
     "build-only": "vite build",

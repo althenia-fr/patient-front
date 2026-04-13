@@ -288,7 +288,7 @@ function refreshAttestations() { attestations.value = getAttestations() }
     </div>
     <!-- Log Out Button -->
     <div v-if="authUser" class="mt-12 pb-12">
-      <button 
+      <button
         @click="doLogout"
         class="card flex w-full items-center justify-between !border-red-50 text-red-600 shadow-soft active:scale-[0.98] transition-all duration-200"
       >
@@ -298,22 +298,12 @@ function refreshAttestations() { attestations.value = getAttestations() }
           </div>
           <div>
             <span class="block font-bold text-base text-left">Log out</span>
-            <span class="text-[10px] text-red-400 font-medium">Session sécurisée</span>
           </div>
         </div>
         <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-50 text-red-300">
           <font-awesome-icon icon="chevron-right" class="text-xs" />
         </div>
       </button>
-    </div>
-
-    <div class="card mt-4"  @click="doLogout">
-      <div class="flex items-center justify-between cursor-pointer">
-        <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-          <font-awesome-icon icon="fa-solid fa-right-from-bracket"/>
-          <p>Déconnexion</p>
-        </div>
-       </div>
     </div>
 
   </section>

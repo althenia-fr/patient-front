@@ -113,7 +113,7 @@ const calculateScores = (): Scores => {
   const vecu = (ans.q5! + ans.q6!) / 2
   const contraintes = (ans.q7! + ans.q8!) / 2
   const total = (gene + craintes + vecu + contraintes) / 4
-  
+
   return {
     gene: Math.round(gene * 10) / 10,
     craintes: Math.round(craintes * 10) / 10,
@@ -166,7 +166,7 @@ const submitQuestionnaire = async () => {
   loading.value = true
 
   try {
-    const userStr = sessionStorage.getItem(STORAGE_KEYS.ALTH_USER) || '{}'
+    const userStr = localStorage.getItem(STORAGE_KEYS.ALTH_USER) || '{}'
     const user = JSON.parse(userStr)
     const patientId = user.uid || user.id || null
 
@@ -235,7 +235,7 @@ const submitQuestionnaire = async () => {
     <!-- Questions 1-2 Screen -->
     <div v-if="currentScreen === 'q1-2'" class="space-y-6">
       <h2 class="text-xl font-extrabold">Questions 1 et 2</h2>
-      
+
       <div v-for="qIdx in [0, 1]" :key="questions[qIdx].id" class="space-y-3 rounded-lg border border-gray-100 bg-white p-4 shadow-soft">
         <h3 class="font-semibold text-gray-800">{{ questions[qIdx].text }}</h3>
         <div class="space-y-2">
@@ -266,7 +266,7 @@ const submitQuestionnaire = async () => {
     <!-- Questions 3-4 Screen -->
     <div v-if="currentScreen === 'q3-4'" class="space-y-6">
       <h2 class="text-xl font-extrabold">Questions 3 et 4</h2>
-      
+
       <div v-for="qIdx in [2, 3]" :key="questions[qIdx].id" class="space-y-3 rounded-lg border border-gray-100 bg-white p-4 shadow-soft">
         <h3 class="font-semibold text-gray-800">{{ questions[qIdx].text }}</h3>
         <div class="space-y-2">
@@ -297,7 +297,7 @@ const submitQuestionnaire = async () => {
     <!-- Questions 5-6 Screen -->
     <div v-if="currentScreen === 'q5-6'" class="space-y-6">
       <h2 class="text-xl font-extrabold">Questions 5 et 6</h2>
-      
+
       <div v-for="qIdx in [4, 5]" :key="questions[qIdx].id" class="space-y-3 rounded-lg border border-gray-100 bg-white p-4 shadow-soft">
         <h3 class="font-semibold text-gray-800">{{ questions[qIdx].text }}</h3>
         <div class="space-y-2">
@@ -328,7 +328,7 @@ const submitQuestionnaire = async () => {
     <!-- Questions 7-8 Screen -->
     <div v-if="currentScreen === 'q7-8'" class="space-y-6">
       <h2 class="text-xl font-extrabold">Questions 7 et 8</h2>
-      
+
       <div v-for="qIdx in [6, 7]" :key="questions[qIdx].id" class="space-y-3 rounded-lg border border-gray-100 bg-white p-4 shadow-soft">
         <h3 class="font-semibold text-gray-800">{{ questions[qIdx].text }}</h3>
         <div class="space-y-2">
@@ -363,7 +363,7 @@ const submitQuestionnaire = async () => {
     <!-- Results & Submission Screen -->
     <div v-if="currentScreen === 'results'" class="space-y-6">
       <h2 class="text-xl font-extrabold">Résultats et Envoi</h2>
-      
+
       <div v-if="errorMessage" class="rounded-xl bg-red-50 border border-red-200 p-4">
         <p class="text-sm text-red-800">{{ errorMessage }}</p>
       </div>

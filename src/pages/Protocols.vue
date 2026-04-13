@@ -29,19 +29,19 @@ const fetchAgenda = async () => {
 
 const fetchCompletedForms = async () => {
   try {
-    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const userStr = localStorage.getItem('alth_user') || '{}'
     const user = JSON.parse(userStr)
     const patientId = user.uid || user.id || null
-    
+
     const response = await apiClient.get('/formSubmission/list', {
       params: { patientId }
     })
     const apiData = response.data?.data || response.data || []
-    
-    const currentWeekApiData = Array.isArray(apiData) 
-      ? apiData.find((w: any) => String(w.weekNumber) === String(currentWeek.value)) 
+
+    const currentWeekApiData = Array.isArray(apiData)
+      ? apiData.find((w: any) => String(w.weekNumber) === String(currentWeek.value))
       : null
-      
+
     if (currentWeekApiData && currentWeekApiData.forms) {
       completedForms.value = currentWeekApiData.forms
         .filter((f: any) => f.submissions && f.submissions.length > 0)
@@ -62,12 +62,12 @@ onMounted(() => {
 const currentWeekFormsList = computed(() => {
   if (!fetchedAgenda.value) return []
   const res = protocolApi.getCurrentWeekForms(fetchedAgenda.value, currentWeek.value)
-  
+
   // Automatically hide forms that have already been submitted this week
   return res.filter((form: string) => {
     const displayName = formIdToDisplayName(form) || ''
     const upperName = displayName.toUpperCase()
-    
+
     const isCompleted = completedForms.value.some(completedType => {
        if (upperName.includes('QUALIVEEN') && completedType.includes('QUALIVEEN')) return true
        if (upperName.includes('SATISFACTION') && completedType.includes('SATISFACTION')) return true

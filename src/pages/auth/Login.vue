@@ -13,6 +13,8 @@ const day = ref('')
 const error = ref('')
 const loading = ref(false)
 
+const version = import.meta.env.VITE_APP_VERSION || 'dev';
+
 onMounted(() => {
   if (authUser.value) {
     router.replace({ name: 'home' })
@@ -60,9 +62,37 @@ watch(day, (newVal) => {
   }
 })
 
+function handleDeleteYear(e: KeyboardEvent)
+{
+  if (year.value === "") {
+    // On empêche le comportement par défaut pour éviter des effets de bord
+    e.preventDefault();
+    monthInput.value?.focus()
+  }
+}
+
+function handleDeleteMonth(e: KeyboardEvent)
+{
+  if (month.value === "") {
+    // On empêche le comportement par défaut pour éviter des effets de bord
+    e.preventDefault();
+    dayInput.value?.focus()
+  }
+}
+
 watch(month, (newVal) => {
   if (newVal.length === 2) {
     yearInput.value?.focus()
+  }
+
+  if (newVal.length === 0) {
+    dayInput.value?.focus()
+  }
+})
+
+watch(year, (newVal) => {
+  if (newVal.length === 0) {
+    monthInput.value?.focus()
   }
 })
 
@@ -96,8 +126,8 @@ watch(month, (newVal) => {
         <label class="block mb-1 text-sm font-medium text-gray-600">Date de naissance</label>
         <div class="grid grid-cols-3 gap-3">
           <input v-model="day"  ref="dayInput" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="JJ" maxlength="2" required />
-          <input v-model="month"  ref="monthInput" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="MM" maxlength="2" required />
-          <input v-model="year"  ref="yearInput" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="AAAA" maxlength="4" required />
+          <input v-model="month"  ref="monthInput" @keydown.delete="handleDeleteMonth" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="MM" maxlength="2" required />
+          <input v-model="year"  ref="yearInput" @keydown.delete="handleDeleteYear" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="AAAA" maxlength="4" required />
         </div>
       </div>
 
@@ -111,6 +141,9 @@ watch(month, (newVal) => {
 
   <p class="mx-auto mt-10 max-w-sm text-center text-xs text-gray-400">
     En vous connectant, vous acceptez nos <a href="#" class="text-brand-secondary hover:underline">conditions d’utilisation</a> et notre <a href="#" class="text-brand-secondary hover:underline">politique de confidentialité</a>.
+    <br/>
+    v.{{ version }}
   </p>
+    {{authUser}}
 </section>
 </template>

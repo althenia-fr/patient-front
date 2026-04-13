@@ -26,9 +26,9 @@ const agendaError = ref<string | null>(null)
 const completedForms = ref<string[]>([])
 
 // Session tracking state
-const { 
-  sessions: trackedSessions, 
-  loading: sessionsLoading, 
+const {
+  sessions: trackedSessions,
+  loading: sessionsLoading,
   error: sessionsError,
   fetchSessions,
   createSessions,
@@ -41,13 +41,13 @@ const { canStartSession } = useGlobalTimer()
 // Session management for multiple daily sessions
 const availableSessions = computed(() => {
   if (!protocolAgenda.value) return []
-  
+
   const sessionsDaily = protocolAgenda.value.sessionsDaily || 1
   const today = new Date().toISOString().split('T')[0]
-  
+
   // Get today's sessions
   const todaySessions = trackedSessions.value.filter(session => session.date === today)
-  
+
   const sessions = []
   for (let i = 1; i <= sessionsDaily; i++) {
     const session = todaySessions.find(s => s.sessionNumber === i)
@@ -57,7 +57,7 @@ const availableSessions = computed(() => {
       isAvailable: canStartSession(i)
     })
   }
-  
+
   return sessions
 })
 
@@ -67,7 +67,7 @@ const fetchProtocolAgenda = async () => {
     agendaLoading.value = true
     agendaError.value = null
     protocolAgenda.value = await protocolApi.getProtocolAgenda()
-    
+
     // After getting protocol agenda, fetch session tracking data
     if (protocolAgenda.value?.Protocol?.length > 0) {
       const pecid = protocolAgenda.value.Protocol[0].pecid
@@ -94,19 +94,19 @@ const fetchProtocolAgenda = async () => {
 
 const fetchCompletedForms = async () => {
   try {
-    const userStr = sessionStorage.getItem('alth_user') || '{}'
+    const userStr = localStorage.getItem('alth_user') || '{}'
     const user = JSON.parse(userStr)
     const patientId = user.uid || user.id || null
-    
+
     const response = await apiClient.get('/formSubmission/list', {
       params: { patientId }
     })
     const apiData = response.data?.data || response.data || []
-    
-    const currentWeekApiData = Array.isArray(apiData) 
-      ? apiData.find((w: any) => String(w.weekNumber) === String(currentWeek.value)) 
+
+    const currentWeekApiData = Array.isArray(apiData)
+      ? apiData.find((w: any) => String(w.weekNumber) === String(currentWeek.value))
       : null
-      
+
     if (currentWeekApiData && currentWeekApiData.forms) {
       completedForms.value = currentWeekApiData.forms
         .filter((f: any) => f.submissions && f.submissions.length > 0)
@@ -125,7 +125,7 @@ onMounted(() => {
   window.addEventListener('storage', read)
   const id = window.setInterval(read, 2000)
   onUnmounted(() => { window.removeEventListener('storage', read); clearInterval(id) })
-  
+
   // Fetch protocol agenda when component mounts
   fetchProtocolAgenda()
 })
@@ -133,12 +133,12 @@ onMounted(() => {
 const currentWeekForms = computed(() => {
   if (!protocolAgenda.value) return []
   let res = protocolApi.getCurrentWeekForms(protocolAgenda.value, currentWeek.value)
-  
+
   // Automatically hide forms that have already been submitted this week
   return res.filter((form: string) => {
     const displayName = formIdToDisplayName(form) || ''
     const upperName = displayName.toUpperCase()
-    
+
     const isCompleted = completedForms.value.some(completedType => {
        if (upperName.includes('QUALIVEEN') && completedType.includes('QUALIVEEN')) return true
        if (upperName.includes('SATISFACTION') && completedType.includes('SATISFACTION')) return true
@@ -170,11 +170,11 @@ const history = computed(() => getHistory())
 const sessionsDone = computed(() => {
   const date = protocolAgenda.value?.startDate || getOnboarding()?.protocolStartDate
   if (!date) return 0
-  
+
   // Use session tracking API data instead of history
   const startDate = new Date(date)
   const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime()
-  
+
   return trackedSessions.value.filter(session => {
     const sessionDate = new Date(session.date).getTime()
     // Consider a session "done" if sessionTimeRemaining is 0 or less
@@ -185,11 +185,11 @@ const sessionsDone = computed(() => {
 const incompleteSessionsCount = computed(() => {
   const date = protocolAgenda.value?.startDate || getOnboarding()?.protocolStartDate
   if (!date) return 0
-  
+
   // Use session tracking API data instead of listSessions
   const startDate = new Date(date)
   const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime()
-  
+
   return trackedSessions.value.filter(session => {
     const sessionDate = new Date(session.date).getTime()
     // Consider a session "incomplete" if sessionTimeRemaining > 0
@@ -201,7 +201,7 @@ const adherence = computed(() => {
   // Calculate adherence based on completed sessions vs expected sessions
   const expectedSessions = daysElapsed.value // One session per day expected
   const completedSessions = sessionsDone.value
-  
+
   if (expectedSessions === 0) return 0
   return Math.min(100, Math.round((completedSessions / expectedSessions) * 100))
 })
@@ -256,19 +256,19 @@ const checkupWeek = computed(() => {
 const protocolProgress = computed(() => {
   const date = protocolAgenda?.value?.startDate || getOnboarding()?.protocolStartDate
   if (!date) return { percentage: 0, remaining: 0 }
-  
+
   const startDate = new Date(date)
   const today = new Date()
-  
+
   const msPerDay = 24 * 60 * 60 * 1000
   const startDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime()
   const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
-  
+
   const totalDays = (protocolDuration.value) * 7
   const elapsedDays = Math.max(0, Math.floor((todayDay - startDay) / msPerDay))
   const percentage = Math.min(100, Math.round((elapsedDays / totalDays) * 100))
   const remaining = Math.max(0, Math.round((totalDays - elapsedDays) / 7))
-  
+
   return { percentage, remaining }
 })
 
@@ -360,26 +360,26 @@ const tips = computed(() => {
       <div class="mt-3 space-y-2">
         <!-- Multiple session buttons based on sessionsDaily -->
         <div v-if="availableSessions.length > 1" class="space-y-2">
-          <RouterLink 
-            v-for="session in availableSessions" 
+          <RouterLink
+            v-for="session in availableSessions"
             :key="session.sessionNumber"
             :to="{ name: 'protocol-detail', params: { id: '1' }, query: { sessionNumber: session.sessionNumber } }"
             class="block w-full"
           >
-            <div 
+            <div
               class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none"
               :class="{
                 'bg-brand-secondary text-white': session.isAvailable && !session.isCompleted,
                 'bg-gray-300 text-gray-500 cursor-not-allowed': !session.isAvailable || session.isCompleted
               }"
             >
-              {{ session.isCompleted ? `Séance ${session.sessionNumber} terminée` : 
+              {{ session.isCompleted ? `Séance ${session.sessionNumber} terminée` :
                  !session.isAvailable ? `Séance ${session.sessionNumber} non disponible` :
                  `Commencer la séance ${session.sessionNumber}` }}
             </div>
           </RouterLink>
         </div>
-        
+
         <!-- Single session button (original behavior) -->
         <RouterLink v-else :to="{ name: 'protocol-detail', params: { id: '1' } }" class="block">
           <div class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none bg-brand-secondary text-white">Débuter une nouvelle séance</div>
@@ -399,18 +399,18 @@ const tips = computed(() => {
           <span>Chargement...</span>
         </div>
       </div>
-      
+
       <div v-if="agendaError" class="rounded-lg bg-red-50 p-3 mb-3">
         <p class="text-sm text-red-600">{{ agendaError }}</p>
       </div>
-      
+
       <div class="mt-3 space-y-2">
         <!-- API-driven agenda forms -->
         <div v-if="protocolAgenda && currentWeekForms.length > 0" class="space-y-2">
-          <RouterLink 
-            v-for="form in currentWeekForms" 
+          <RouterLink
+            v-for="form in currentWeekForms"
             :key="form"
-            :to="{ name: formIdToRouteName(form) || 'usp' }" 
+            :to="{ name: formIdToRouteName(form) || 'usp' }"
             class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer"
           >
             <p class="text-xs text-gray-600">
@@ -419,7 +419,7 @@ const tips = computed(() => {
             </p>
           </RouterLink>
         </div>
-        
+
         <!-- Fallback to hardcoded logic if API data is not available -->
         <div v-else-if="!protocolAgenda && !agendaLoading && !agendaError" class="space-y-2">
           <RouterLink v-if="currentWeek === 1" :to="{ name: 'usp' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
@@ -441,7 +441,7 @@ const tips = computed(() => {
             <p class="text-sm font-semibold text-gray-800">Date de fin du protocole</p>
           </div>
         </div>
-        
+
         <!-- No items message -->
         <p v-if="(!protocolAgenda && currentWeekForms.length === 0) || (protocolAgenda && currentWeekForms.length === 0)" class="text-sm text-gray-500">
           Aucun agenda cette semaine
