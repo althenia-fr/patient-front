@@ -51,5 +51,5 @@ export async function unsubscribeUser() {
 
 export async function localTestNotification(title = 'Bravo !', body = '+10 points pour votre séance') {
   const reg = await getSWRegistration()
-  if (reg) await reg.showNotification(title, { body, icon: '/favicon.ico', badge: '/favicon.ico' })
+  if (reg) await reg.showNotification(title, { body, icon: '/stimeo_favicon.png', badge: '/stimeo_favicon.png' })
 }

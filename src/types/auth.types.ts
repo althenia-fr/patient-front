@@ -1,8 +1,6 @@
-import type { ApiResponse } from './api.types'
-
 export interface User {
     id: string
-    firstName: string
+    firstname: string
     lastName: string
     email: string
     phone: string
@@ -32,6 +30,7 @@ export interface LoginRequest {
     year: string
     month: string
     day: string
+  app:string
 }
 
 export interface PasswordResetRequest {
@@ -58,8 +57,7 @@ export interface UserData {
     creation: string
 }
 
-export interface AuthData {
-    userData: UserData
+export interface AuthData extends UserData{
     accessToken: string
     refreshToken: string
     tokenType: string
@@ -74,6 +72,3 @@ export interface RefreshTokenData {
     expiresIn: number
 }
 
-export type AuthResponse = ApiResponse<AuthData>
-
-export type RefreshTokenResponse = ApiResponse<AuthData>

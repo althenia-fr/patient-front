@@ -24,16 +24,20 @@ async function submit(e: Event) {
   error.value = ''
   loading.value = true
   try {
-    await authApi.login({ 
-      mobile: mobile.value, 
-      year: year.value, 
-      month: month.value, 
-      day: day.value 
+    await authApi.login({
+      mobile: mobile.value,
+      year: year.value,
+      month: month.value,
+      day: day.value,
+      app:'patient'
     })
     const redirect = (route.query.redirect as string) || '/home'
     router.replace(redirect)
   } catch (err: any) {
-    error.value = err?.message || 'Échec de connexion'
+
+      if(err.message==='INVALID_CREDENTIALS') error.value = 'Mauvais identifiants'
+      else error.value = err?.message || 'Échec de connexion'
+
   } finally {
     loading.value = false
   }
@@ -41,15 +45,17 @@ async function submit(e: Event) {
 </script>
 <template>
   <section class="mx-auto max-w-sm px-4 py-8">
-  <div class="mb-10 text-center">
-    <h1 class="text-4xl font-bold tracking-tight text-brand-primary" style="font-family: 'Comfortaa', cursive;">
-      Althenia
-    </h1>
-  </div>
+    <img
+      loading="lazy"
+       src="/stimeoplus_logo.png"
+      alt=""
+      class="w-full object-cover mt-5"
+      style="aspect-ratio:2.51; min-width:20px; min-height:20px; overflow:hidden;"
+    />
 
   <!-- Carte de connexion -->
   <div class="rounded-3xl border border-gray-100 bg-white p-8 shadow-xl">
-    <h2 class="mb-6 text-center text-2xl font-bold text-gray-800">Se connecter</h2>
+    <h2 class="mb-6 text-center text-2xl font-bold text-gray-800">connexion</h2>
     <form class="space-y-5" @submit="submit">
       <div>
         <label class="block mb-1 text-sm font-medium text-gray-600">Numéro de mobile</label>
@@ -60,7 +66,7 @@ async function submit(e: Event) {
           <input v-model="mobile" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 pl-11 focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="tel" placeholder="06 00 00 00 00" required />
         </div>
       </div>
-      
+
       <div>
         <label class="block mb-1 text-sm font-medium text-gray-600">Date de naissance</label>
         <div class="grid grid-cols-3 gap-3">
@@ -73,13 +79,13 @@ async function submit(e: Event) {
       <button type="submit" class="btn-primary mt-4 w-full rounded-2xl py-4 text-lg font-semibold shadow-md active:scale-[0.98] transition-transform" :disabled="loading">
         {{ loading ? 'Connexion…' : 'Continuer' }}
       </button>
-      
+
       <p v-if="error" class="mt-4 text-center text-sm font-medium text-red-500 animate-pulse">{{ error }}</p>
     </form>
   </div>
 
   <p class="mx-auto mt-10 max-w-sm text-center text-xs text-gray-400">
-    En vous connectant, vous acceptez nos <a href="#" class="text-brand-primary hover:underline">conditions d’utilisation</a> et notre <a href="#" class="text-brand-primary hover:underline">politique de confidentialité</a>.
+    En vous connectant, vous acceptez nos <a href="#" class="text-brand-secondary hover:underline">conditions d’utilisation</a> et notre <a href="#" class="text-brand-secondary hover:underline">politique de confidentialité</a>.
   </p>
 </section>
 </template>

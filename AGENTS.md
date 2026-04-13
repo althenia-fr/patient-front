@@ -30,7 +30,7 @@ src/                     # Vue application source
 └── ...                 # Other source files
 
 public/                 # Static assets
-├── favicon.ico         # Site favicon
+├── stimeo_favicon.png         # Site stimeo_favicon.png
 └── ...                 # Other static files
 ```
 

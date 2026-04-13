@@ -11,7 +11,7 @@ import { useProtocol } from '@/composables/useProtocol'
 import { useSessionTracking } from '@/composables/useSessionTracking'
 import { useGlobalTimer } from '@/composables/useGlobalTimer'
 import { protocolApi } from '@/services/api'
-import type { ProtocolAgendaData } from '@/types/protocol.types'
+import type { ProtocolAgenda } from '@/types/protocol.types'
 import { formIdToRouteName, formIdToDisplayName } from '@/types/protocol.types'
 import apiClient from '@/services/core/apiClient'
 
@@ -20,7 +20,7 @@ const remEnabled = computed(() => reminder.value.enabled)
 const remTime = computed(() => `${String(reminder.value.hour).padStart(2,'0')}:${String(reminder.value.minute).padStart(2,'0')}`)
 
 // Protocol agenda state
-const protocolAgenda = ref<ProtocolAgendaData | null>(null)
+const protocolAgenda = ref<ProtocolAgenda | null>(null)
 const agendaLoading = ref(false)
 const agendaError = ref<string | null>(null)
 const completedForms = ref<string[]>([])
@@ -83,8 +83,10 @@ const fetchProtocolAgenda = async () => {
     // Fetch completed forms to filter them from the agenda
     await fetchCompletedForms()
   } catch (error: any) {
-    console.error('Failed to fetch protocol agenda:', error)
-    agendaError.value = error.message || 'Impossible de charger l\'agenda du protocole'
+
+    if('NOT_FOUND'===error.message) agendaError.value = 'Impossible de charger l\'agenda du protocole'
+    else agendaError.value = error.message
+
   } finally {
     agendaLoading.value = false
   }

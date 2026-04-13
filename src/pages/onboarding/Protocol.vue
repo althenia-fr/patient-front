@@ -37,7 +37,7 @@ function next() {
     </div>
 
     <div class="mt-6 flex items-center justify-between">
-      <RouterLink :to="{ name: 'welcome' }" class="text-sm text-gray-500">Retour</RouterLink>
+      <RouterLink :to="{ name: 'home' }" class="text-sm text-gray-500">Retour</RouterLink>
       <button class="btn-primary rounded-full px-6 py-3" :disabled="!selected" @click="next">Suivant</button>
     </div>
   </section>

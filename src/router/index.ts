@@ -1,9 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 
-import Home from '@/pages/Home.vue'
-import Welcome from '@/pages/Welcome.vue'
+
 import Splash from '@/pages/preinstall/Splash.vue'
+import Safari from '@/pages/preinstall/Safari.vue'
+import Chrome from '@/pages/preinstall/Chrome.vue'
+
+import Home from '@/pages/Home.vue'
 import Protocols from '@/pages/Protocols.vue'
 import ProtocolDetail from '@/pages/ProtocolDetail.vue'
 import Profile from '@/pages/Profile.vue'
@@ -12,9 +15,7 @@ import Support from '@/pages/Support.vue'
 import Notifications from '@/pages/Notifications.vue'
 import Education from '@/pages/Education.vue'
 import Providers from '@/pages/Providers.vue'
-import SignIn from '@/pages/auth/SignIn.vue'
-import SignUp from '@/pages/auth/SignUp.vue'
-import ForgotPassword from '@/pages/auth/ForgotPassword.vue'
+import Login from '@/pages/auth/Login.vue'
 import Consent from '@/pages/auth/Consent.vue'
 import Qualiveen from '@/pages/Qualiveen.vue'
 import USP from '@/pages/USP.vue'
@@ -28,64 +29,36 @@ import MictionnelResults from '@/pages/MictionnelResults.vue'
 import ProtocolResults from '@/pages/ProtocolResults.vue'
 import { authUser } from '@/utils/auth'
 
-const ResetPassword = () => import('../pages/ResetPassword.vue')
-
-const unauth = (to: any, from: any, next: any) => {
-  if (authUser.value) {
-    next({ name: 'home' })
-  } else {
-    next()
-  }
-}
-
 const routes: RouteRecordRaw[] = [
-  { path: '/', name: 'splash', component: Splash, meta: { layout: 'auth' } },
-  { path: '/welcome', name: 'welcome', component: Welcome, meta: { layout: 'auth' } },
-  { path: '/home', name: 'home', component: Home, meta: { requiresAuth: true } },
-  { path: '/protocols', name: 'protocols', component: Protocols, meta: { requiresAuth: true } },
-  { path: '/protocols/:id', name: 'protocol-detail', component: ProtocolDetail, meta: { requiresAuth: true } },
-  { path: '/protocols-results', name: 'protocol-results', component: ProtocolResults, meta: { requiresAuth: true } },
-  { path: '/profile', name: 'profile', component: Profile, meta: { requiresAuth: true } },
-  { path: '/education', name: 'education', component: Education },
-  { path: '/qualiveen', name: 'qualiveen', component: Qualiveen, meta: { requiresAuth: true } },
-  { path: '/usp', name: 'usp', component: USP, meta: { requiresAuth: true } },
-  { path: '/pgi_i', name: 'pgi_i', component: PGI, meta: { requiresAuth: true } },
-  { path: '/satisfaction', name: 'satisfaction', component: Satisfaction, meta: { requiresAuth: true } },
-  { path: '/evaluation-evolution', name: 'evaluation_evolution', component: EvaluationEvolution, meta: { requiresAuth: true } },
-  { path: '/questionnaire-results', name: 'questionnaire-results', component: QuestionnaireResults, meta: { requiresAuth: true } },
-  { path: '/chart-results', name: 'chart-results', component: ChartResults, meta: { requiresAuth: true } },
-  { path: '/mictionnel', name: 'mictionnel', component: MictionnelCalendar, meta: { requiresAuth: true } },
-  { path: '/mictionnel-results', name: 'mictionnel-results', component: MictionnelResults, meta: { requiresAuth: true } },
-  { path: '/providers', name: 'providers', component: Providers, meta: { requiresAuth: true } },
-  { path: '/support', name: 'support', component: Support },
-  { path: '/notifications', name: 'notifications', component: Notifications, meta: { requiresAuth: true } },
-  { path: '/faq', name: 'faq', component: FAQ },
-  // Auth pages
-  { path: '/signin', name: 'signin', component: SignIn, meta: { layout: 'auth' } },
-  { path: '/signup', name: 'signup', component: SignUp, meta: { layout: 'auth' } },
-  { path: '/forgot', name: 'forgot', component: ForgotPassword, meta: { layout: 'auth' } },
-  { path: '/consent', name: 'consent', component: Consent, meta: { layout: 'auth' } },
-  { path: '/reset-password', name: 'reset-password', component: ResetPassword, meta: { layout: 'auth', title: 'Nouveau mot de passe' } },
-  {
-    path: '/safari',
-    name: 'safari',
-    beforeEnter : unauth,
-    component: () => import('@/pages/preinstall/Safari.vue'),
-    meta: {
-      isAuthenticated: false,
-      layout: 'auth',
-    }
-  },
-  {
-    path: '/chrome',
-    name: 'chrome',
-    beforeEnter : unauth,
-    component: () => import('@/pages/preinstall/Chrome.vue'),
-    meta: {
-      isAuthenticated: false,
-      layout: 'auth',
-    }
-  },
+    { path: '/', name: 'splash', component: Splash, meta: { requiresAuth: false } },
+    { path: '/safari', name: 'safari', component: Safari, meta: { requiresAuth: false } },
+    { path: '/chrome', name: 'chrome', component: Chrome, meta: { requiresAuth: false } },
+    { path: '/faq', name: 'faq', component: FAQ, meta: { requiresAuth: false } },
+
+    { path: '/login', name: 'login', component: Login, meta: { requiresAuth: false }  },
+    { path: '/consent', name: 'consent', component: Consent, meta: { requiresAuth: false }  },
+
+    { path: '/home', name: 'home', component: Home, meta: { requiresAuth: true } },
+    { path: '/protocols', name: 'protocols', component: Protocols, meta: { requiresAuth: true } },
+    { path: '/protocols/:id', name: 'protocol-detail', component: ProtocolDetail, meta: { requiresAuth: true } },
+    { path: '/protocols-results', name: 'protocol-results', component: ProtocolResults, meta: { requiresAuth: true } },
+    { path: '/profile', name: 'profile', component: Profile, meta: { requiresAuth: true } },
+    { path: '/education', name: 'education', component: Education },
+    { path: '/qualiveen', name: 'qualiveen', component: Qualiveen, meta: { requiresAuth: true } },
+    { path: '/usp', name: 'usp', component: USP, meta: { requiresAuth: true } },
+    { path: '/pgi_i', name: 'pgi_i', component: PGI, meta: { requiresAuth: true } },
+    { path: '/satisfaction', name: 'satisfaction', component: Satisfaction, meta: { requiresAuth: true } },
+    { path: '/evaluation-evolution', name: 'evaluation_evolution', component: EvaluationEvolution, meta: { requiresAuth: true } },
+    { path: '/questionnaire-results', name: 'questionnaire-results', component: QuestionnaireResults, meta: { requiresAuth: true } },
+    { path: '/chart-results', name: 'chart-results', component: ChartResults, meta: { requiresAuth: true } },
+    { path: '/mictionnel', name: 'mictionnel', component: MictionnelCalendar, meta: { requiresAuth: true } },
+    { path: '/mictionnel-results', name: 'mictionnel-results', component: MictionnelResults, meta: { requiresAuth: true } },
+    { path: '/providers', name: 'providers', component: Providers, meta: { requiresAuth: true } },
+    { path: '/support', name: 'support', component: Support },
+    { path: '/notifications', name: 'notifications', component: Notifications, meta: { requiresAuth: true } },
+
+    // ALWAYS LASt ROUTE (catchall)
+    {path: '/:pathMatch(.*)*',name: 'not-found', component: Splash, meta: { requiresAuth: false } }
 ]
 
 export const router = createRouter({
@@ -98,19 +71,17 @@ export const router = createRouter({
 
 
 router.beforeEach((to, _from, next) => {
-  if (to.meta && (to.meta as any).requiresAuth && !authUser.value) {
-    next({ name: 'signin', query: { redirect: to.fullPath } })
+
+    if (to.meta && (to.meta as any).requiresAuth && !authUser.value) {
+    next({ name: 'login', query: { redirect: to.fullPath } })
     return
   }
-  if ((to.name === 'welcome' || to.name === 'splash') && authUser.value) {
+
+  if (to.name === 'splash' && authUser.value) {
     next({ name: 'home' })
     return
   }
-  // Redirect authenticated users away from reset password page
-  if (to.name === 'reset-password' && authUser.value) {
-    next({ name: 'home' })
-    return
-  }
+
   next()
 })
 

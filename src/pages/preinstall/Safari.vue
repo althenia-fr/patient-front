@@ -3,7 +3,7 @@
 
     <div class="rounded-2xl border-2 border-slate-300 bg-white p-6 shadow-card">
 
-      <img loading="lazy" src="/theresa.png" alt="" style="width: 150px; margin:auto"/>
+      <img loading="lazy" src="/stimeoplus_logo.png" alt="" style="width: 150px; margin:auto"/>
 
       <div style="max-height: 80px; margin: auto;width: fit-content; margin-top: 20px;margin-bottom: 20px; text-align: center">
         <h1 class="text-xl font-semibold text-brand-600">Installation Safari</h1>
