@@ -43,7 +43,7 @@ const routes: RouteRecordRaw[] = [
     { path: '/protocols/:id', name: 'protocol-detail', component: ProtocolDetail, meta: { requiresAuth: true } },
     { path: '/protocols-results', name: 'protocol-results', component: ProtocolResults, meta: { requiresAuth: true } },
     { path: '/profile', name: 'profile', component: Profile, meta: { requiresAuth: true } },
-    { path: '/education', name: 'education', component: Education },
+    { path: '/education', name: 'education', component: Education , meta: { requiresAuth: true } },
     { path: '/qualiveen', name: 'qualiveen', component: Qualiveen, meta: { requiresAuth: true } },
     { path: '/usp', name: 'usp', component: USP, meta: { requiresAuth: true } },
     { path: '/pgi_i', name: 'pgi_i', component: PGI, meta: { requiresAuth: true } },
@@ -54,7 +54,7 @@ const routes: RouteRecordRaw[] = [
     { path: '/mictionnel', name: 'mictionnel', component: MictionnelCalendar, meta: { requiresAuth: true } },
     { path: '/mictionnel-results', name: 'mictionnel-results', component: MictionnelResults, meta: { requiresAuth: true } },
     { path: '/providers', name: 'providers', component: Providers, meta: { requiresAuth: true } },
-    { path: '/support', name: 'support', component: Support },
+    { path: '/support', name: 'support', component: Support, meta: { requiresAuth: true } },
     { path: '/notifications', name: 'notifications', component: Notifications, meta: { requiresAuth: true } },
 
     // ALWAYS LASt ROUTE (catchall)

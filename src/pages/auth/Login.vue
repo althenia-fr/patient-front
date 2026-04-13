@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import {ref, onMounted, watch} from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { authApi } from '@/services/auth.service'
 import { authUser } from '@/utils/auth'
@@ -15,7 +15,7 @@ const loading = ref(false)
 
 onMounted(() => {
   if (authUser.value) {
-    router.replace('/home')
+    router.replace({ name: 'home' })
   }
 })
 
@@ -42,6 +42,31 @@ async function submit(e: Event) {
     loading.value = false
   }
 }
+
+const mobileInput = ref<HTMLInputElement | null>(null)
+const dayInput = ref<HTMLInputElement | null>(null)
+const monthInput = ref<HTMLInputElement | null>(null)
+const yearInput = ref<HTMLInputElement | null>(null)
+
+watch(mobile, (newVal) => {
+  if (newVal.length === 10) {
+    dayInput.value?.focus()
+  }
+})
+
+watch(day, (newVal) => {
+  if (newVal.length === 2) {
+    monthInput.value?.focus()
+  }
+})
+
+watch(month, (newVal) => {
+  if (newVal.length === 2) {
+    yearInput.value?.focus()
+  }
+})
+
+
 </script>
 <template>
   <section class="mx-auto max-w-sm px-4 py-8">
@@ -63,16 +88,16 @@ async function submit(e: Event) {
           <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
             <i class="fa-solid fa-phone"></i>
           </span>
-          <input v-model="mobile" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 pl-11 focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="tel" placeholder="06 00 00 00 00" required />
+          <input v-model="mobile" ref="mobileInput"  class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 pl-11 focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="tel" placeholder="06 00 00 00 00" required />
         </div>
       </div>
 
       <div>
         <label class="block mb-1 text-sm font-medium text-gray-600">Date de naissance</label>
         <div class="grid grid-cols-3 gap-3">
-          <input v-model="day" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="JJ" maxlength="2" required />
-          <input v-model="month" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="MM" maxlength="2" required />
-          <input v-model="year" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="AAAA" maxlength="4" required />
+          <input v-model="day"  ref="dayInput" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="JJ" maxlength="2" required />
+          <input v-model="month"  ref="monthInput" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="MM" maxlength="2" required />
+          <input v-model="year"  ref="yearInput" class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center focus:border-brand-primary focus:bg-white focus:ring-1 focus:ring-brand-primary transition-all shadow-sm" type="text" placeholder="AAAA" maxlength="4" required />
         </div>
       </div>
 
