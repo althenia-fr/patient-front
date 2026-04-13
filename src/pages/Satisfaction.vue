@@ -99,7 +99,7 @@ const submitQuestionnaire = async () => {
 
     saveResult('Satisfaction', payload)
 
-    const response = await apiClient.post('/formSubmission/add', payload).catch(() => null)
+    const response = await apiClient.post('/formSubmission/add', payload)
 
     successMessage.value = 'Votre réponse a été enregistrée'
     setTimeout(() => {

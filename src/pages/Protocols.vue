@@ -8,10 +8,12 @@ import { getOnboarding } from '@/utils/onboarding'
 import { getProtocolAgenda, getQuestionnairesForWeek } from '@/utils/protocolAgenda'
 import { useProtocol } from '@/composables/useProtocol'
 import { protocolApi } from '@/services/api'
+import apiClient from '@/services/core/apiClient'
 import type { ProtocolAgenda } from '@/types/protocol.types'
 import { formIdToRouteName, formIdToDisplayName } from '@/types/protocol.types'
 
 const agendaOpen = ref(false)
+const completedForms = ref<string[]>([])
 
 // Fetched protocol agenda from API
 const fetchedAgenda = ref<ProtocolAgenda | null>(null)

@@ -223,7 +223,7 @@ const submitQuestionnaire = async () => {
 
     saveResult('USP', payload)
 
-    const response = await apiClient.post('/formSubmission/add', payload).catch(() => null)
+    const response = await apiClient.post('/formSubmission/add', payload)
     
     successMessage.value = 'Questionnaire envoyé avec succès !'
     setTimeout(() => {
