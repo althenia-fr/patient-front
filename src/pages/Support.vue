@@ -39,14 +39,14 @@ const facility = computed(() => ({
         </div>
       </div>
       <div class="mt-2 space-y-2 text-sm">
-        <div class="text-gray-500">Support technique et questions</div>
+        <div class="text-gray-500">Centre Relation Patients</div>
         <div>0 801 270 111 (gratuit)</div>
-        <div>crp@stimeo.fr</div>
+        <div>crp@stimeo.care</div>
         <div>Lun–Ven: 9h–18h</div>
       </div>
       <div class="mt-3 grid grid-cols-2 gap-3">
         <a href="tel:0801270111" class="btn-primary">Appeler</a>
-        <a href="mailto:crp@stimeo.fr" class="rounded-full bg-gray-50 px-4 py-2 text-center font-semibold text-gray-700">Email</a>
+        <a href="mailto:crp@stimeo.care" class="rounded-full bg-gray-50 px-4 py-2 text-center font-semibold text-gray-700">Email</a>
       </div>
     </div>
 

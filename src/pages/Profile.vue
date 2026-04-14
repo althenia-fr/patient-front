@@ -309,7 +309,7 @@ function refreshAttestations() { attestations.value = getAttestations() }
       <div class="flex items-center justify-between cursor-pointer" @click="reloadSoftware">
         <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
           <font-awesome-icon icon="fa-solid fa-microchip"/>
-          <p>Mettre à jour</p>
+          <p>Mise à jour logiciel</p>
         </div>
         <div class="text-gray-400">
           {{version}}
