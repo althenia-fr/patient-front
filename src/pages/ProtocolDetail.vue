@@ -170,7 +170,7 @@ onMounted(() => {
               : 'bg-green-500 text-white hover:bg-green-600'
           ]"
         >
-          {{ isRunning ? 'Pause' : canResumeSession ? 'Reprendre la session' : `Démarrer la séance ${sessionNumber.value}` }}
+          {{ isRunning ? 'Pause' : canResumeSession ? 'Reprendre la session' : `Démarrer la séance ${sessionNumber}` }}
         </button>
 
         <!-- <button

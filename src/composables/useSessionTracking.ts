@@ -78,7 +78,12 @@ export function useSessionTracking() {
 
   // Get session by date
   const getSessionByDate = (date: string): SessionTrackingItem | undefined => {
-    return sessions.value.find(session => session.date === date)
+    // Convert sessions to array properly (same fix as in Home.vue)
+    const sessionsArray = Array.isArray(sessions.value) 
+      ? sessions.value 
+      : Object.values(sessions.value || {}) as SessionTrackingItem[]
+    
+    return sessionsArray.find((session: SessionTrackingItem) => session.date === date)
   }
 
   // Clear sessions (useful for logout or PEC change)
