@@ -9,6 +9,7 @@ const globalState = {
   remaining: ref(0),
   totalDuration: ref(0),
   sessionId: ref<number | null>(null),
+  sessionNumber: ref<number | null>(null), // Track current session number
   protocolAgenda: ref<ProtocolAgenda | null>(null),
   interval: ref<number | null>(null),
   startTime: ref<number | null>(null),
@@ -48,21 +49,27 @@ export function useGlobalTimer() {
   })
 
   // Check if a specific session number can be started
-  const canStartSession = (sessionNumber: number) => {
+  const canStartSession = (sessionNumber: number, sessionsData?: any) => {
     if (!globalState.protocolAgenda.value) return false
     
     const today = new Date().toISOString().split('T')[0]
-    const todaySessions = sessions.value.filter(session => session.date === today)
+    
+    // Convert sessions to array properly (same fix as in Home.vue)
+    const sessionsArray = Array.isArray(sessionsData) 
+      ? sessionsData 
+      : Object.values(sessionsData || {})
+    
+    const todaySessions = sessionsArray.filter((session: any) => session.date === today)
     
     // Session 1 can always be started if not completed
     if (sessionNumber === 1) {
-      const session1 = todaySessions.find(s => s.sessionNumber === 1)
+      const session1 = todaySessions.find((s: any) => s.sessionNumber === 1)
       return !session1 || session1.sessionTimeRemaining > 0
     }
     
     // For session 2+, check if previous session is completed
-    const previousSession = todaySessions.find(s => s.sessionNumber === sessionNumber - 1)
-    const currentSession = todaySessions.find(s => s.sessionNumber === sessionNumber)
+    const previousSession = todaySessions.find((s: any) => s.sessionNumber === sessionNumber - 1)
+    const currentSession = todaySessions.find((s: any) => s.sessionNumber === sessionNumber)
     
     const isPreviousCompleted = previousSession && previousSession.sessionTimeRemaining <= 0
     const isCurrentCompleted = currentSession && currentSession.sessionTimeRemaining <= 0
@@ -91,19 +98,37 @@ export function useGlobalTimer() {
     // Fetch existing sessions to check for resumable sessions
     try {
       if (protocolAgenda.protocol?.length > 0) {
-        const pecId = protocolAgenda.protocol[0].pecId
+        const pecId = protocolAgenda.protocol[0].pecid
         await fetchSessions(pecId)
 
         // Check if there's an existing session for today
         const today = new Date().toISOString().split('T')[0]
-        const existingSession = getSessionByDate(today)
+        // console.log('DEBUG: Looking for sessions to resume for today:', today)
+        
+        // Get all sessions and convert to array properly
+        const sessionsArray = Array.isArray(sessions.value) 
+          ? sessions.value 
+          : Object.values(sessions.value || {})
+        
+        // console.log('DEBUG: All sessions:', sessionsArray)
+        
+        // Find today's sessions with remaining time
+        const todaySessions = sessionsArray.filter((session: any) => 
+          session.date === today && session.sessionTimeRemaining > 0
+        )
+        
+        // console.log('DEBUG: Today sessions with remaining time:', todaySessions)
+        
+        // Use the first session with remaining time (or the most recent one)
+        const existingSession = todaySessions[0]
 
-        if (existingSession && existingSession.sessionTimeRemaining > 0) {
+        if (existingSession) {
           // Set up timer to resume existing session
           // Handle both decimal minutes and integer minutes from API
           // Only update if timer is not currently running
           if (!globalState.running.value || forceReinitialize) {
             globalState.sessionId.value = existingSession.id
+            globalState.sessionNumber.value = existingSession.sessionNumber || null
             globalState.remaining.value = Math.round(existingSession.sessionTimeRemaining * 60)
             console.log('Found resumable session:', existingSession)
             console.log('Converted', existingSession.sessionTimeRemaining, 'minutes to', globalState.remaining.value, 'seconds')
@@ -153,6 +178,7 @@ export function useGlobalTimer() {
         console.log('createdSessions', createdSessions);
         if (createdSessions?.length > 0) {
           globalState.sessionId.value = createdSessions[0].id
+          globalState.sessionNumber.value = sessionNumber // Store the session number
           console.log('Global session tracking created:', createdSessions[0])
         }
       }
@@ -202,10 +228,12 @@ export function useGlobalTimer() {
         const exactMinutes = Math.round((globalState.remaining.value / 60) * 100) / 100
         await updateSession({
           id: globalState.sessionId.value,
-          sessionTimeRemaining: exactMinutes
+          sessionTimeRemaining: exactMinutes,
+          sessionNumber: globalState.sessionNumber.value || undefined
         })
         console.log('Global session tracking paused:', {
           id: globalState.sessionId.value,
+          sessionNumber: globalState.sessionNumber.value,
           remainingTime: exactMinutes,
           remainingSeconds: globalState.remaining.value
         })
@@ -249,10 +277,12 @@ export function useGlobalTimer() {
       try {
         await updateSession({
           id: globalState.sessionId.value,
-          sessionTimeRemaining: 0 // Timer completed - set to 0 minutes
+          sessionTimeRemaining: 0, // Timer completed - set to 0 minutes
+          sessionNumber: globalState.sessionNumber.value || undefined
         })
         console.log('Global session tracking ended:', {
           id: globalState.sessionId.value,
+          sessionNumber: globalState.sessionNumber.value,
           remainingTime: 0
         })
       } catch (error) {
@@ -269,6 +299,7 @@ export function useGlobalTimer() {
     globalState.running.value = false
     globalState.remaining.value = globalState.totalDuration.value
     globalState.sessionId.value = null
+    globalState.sessionNumber.value = null
     globalState.startTime.value = null
     globalState.pausedTime.value = 0
     globalState.lastPauseTime.value = null

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watchEffect } from 'vue'
 import { readConf } from '@/utils/reminders'
 import { getWeekInfo, getProtocolStart } from '@/utils/protocol'
 import { getOnboarding } from '@/utils/onboarding'
@@ -39,14 +39,32 @@ const {
 const { canStartSession } = useGlobalTimer()
 
 // Session management for multiple daily sessions
-const availableSessions = computed(() => {
-  if (!protocolAgenda.value) return []
+interface AvailableSession {
+  sessionNumber: number
+  isCompleted: boolean
+  isAvailable: boolean | undefined
+}
+
+const availableSessions = ref<AvailableSession[]>([])
+
+watchEffect(() => {
+  // Don't compute until both protocol agenda and sessions are loaded
+  if (!protocolAgenda.value || sessionsLoading.value) {
+    availableSessions.value = []
+    return
+  }
 
   const sessionsDaily = protocolAgenda.value.sessionsDaily || 1
   const today = new Date().toISOString().split('T')[0]
 
   // Get today's sessions
-  const todaySessions = trackedSessions.value.filter(session => session.date === today)
+  const sessionsArray = Array.isArray(trackedSessions.value) 
+    ? trackedSessions.value 
+    : Object.values(trackedSessions.value || {})
+  
+  const todaySessions = sessionsArray.filter((session: any) => 
+    session.date === today
+  )
 
   const sessions = []
   for (let i = 1; i <= sessionsDaily; i++) {
@@ -54,11 +72,12 @@ const availableSessions = computed(() => {
     sessions.push({
       sessionNumber: i,
       isCompleted: session ? session.sessionTimeRemaining <= 0 : false,
-      isAvailable: canStartSession(i)
+      isAvailable: canStartSession(i, sessionsArray)
     })
   }
 
-  return sessions
+  availableSessions.value = sessions
+  console.log('availableSessions updated:', availableSessions.value)  
 })
 
 // Fetch protocol agenda on component mount
@@ -69,8 +88,8 @@ const fetchProtocolAgenda = async () => {
     protocolAgenda.value = await protocolApi.getProtocolAgenda()
 
     // After getting protocol agenda, fetch session tracking data
-    if (protocolAgenda.value?.Protocol?.length > 0) {
-      const pecid = protocolAgenda.value.Protocol[0].pecid
+    if (protocolAgenda.value?.protocol?.length > 0) {
+      const pecid = protocolAgenda.value.protocol[0].pecid
       if (pecid) {
         try {
           await fetchSessions(pecid)
@@ -171,11 +190,16 @@ const sessionsDone = computed(() => {
   const date = protocolAgenda.value?.startDate || getOnboarding()?.protocolStartDate
   if (!date) return 0
 
+  // Convert sessions to array properly
+  const sessionsArray = Array.isArray(trackedSessions.value) 
+    ? trackedSessions.value 
+    : Object.values(trackedSessions.value || {})
+
   // Use session tracking API data instead of history
   const startDate = new Date(date)
   const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime()
 
-  return trackedSessions.value.filter(session => {
+  return sessionsArray.filter((session: any) => {
     const sessionDate = new Date(session.date).getTime()
     // Consider a session "done" if sessionTimeRemaining is 0 or less
     return sessionDate >= startDateOnly && session.sessionTimeRemaining <= 0
@@ -186,11 +210,16 @@ const incompleteSessionsCount = computed(() => {
   const date = protocolAgenda.value?.startDate || getOnboarding()?.protocolStartDate
   if (!date) return 0
 
+  // Convert sessions to array properly
+  const sessionsArray = Array.isArray(trackedSessions.value) 
+    ? trackedSessions.value 
+    : Object.values(trackedSessions.value || {})
+
   // Use session tracking API data instead of listSessions
   const startDate = new Date(date)
   const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime()
 
-  return trackedSessions.value.filter(session => {
+  return sessionsArray.filter((session: any) => {
     const sessionDate = new Date(session.date).getTime()
     // Consider a session "incomplete" if sessionTimeRemaining > 0
     return sessionDate >= startDateOnly && session.sessionTimeRemaining > 0
@@ -199,7 +228,9 @@ const incompleteSessionsCount = computed(() => {
 
 const adherence = computed(() => {
   // Calculate adherence based on completed sessions vs expected sessions
-  const expectedSessions = daysElapsed.value // One session per day expected
+  // Now supports multiple sessions per day
+  const sessionsDaily = protocolAgenda.value?.sessionsDaily || 1
+  const expectedSessions = daysElapsed.value * sessionsDaily
   const completedSessions = sessionsDone.value
 
   if (expectedSessions === 0) return 0
@@ -358,12 +389,22 @@ const tips = computed(() => {
         <div class="text-center text-lg font-semibold text-gray-800">{{ today }}</div>
       </div>
       <div class="mt-3 space-y-2">
+        <!-- Show loading state while sessions are being fetched -->
+        <div v-if="sessionsLoading" class="flex justify-center py-4">
+          <div class="flex items-center gap-2 text-sm text-gray-500">
+            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12a9 9 0 11-6.219-8.56"/>
+            </svg>
+            <span>Chargement des séances...</span>
+          </div>
+        </div>
+
         <!-- Multiple session buttons based on sessionsDaily -->
-        <div v-if="availableSessions.length > 1" class="space-y-2">
+        <div v-else-if="availableSessions.length > 1" class="space-y-2">
           <RouterLink
             v-for="session in availableSessions"
             :key="session.sessionNumber"
-            :to="{ name: 'protocol-detail', params: { id: '1' }, query: { sessionNumber: session.sessionNumber } }"
+            :to="{ name: 'protocol-detail', params: { id: session.sessionNumber }, query: { sessionNumber: session.sessionNumber } }"
             class="block w-full"
           >
             <div
