@@ -58,11 +58,11 @@ watchEffect(() => {
   const today = new Date().toISOString().split('T')[0]
 
   // Get today's sessions
-  const sessionsArray = Array.isArray(trackedSessions.value) 
-    ? trackedSessions.value 
+  const sessionsArray = Array.isArray(trackedSessions.value)
+    ? trackedSessions.value
     : Object.values(trackedSessions.value || {})
-  
-  const todaySessions = sessionsArray.filter((session: any) => 
+
+  const todaySessions = sessionsArray.filter((session: any) =>
     session.date === today
   )
 
@@ -77,7 +77,7 @@ watchEffect(() => {
   }
 
   availableSessions.value = sessions
-  console.log('availableSessions updated:', availableSessions.value)  
+  console.log('availableSessions updated:', availableSessions.value)
 })
 
 // Fetch protocol agenda on component mount
@@ -161,9 +161,9 @@ const currentWeekForms = computed(() => {
     const isCompleted = completedForms.value.some(completedType => {
        if (upperName.includes('QUALIVEEN') && completedType.includes('QUALIVEEN')) return true
        if (upperName.includes('SATISFACTION') && completedType.includes('SATISFACTION')) return true
-       if ((upperName.includes('PG') || upperName.includes('PGI')) && (completedType.includes('PG') || completedType.includes('PGI'))) return true
-       if ((upperName.includes('EVOLUTION') || upperName.includes('ÉVOLUTION') || upperName.includes('THERA')) && (completedType.includes('EVOLUTION') || completedType.includes('THERA') || completedType.includes('ÉVOLUTION'))) return true
-       if (upperName.includes('MICTIONNEL') && completedType.includes('MICTIONNEL')) return true
+       if (upperName.includes('PGI') && completedType.includes('PGI')) return true
+       if (upperName.includes('EVOLUTION') && completedType.includes('EVOLUTION') ) return true
+       if (upperName.includes('MICTION') && completedType.includes('MICTION')) return true
        if (upperName.includes('USP') && completedType.includes('USP')) return true
        return completedType === upperName
     })
@@ -191,8 +191,8 @@ const sessionsDone = computed(() => {
   if (!date) return 0
 
   // Convert sessions to array properly
-  const sessionsArray = Array.isArray(trackedSessions.value) 
-    ? trackedSessions.value 
+  const sessionsArray = Array.isArray(trackedSessions.value)
+    ? trackedSessions.value
     : Object.values(trackedSessions.value || {})
 
   // Use session tracking API data instead of history
@@ -211,8 +211,8 @@ const incompleteSessionsCount = computed(() => {
   if (!date) return 0
 
   // Convert sessions to array properly
-  const sessionsArray = Array.isArray(trackedSessions.value) 
-    ? trackedSessions.value 
+  const sessionsArray = Array.isArray(trackedSessions.value)
+    ? trackedSessions.value
     : Object.values(trackedSessions.value || {})
 
   // Use session tracking API data instead of listSessions
@@ -455,7 +455,7 @@ const tips = computed(() => {
             class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer"
           >
             <p class="text-xs text-gray-600">
-              <span class="text-gray-600">Merci de compléter le questionnaire </span>
+              <span class="text-gray-600">Complétez le questionnaire </span>
               <span class="font-semibold text-cyan-700">{{ formIdToDisplayName(form) }}</span>
             </p>
           </RouterLink>
@@ -464,16 +464,16 @@ const tips = computed(() => {
         <!-- Fallback to hardcoded logic if API data is not available -->
         <div v-else-if="!protocolAgenda && !agendaLoading && !agendaError" class="space-y-2">
           <RouterLink v-if="currentWeek === 1" :to="{ name: 'usp' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
-            <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">USP</span></p>
+            <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Complétez le questionnaire </p></span> <span class="font-semibold text-cyan-700">USP</span></p>
           </RouterLink>
           <RouterLink v-if="currentWeek === 1" :to="{ name: 'qualiveen' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
-            <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">Qualiveen</span></p>
+            <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Complétez le questionnaire </p></span> <span class="font-semibold text-cyan-700">Qualiveen</span></p>
           </RouterLink>
           <RouterLink v-if="currentWeek === 4 || currentWeek === 9 || currentWeek === 12 || currentWeek === 16 || currentWeek === 20 || currentWeek === 24" :to="{ name: 'satisfaction' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
-            <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">Satisfaction</span></p>
+            <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Complétez le questionnaire </p></span> <span class="font-semibold text-cyan-700">Satisfaction</span></p>
           </RouterLink>
-          <RouterLink v-if="currentWeek === 4 || currentWeek === 9 || currentWeek === 12 || currentWeek === 16 || currentWeek === 20 || currentWeek === 24" :to="{ name: 'pgi_i' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
-            <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Merci de compléter le questionnaire </p></span> <span class="font-semibold text-cyan-700">PG-I</span></p>
+          <RouterLink v-if="currentWeek === 4 || currentWeek === 9 || currentWeek === 12 || currentWeek === 16 || currentWeek === 20 || currentWeek === 24" :to="{ name: 'pgi' }" class="block rounded-lg bg-cyan-50 p-3 hover:bg-cyan-100 transition cursor-pointer">
+            <p class="text-xs text-gray-600"><span class="text-gray-600"><p>Complétez le questionnaire </p></span> <span class="font-semibold text-cyan-700">PG-I</span></p>
           </RouterLink>
           <div v-if="checkupWeek && currentWeek === checkupWeek" class="rounded-lg bg-gray-50 p-3">
             <p class="text-sm font-semibold text-gray-800">Date Rendez-vous de contrôle</p>

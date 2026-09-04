@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch, onActivated } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getLatestResultByWeekAndQuestionnaire } from '@/utils/questionnaireResults'
 import { getOnboarding } from '@/utils/onboarding'
-import { getProtocolAgenda, getQuestionnairesForWeekExcludingCalendar } from '@/utils/protocolAgenda'
 import { getChartDataByWeek } from '@/utils/chartData'
 import type { QuestionnaireResult } from '@/utils/questionnaireResults'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
-import { Bar } from 'vue-chartjs'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
@@ -18,18 +15,15 @@ const apiRawWeeks = ref<any[]>([])
 const chartData = ref([])
 const expandedWeeks = ref<Set<number>>(new Set())
 
-const protocolDuration = computed(() => getOnboarding()?.protocolDuration || 13)
-const protocolAgenda = computed(() => getProtocolAgenda(protocolDuration.value))
-
 import apiClient from '@/services/core/apiClient'
 
 function normalizeFormType(type: string): string {
   const upper = String(type).toUpperCase()
   if (upper.includes('QUALIVEEN')) return 'Qualiveen'
   if (upper.includes('SATISFACTION')) return 'Satisfaction'
-  if (upper.includes('PG') || upper.includes('PG-I') || upper.includes('PGI')) return 'PG-I'
-  if (upper.includes('EVOLUTION') || upper.includes('ÉVOLUTION') || upper.includes('THERA')) return 'Evolution Thérapeutique'
-  if (upper.includes('MICTIONNEL')) return 'Calendrier Mictionnel'
+  if (upper.includes('PGI')) return 'PG-I'
+  if (upper.includes('EVOLUTION')) return 'Evolution Thérapeutique'
+  if (upper.includes('MICTION')) return 'Calendrier Mictionnel'
   if (upper.includes('USP')) return 'USP'
   return type
 }
@@ -186,11 +180,11 @@ function getScoreDisplay(results: QuestionnaireResult[]): string {
         'Grandement aggravés',
         'Très grandement aggravés',
       ]
-      const satisfactionScore = data.satisfactionScore !== undefined ? data.satisfactionScore : 6 - satisfactionLevel
-      return `${satisfactionOptions[satisfactionLevel]} (${satisfactionScore}/6)`
+      const satisfaction = data.satisfaction !== undefined ? data.satisfaction : 6 - satisfactionLevel
+      return `${satisfactionOptions[satisfactionLevel]} (${satisfaction}/6)`
 
     case 'PG-I':
-      const pgiLevel = data.pgi_i !== undefined ? data.pgi_i : null
+      const pgiLevel = data.pgi !== undefined ? data.pgi : null
       if (pgiLevel === null) return '—'
       const pgiOptions = [
         'Très grandement mieux',
@@ -249,10 +243,10 @@ function isWeekExpanded(week: number): boolean {
 function openQuestionnaire(questionnaire: string) {
   const routeMap: Record<string, string> = {
     'Qualiveen': 'qualiveen',
-    'PG-I': 'pgi_i',
+    'PG-I': 'pgi',
     'USP': 'usp',
     'Satisfaction': 'satisfaction',
-    'Evolution Thérapeutique': 'evaluation_evolution',
+    'Evolution Thérapeutique': 'evolution',
   }
 
   const routeName = routeMap[questionnaire]
@@ -261,121 +255,6 @@ function openQuestionnaire(questionnaire: string) {
   }
 }
 
-// Function to get normalized score on 0-7 scale for charting
-function getNormalizedScoreForChart(questionnaire: string, data: Record<string, any>): number {
-  switch (questionnaire) {
-    case 'Satisfaction':
-      return data.satisfactionScore !== undefined ? data.satisfactionScore : (data.satisfaction !== undefined ? 6 - data.satisfaction : 0)
-    case 'PG-I':
-      return data.pgiScore !== undefined ? data.pgiScore : (data.pgi_i !== undefined ? 6 - data.pgi_i : 0)
-    case 'USP':
-      if (data.scores?.total !== undefined) {
-        const scoreOnSevenScale = (data.scores.total / 39) * 7
-        return Math.round(scoreOnSevenScale * 100) / 100
-      }
-      return 0
-    case 'Qualiveen':
-      if (data.scores?.total !== undefined) {
-        const scoreOnSevenScale = (data.scores.total / 4) * 7
-        return Math.round(scoreOnSevenScale * 100) / 100
-      }
-      return 0
-    default:
-      return 0
-  }
-}
-
-// Make function available to template
-const getQuestionnairesForWeekExcludingCalendarFn = getQuestionnairesForWeekExcludingCalendar
-
-// Options pour le graphique en barres Evolution Thérapeutique
-const barChartOptions = {
-  responsive: true,
-  maintainAspectRatio: true,
-  plugins: {
-    legend: {
-      display: true,
-      position: 'top' as const,
-    },
-    title: {
-      display: true,
-      text: 'Évolution Thérapeutique',
-      font: { size: 16, weight: 'bold' as const },
-    },
-  },
-  scales: {
-    y: {
-      min: 0,
-      max: 7,
-      ticks: {
-        stepSize: 1,
-      },
-      title: {
-        display: true,
-        text: 'Score',
-      },
-    },
-    x: {
-      title: {
-        display: true,
-        text: 'Semaine',
-      },
-    },
-  },
-}
-
-// Préparer les données pour le graphique en barres (Evolution)
-function getBarChartData() {
-  const weeks = chartData.value
-    .filter((d: any) => d.evolutionData)
-    .map((d: any) => `S${d.week}`)
-
-  const evolutionDataPoints = chartData.value.filter((d: any) => d.evolutionData)
-
-  console.log('Evolution data points:', evolutionDataPoints)
-  console.log('Weeks:', weeks)
-
-  return {
-    labels: weeks,
-    datasets: [
-      {
-        label: 'Urgences',
-        data: evolutionDataPoints.map((d: any) => d.evolutionData?.urgences ?? 0),
-        backgroundColor: '#EF4444',
-      },
-      {
-        label: 'Mictions nocturnes',
-        data: evolutionDataPoints.map((d: any) => d.evolutionData?.nuit ?? 0),
-        backgroundColor: '#F59E0B',
-      },
-      {
-        label: 'Fuites urinaires',
-        data: evolutionDataPoints.map((d: any) => d.evolutionData?.fuites ?? 0),
-        backgroundColor: '#FBBF24',
-      },
-      {
-        label: 'Douleur miction',
-        data: evolutionDataPoints.map((d: any) => d.evolutionData?.douleurMiction ?? 0),
-        backgroundColor: '#F87171',
-      },
-      {
-        label: 'Douleur hors miction',
-        data: evolutionDataPoints.map((d: any) => d.evolutionData?.douleurHorsMiction ?? 0),
-        backgroundColor: '#FB923C',
-      },
-      {
-        label: 'État protection',
-        data: evolutionDataPoints.map((d: any) => d.evolutionData?.etatProtection ?? 0),
-        backgroundColor: '#6366F1',
-      },
-      {
-        label: 'Évolution protection',
-        data: evolutionDataPoints.map((d: any) => d.evolutionData?.evolutionProtection ?? 0),
-        backgroundColor: '#8B5CF6',
-      },
-    ],
-  }
-}
 </script>
 
 <template>

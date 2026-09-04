@@ -19,7 +19,7 @@ Dans `src/pages/`:
 - [ ] USP.vue
 - [ ] PG_I.vue
 - [ ] Satisfaction.vue
-- [ ] EvaluationEvolution.vue
+- [ ] Evolution.vue
 - [ ] QuestionnaireResults.vue
 - [ ] ChartResults.vue
 - [ ] MictionnelCalendar.vue
@@ -43,7 +43,6 @@ Dans `src/utils/`:
 - [ ] mictionnelStats.ts
 
 **Données de démo:**
-- [ ] demoQuestionnaireData.ts
 - [ ] demoMictionnelData.ts
 
 **Utilitaires supplémentaires:**

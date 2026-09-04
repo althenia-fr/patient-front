@@ -40,7 +40,7 @@ export const API_ENDPOINTS = {
     UPDATE_PEC: '/pec',
   },
   PROTOCOL: {
-    GET_AGENDA: '/patient/protocolAgenda/list',
+    GET_AGENDA: '/patient/protocolAgenda/get',
   },
   SESSION_TRACKING: {
     GET_SESSIONS: '/patient/sessionTracking/list',

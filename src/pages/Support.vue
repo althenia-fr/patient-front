@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { getOnboarding } from '@/utils/onboarding'
-import { RouterLink } from 'vue-router'
+import {RouterLink, useRouter} from 'vue-router'
+import {authUser, signOut} from "@/utils/auth.ts";
 
 const ob = getOnboarding()
 const facility = computed(() => ({
@@ -9,40 +10,26 @@ const facility = computed(() => ({
   address: ob.facility?.address || '123 Avenue de la République, 75001 Paris',
   doctor: ob.facility?.doctor || 'Dr. Marie BERNARD',
 }))
+
+const router = useRouter()
+async function doLogout(){ await signOut(); router.replace({ name: 'login' }) }
+
+
 </script>
 
 <template>
-  <section class="mx-auto w-full px-4 py-6 sm:max-w-md md:max-w-lg lg:max-w-xl">
-
-    <!-- Aide (moved first) -->
-    <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-4">
-      <div class="mb-3 font-semibold">Besoin d'aide ?</div>
-      <div class="space-y-3 text-sm">
-        <RouterLink :to="{ name: 'education' }" class="rounded-full bg-white px-4 py-2 border border-gray-100 flex items-center justify-center gap-2 w-full whitespace-nowrap">
-          Guide d'utilisation
-        </RouterLink>
-        <RouterLink :to="{ name: 'education' }" class="rounded-full bg-white px-4 py-2 border border-gray-100 flex items-center justify-center gap-2 w-full whitespace-nowrap">
-          Vidéos tutoriels
-        </RouterLink>
-        <RouterLink :to="{ name: 'faq' }" class="rounded-full bg-white px-4 py-2 border border-gray-100 flex items-center justify-center gap-2 w-full whitespace-nowrap">
-          FAQ
-        </RouterLink>
-      </div>
-    </div>
+  <section class="mx-auto w-full px-4 py-6 sm:max-w-md md:max-w-lg lg:max-w-xl pb-24">
 
     <!-- Support STIMEO (moved second) -->
     <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2 text-gray-700 font-semibold">
-          <svg class="h-5 w-5 text-brand-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18v-6h6v6"/><path d="M8 6h8l1 3H7l1-3z"/></svg>
-          Support STIMEO
+          Aide STIMEO
         </div>
       </div>
       <div class="mt-2 space-y-2 text-sm">
-        <div class="text-gray-500">Centre Relation Patients</div>
-        <div>0 801 270 111 (gratuit)</div>
+        <div>0 801 270 111 (gratuit, lun–ven: 9h–17h)</div>
         <div>crp@stimeo.care</div>
-        <div>Lun–Ven: 9h–18h</div>
       </div>
       <div class="mt-3 grid grid-cols-2 gap-3">
         <a href="tel:0801270111" class="btn-primary">Appeler</a>
@@ -65,6 +52,39 @@ const facility = computed(() => ({
         <a href="tel:+33145678912" class="btn-primary">Appeler</a>
         <a href="mailto:contact@chu.fr" class="rounded-full bg-gray-50 px-4 py-2 text-center font-semibold text-gray-700">Email</a>
       </div>
+    </div>
+
+    <!-- Aide (moved first) -->
+    <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-4">
+      <div class="mb-3 font-semibold">Besoin d'aide ?</div>
+      <div class="space-y-3 text-sm">
+        <!--RouterLink :to="{ name: 'education' }" class="rounded-full bg-white px-4 py-2 border border-gray-100 flex items-center justify-center gap-2 w-full whitespace-nowrap">
+          Guide d'utilisation
+        </RouterLink>
+        <RouterLink :to="{ name: 'education' }" class="rounded-full bg-white px-4 py-2 border border-gray-100 flex items-center justify-center gap-2 w-full whitespace-nowrap">
+          Vidéos tutoriels
+        </RouterLink-->
+        <RouterLink :to="{ name: 'faq' }" class="rounded-full bg-white px-4 py-2 border border-gray-100 flex items-center justify-center gap-2 w-full whitespace-nowrap">
+          Foire Aux Questions
+        </RouterLink>
+      </div>
+    </div>
+
+    <!-- Log Out Button -->
+    <div v-if="authUser" class="pb-12">
+      <button
+          @click="doLogout"
+          class="card flex w-full items-center justify-between !border-red-50 text-red-600 shadow-soft active:scale-[0.98] transition-all duration-200"
+      >
+        <div class="flex items-center gap-3">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-500">
+            <font-awesome-icon icon="right-from-bracket" class="text-xl text-red-500" />
+          </div>
+          <div>
+            <span class="block font-bold text-base text-left">Déconnexion</span>
+          </div>
+        </div>
+      </button>
     </div>
 
   </section>

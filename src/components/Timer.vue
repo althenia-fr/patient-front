@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount, defineEmits, watch } from 'vue'
 
-const props = withDefaults(defineProps<{ 
-  durationSec?: number; 
-  size?: number; 
-  stroke?: number; 
+const props = withDefaults(defineProps<{
+  durationSec?: number;
+  size?: number;
+  stroke?: number;
   canStart?: boolean;
   remainingTime?: number;
   isRunning?: boolean;
@@ -13,12 +13,12 @@ const props = withDefaults(defineProps<{
   size: 220,
   stroke: 12,
   canStart: true,
-  remainingTime: undefined,
+  remainingTime: 1200,
   isRunning: false,
 })
 
-const emit = defineEmits<{ 
-  (e: 'finished', seconds: number): void; 
+const emit = defineEmits<{
+  (e: 'finished', seconds: number): void;
   (e: 'blocked'): void;
   (e: 'started'): void;
   (e: 'paused', remainingTime: number): void;
@@ -28,9 +28,6 @@ const running = ref(false)
 const remaining = ref(props.durationSec)
 
 // Use global timer state if provided, otherwise use local state
-const effectiveRunning = computed(() => {
-  return props.isRunning !== undefined ? props.isRunning : running.value
-})
 
 const effectiveRemaining = computed(() => {
   return props.remainingTime !== undefined ? props.remainingTime : remaining.value
@@ -49,6 +46,7 @@ const timeDisplay = computed(() => {
 let timer: number | null = null
 
 const radius = computed(() => (props.size - props.stroke) / 2)
+
 const circumference = computed(() => 2 * Math.PI * radius.value)
 const dashOffset = computed(() => circumference.value * (1 - (props.durationSec - effectiveRemaining.value) / props.durationSec))
 
@@ -57,7 +55,7 @@ function toggle() {
   if (props.isRunning !== undefined || props.remainingTime !== undefined) {
     return // Global timer controls the state
   }
-  
+
   if (running.value) {
     running.value = false
     if (timer) window.clearInterval(timer)
@@ -76,23 +74,25 @@ function toggle() {
     emit('started')
   }
 }
+
 function reset() {
   // If using global state, don't handle local timer logic
   if (props.isRunning !== undefined || props.remainingTime !== undefined) {
     return // Global timer controls the state
   }
-  
+
   if (timer) window.clearInterval(timer)
   timer = null
   running.value = false
   remaining.value = props.durationSec
 }
+
 function finish() {
   // If using global state, don't handle local timer logic
   if (props.isRunning !== undefined || props.remainingTime !== undefined) {
     return // Global timer controls the state
   }
-  
+
   if (timer) window.clearInterval(timer)
   timer = null
   running.value = false
@@ -101,15 +101,7 @@ function finish() {
   emit('finished', elapsed)
 }
 
-function formatHHMMSS(t: number) {
-  const h = Math.floor(t / 3600)
-  const m = Math.floor((t % 3600) / 60)
-  const s = Math.floor(t % 60)
-  const pad = (n: number) => n.toString().padStart(2, '0')
-  return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`
-}
-
-watch(() => props.durationSec, (nv) => { remaining.value = nv })
+watch(() => props.durationSec, (nv) => { remaining.value = nv})
 
 onBeforeUnmount(() => { if (timer) window.clearInterval(timer) })
 </script>

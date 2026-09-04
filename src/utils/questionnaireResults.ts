@@ -1,4 +1,3 @@
-import { getWeekInfo } from './protocol'
 
 export interface QuestionnaireResult {
   id: string
@@ -14,9 +13,9 @@ const RESULTS_KEY = 'questionnaire_results'
 export function saveResult(questionnaireName: string, data: Record<string, any>, week?: number) {
   try {
     const results = getResults()
-    const weekInfo = week || getWeekInfo().current
+    const weekInfo = week || 1
     const now = new Date()
-    
+
     const result: QuestionnaireResult = {
       id: `${questionnaireName}_${Date.now()}`,
       questionnaireName,
@@ -25,7 +24,7 @@ export function saveResult(questionnaireName: string, data: Record<string, any>,
       data,
       timestamp: Date.now(),
     }
-    
+
     results.push(result)
     localStorage.setItem(RESULTS_KEY, JSON.stringify(results))
     return result

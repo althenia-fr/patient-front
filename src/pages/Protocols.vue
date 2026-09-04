@@ -71,9 +71,9 @@ const currentWeekFormsList = computed(() => {
     const isCompleted = completedForms.value.some(completedType => {
        if (upperName.includes('QUALIVEEN') && completedType.includes('QUALIVEEN')) return true
        if (upperName.includes('SATISFACTION') && completedType.includes('SATISFACTION')) return true
-       if ((upperName.includes('PG') || upperName.includes('PGI')) && (completedType.includes('PG') || completedType.includes('PGI'))) return true
-       if ((upperName.includes('EVOLUTION') || upperName.includes('ÉVOLUTION') || upperName.includes('THERA')) && (completedType.includes('EVOLUTION') || completedType.includes('THERA') || completedType.includes('ÉVOLUTION'))) return true
-       if (upperName.includes('MICTIONNEL') && completedType.includes('MICTIONNEL')) return true
+       if (upperName.includes('PGI') && completedType.includes('PGI')) return true
+       if (upperName.includes('EVOLUTION') && completedType.includes('EVOLUTION') ) return true
+       if (upperName.includes('MICTION') && completedType.includes('MICTION')) return true
        if (upperName.includes('USP') && completedType.includes('USP')) return true
        return completedType === upperName
     })

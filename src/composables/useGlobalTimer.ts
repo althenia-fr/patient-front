@@ -51,29 +51,29 @@ export function useGlobalTimer() {
   // Check if a specific session number can be started
   const canStartSession = (sessionNumber: number, sessionsData?: any) => {
     if (!globalState.protocolAgenda.value) return false
-    
+
     const today = new Date().toISOString().split('T')[0]
-    
+
     // Convert sessions to array properly (same fix as in Home.vue)
-    const sessionsArray = Array.isArray(sessionsData) 
-      ? sessionsData 
+    const sessionsArray = Array.isArray(sessionsData)
+      ? sessionsData
       : Object.values(sessionsData || {})
-    
+
     const todaySessions = sessionsArray.filter((session: any) => session.date === today)
-    
+
     // Session 1 can always be started if not completed
     if (sessionNumber === 1) {
       const session1 = todaySessions.find((s: any) => s.sessionNumber === 1)
       return !session1 || session1.sessionTimeRemaining > 0
     }
-    
+
     // For session 2+, check if previous session is completed
     const previousSession = todaySessions.find((s: any) => s.sessionNumber === sessionNumber - 1)
     const currentSession = todaySessions.find((s: any) => s.sessionNumber === sessionNumber)
-    
+
     const isPreviousCompleted = previousSession && previousSession.sessionTimeRemaining <= 0
     const isCurrentCompleted = currentSession && currentSession.sessionTimeRemaining <= 0
-    
+
     return isPreviousCompleted && !isCurrentCompleted
   }
 
@@ -104,21 +104,21 @@ export function useGlobalTimer() {
         // Check if there's an existing session for today
         const today = new Date().toISOString().split('T')[0]
         // console.log('DEBUG: Looking for sessions to resume for today:', today)
-        
+
         // Get all sessions and convert to array properly
-        const sessionsArray = Array.isArray(sessions.value) 
-          ? sessions.value 
+        const sessionsArray = Array.isArray(sessions.value)
+          ? sessions.value
           : Object.values(sessions.value || {})
-        
+
         // console.log('DEBUG: All sessions:', sessionsArray)
-        
+
         // Find today's sessions with remaining time
-        const todaySessions = sessionsArray.filter((session: any) => 
+        const todaySessions = sessionsArray.filter((session: any) =>
           session.date === today && session.sessionTimeRemaining > 0
         )
-        
+
         // console.log('DEBUG: Today sessions with remaining time:', todaySessions)
-        
+
         // Use the first session with remaining time (or the most recent one)
         const existingSession = todaySessions[0]
 

@@ -26,9 +26,9 @@ export const formIdToRouteName = (formId: string): string => {
     'USP': 'usp',
     'QUALIVEEN': 'qualiveen',
     'SATISFACTION': 'satisfaction',
-    'PGI': 'pgi_i',
-    'EVOLUTION_THERAPEUTIQUE': 'evaluation_evolution',
-    'VOIDING_CALENDAR': 'mictionnel'
+    'PGI': 'pgi',
+    'EVOLUTION': 'evolution',
+    'MICTION': 'mictionnel'
   }
   return routeMap[formId] || 'home'
 }

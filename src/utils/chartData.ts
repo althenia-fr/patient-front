@@ -104,11 +104,11 @@ export function getChartDataByWeek(providedResults?: QuestionnaireResult[]): Cha
         break
       case 'Satisfaction':
         // Satisfaction score 0-6, normaliser à 0-7
-        const satisfactionScore = result.data.satisfactionScore
-        if (satisfactionScore !== undefined) {
-          dataPoint.satisfaction = satisfactionScore
+        const satisfaction = result.data.satisfaction
+        if (satisfaction !== undefined) {
+          dataPoint.satisfaction = satisfaction
         } else if (result.data.satisfaction !== undefined) {
-          // Fallback: si satisfactionScore n'existe pas, calculer à partir de l'index
+          // Fallback: si satisfaction n'existe pas, calculer à partir de l'index
           dataPoint.satisfaction = 6 - result.data.satisfaction
         }
         break

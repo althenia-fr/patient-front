@@ -50,7 +50,7 @@ src/pages/
 ├── USP.vue                       (questionnaire)
 ├── PG_I.vue                      (questionnaire)
 ├── Satisfaction.vue              (questionnaire)
-├── EvaluationEvolution.vue       (questionnaire)
+├── Evolution.vue                 (questionnaire)
 ├── QuestionnaireResults.vue      (résultats)
 ├── ChartResults.vue              (graphiques)
 ├── MictionnelCalendar.vue        (calendrier)
@@ -74,7 +74,6 @@ src/utils/
 ├── questionnaireResults.ts       (résultats questionnaires)
 ├── chartData.ts                  (données pour graphiques)
 ├── mictionnelStats.ts            (stats mictionnel)
-├── demoQuestionnaireData.ts      (données de démo)
 ├── demoMictionnelData.ts         (données mictionnel démo)
 ├── auth.ts                       (authentification)
 ├── notifications.ts              (notifications)
@@ -122,7 +121,7 @@ import Qualiveen from '@/pages/Qualiveen.vue'
 import USP from '@/pages/USP.vue'
 import PGI from '@/pages/PG_I.vue'
 import Satisfaction from '@/pages/Satisfaction.vue'
-import EvaluationEvolution from '@/pages/EvaluationEvolution.vue'
+import Evolution from '@/pages/Evolution.vue'
 import QuestionnaireResults from '@/pages/QuestionnaireResults.vue'
 import ChartResults from '@/pages/ChartResults.vue'
 import MictionnelCalendar from '@/pages/MictionnelCalendar.vue'
@@ -139,9 +138,9 @@ const routes: RouteRecordRaw[] = [
   { path: '/protocols-results', name: 'protocol-results', component: ProtocolResults, meta: { requiresAuth: true } },
   { path: '/qualiveen', name: 'qualiveen', component: Qualiveen, meta: { requiresAuth: true } },
   { path: '/usp', name: 'usp', component: USP, meta: { requiresAuth: true } },
-  { path: '/pgi_i', name: 'pgi_i', component: PGI, meta: { requiresAuth: true } },
+  { path: '/pgi', name: 'pgi', component: PGI, meta: { requiresAuth: true } },
   { path: '/satisfaction', name: 'satisfaction', component: Satisfaction, meta: { requiresAuth: true } },
-  { path: '/evaluation-evolution', name: 'evaluation_evolution', component: EvaluationEvolution, meta: { requiresAuth: true } },
+  { path: '/evolution', name: 'evolution', component: EvaluationEvolution, meta: { requiresAuth: true } },
   { path: '/questionnaire-results', name: 'questionnaire-results', component: QuestionnaireResults, meta: { requiresAuth: true } },
   { path: '/chart-results', name: 'chart-results', component: ChartResults, meta: { requiresAuth: true } },
   { path: '/mictionnel', name: 'mictionnel', component: MictionnelCalendar, meta: { requiresAuth: true } },

@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
-import { authUser, signOut } from '@/utils/auth'
-import { useRouter } from 'vue-router'
+import { authUser } from '@/utils/auth'
 import { getOnboarding, saveOnboarding } from '@/utils/onboarding'
 import { getAttestations, getMethod, setMethod } from '@/utils/caution'
 import { useProtocol } from '@/composables/useProtocol'
-const router = useRouter()
-async function doLogout(){ await signOut(); router.replace({ name: 'login' }) }
 
 const version = ref('v.'+import.meta.env.VITE_APP_VERSION || 'v.dev');
 
@@ -315,24 +312,6 @@ function refreshAttestations() { attestations.value = getAttestations() }
           {{version}}
         </div>
       </div>
-    </div>
-
-
-    <!-- Log Out Button -->
-    <div v-if="authUser" class="mt-12 pb-12">
-      <button
-        @click="doLogout"
-        class="card flex w-full items-center justify-between !border-red-50 text-red-600 shadow-soft active:scale-[0.98] transition-all duration-200"
-      >
-        <div class="flex items-center gap-3">
-          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-500">
-            <font-awesome-icon icon="right-from-bracket" class="text-xl text-red-500" />
-          </div>
-          <div>
-            <span class="block font-bold text-base text-left">Log out</span>
-          </div>
-        </div>
-      </button>
     </div>
 
   </section>
