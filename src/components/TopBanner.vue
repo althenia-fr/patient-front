@@ -48,10 +48,10 @@ onMounted(() => {
       <div class="w-full border border-gray-100 bg-white p-3">
       <div class="flex items-start justify-between">
         <div class="flex items-center gap-3">
-          <RouterLink :to="{ name: 'notifications' }" class="relative grid h-9 w-9 place-items-center rounded-full bg-white text-gray-700 hover:bg-gray-50" :title="'Alertes'">
+          <!--RouterLink :to="{ name: 'notifications' }" class="relative grid h-9 w-9 place-items-center rounded-full bg-white text-gray-700 hover:bg-gray-50" :title="'Alertes'">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span v-if="unread>0" class="absolute -top-1 -right-1 grid h-5 min-w-[1.25rem] place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{{ unread }}</span>
-          </RouterLink>
+          </RouterLink-->
           <div>
             <div class="text-base font-bold whitespace-nowrap">Bonjour, {{ firstname }}</div>
             <span v-if="week" class="inline-flex items-center gap-2 rounded-full bg-brand-secondary/30 px-3 py-1 text-xs font-semibold text-gray-700 whitespace-nowrap">

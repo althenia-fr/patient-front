@@ -44,16 +44,17 @@ const processQueue = (error: any = null) => {
 }
 
 // Separate refresh token function to avoid circular dependency
+/*
 export const refreshToken = async (): Promise<AuthData> => {
   try {
 
-    const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+    //const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
     if (!refreshToken)  throw new Error('No refresh token available')
 
     const response = await apiClient.post<AuthData>(API_ENDPOINTS.AUTH.REFRESH_TOKEN, {refreshToken,})
 
     if (response.data && response.data.accessToken)  localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.data.accessToken)
-    if (response.data && response.data.refreshToken)  localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.data.refreshToken)
+    //if (response.data && response.data.refreshToken)  localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.data.refreshToken)
     if (response.data && response.data.userData) localStorage.setItem(STORAGE_KEYS.ALTH_USER,JSON.stringify(response.data.userData))
 
     return response.data
@@ -62,13 +63,16 @@ export const refreshToken = async (): Promise<AuthData> => {
     logError('RefreshToken', error)
 
     localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
+    //localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
     localStorage.removeItem(STORAGE_KEYS.ALTH_USER)
 
     throw error
   }
 }
 
+ */
+
+/*
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -120,6 +124,6 @@ apiClient.interceptors.response.use(
 
     return Promise.reject(error)
   },
-)
+)*/
 
 export default apiClient

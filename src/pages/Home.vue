@@ -175,6 +175,7 @@ const week = computed(() => {
   const weekInfo = getWeekInfo(protocolAgenda.value || undefined)
   return weekInfo
 })
+
 const today = computed(() => {
   try {
     const s = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })

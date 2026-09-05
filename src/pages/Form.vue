@@ -98,7 +98,7 @@ const submitQuestionnaire = async () => {
 
     successMessage.value = 'Questionnaire envoyé avec succès !'
     setTimeout(() => {
-      router.push({ name: 'questionnaire-results' })
+      router.push({ name: 'home' })
     }, 1500)
   } catch (error: any) {
     errorMessage.value = 'Erreur d\'envoi, veuillez réessayer'
@@ -155,7 +155,7 @@ const submitQuestionnaire = async () => {
 
       <!-- Results & Submission Screen -->
       <div v-if="currentScreen === screenOrder[screenOrder.length-1]" class="space-y-4">
-        <h2 class="text-lg font-extrabold">Résultats</h2>
+        <h2 class="text-lg font-extrabold">Vérifier avant envoi</h2>
 
         <div v-if="errorMessage" class="rounded-lg bg-red-50 border border-red-200 p-3">
           <p class="text-xs text-red-800">{{ errorMessage }}</p>

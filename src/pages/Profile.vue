@@ -314,5 +314,7 @@ function refreshAttestations() { attestations.value = getAttestations() }
       </div>
     </div>
 
+    <div class="h-24"></div>
+
   </section>
 </template>

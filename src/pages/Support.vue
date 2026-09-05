@@ -14,6 +14,7 @@ const facility = computed(() => ({
 const router = useRouter()
 async function doLogout(){ await signOut(); router.replace({ name: 'login' }) }
 
+const doctorContact = authUser.value.user_metadata.doctorContact;
 
 </script>
 
@@ -28,8 +29,8 @@ async function doLogout(){ await signOut(); router.replace({ name: 'login' }) }
         </div>
       </div>
       <div class="mt-2 space-y-2 text-sm">
-        <div>0 801 270 111 (gratuit, lun–ven: 9h–17h)</div>
-        <div>crp@stimeo.care</div>
+        <div><font-awesome-icon class=" text-brand-primary" icon="fa-solid fa-phone"/> 0 801 270 111 (gratuit, lun–ven: 9h–17h)</div>
+        <div><font-awesome-icon class=" text-brand-primary" icon="fa-regular fa-envelope"/> crp@stimeo.care</div>
       </div>
       <div class="mt-3 grid grid-cols-2 gap-3">
         <a href="tel:0801270111" class="btn-primary">Appeler</a>
@@ -41,16 +42,17 @@ async function doLogout(){ await signOut(); router.replace({ name: 'login' }) }
     <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-4">
       <div class="flex items-center gap-2 text-gray-700 font-semibold">
         <svg class="h-5 w-5 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M6 21a6 6 0 0 1 12 0"/></svg>
-        Médecin prescripteur
+        {{doctorContact.doctorName }}
       </div>
       <div class="mt-3 space-y-2 text-sm">
-        <div class="font-semibold">{{ facility.name }}</div>
-        <div class="flex items-center gap-2"><svg class="h-4 w-4 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg> {{ facility.address }}</div>
-        <div class="flex items-center gap-2"><svg class="h-4 w-4 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92V19a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3 5.18 2 2 0 0 1 5 3h2.09a2 2 0 0 1 2 1.72c.12.81.3 1.6.55 2.36a2 2 0 0 1-.45 2.11L8.09 10.91a16 16 0 0 0 5 5l1.72-1.72a2 2 0 0 1 2.11-.45c.76.25 1.55.43 2.36.55A2 2 0 0 1 22 16.92z"/></svg> 01 45 67 89 12</div>
+        <div class="font-semibold" v-if="doctorContact && doctorContact.siteName">{{doctorContact.siteName }}</div>
+        <div class="flex items-center gap-2"><svg class="h-4 w-4 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg> {{doctorContact.address1 }}, {{doctorContact.postcode }} {{doctorContact.city }}</div>
+        <div class="flex items-center gap-2"> <font-awesome-icon class=" text-brand-primary" icon="fa-solid fa-phone"/> {{doctorContact.phone }}</div>
+        <div class="flex items-center gap-2"><font-awesome-icon class=" text-brand-primary" icon="fa-regular fa-envelope"/> {{doctorContact.email }}</div>
       </div>
       <div class="mt-4 grid grid-cols-2 gap-3">
-        <a href="tel:+33145678912" class="btn-primary">Appeler</a>
-        <a href="mailto:contact@chu.fr" class="rounded-full bg-gray-50 px-4 py-2 text-center font-semibold text-gray-700">Email</a>
+        <a :href="'tel:'+doctorContact.phone" class="btn-primary">Appeler</a>
+        <a :href="'mailto:'+doctorContact.email" class="rounded-full bg-gray-50 px-4 py-2 text-center font-semibold text-gray-700">Email</a>
       </div>
     </div>
 

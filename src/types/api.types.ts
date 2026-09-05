@@ -29,11 +29,8 @@ export interface UpdateSessionTrackingPayload {
 
 export const API_ENDPOINTS = {
   AUTH: {
-    SIGNUP: '/auth/signup',
-    LOGIN: '/auth/login',
-    PWDRESET: '/auth/pwdreset',
-    PWDEDIT: '/auth/pwdedit',
-    REFRESH_TOKEN: '/auth/refresh-token',
+    LOGIN: '/patient/login',
+    //REFRESH_TOKEN: '/auth/refresh-token',
   },
   PEC: {
     GET_PEC: '/pec',
@@ -51,6 +48,6 @@ export const API_ENDPOINTS = {
 
 export const STORAGE_KEYS = {
   AUTH_TOKEN: 'auth_token',
-  REFRESH_TOKEN: 'refresh_token',
+  //REFRESH_TOKEN: 'refresh_token',
   ALTH_USER: 'alth_user',
 } as const

@@ -10,19 +10,19 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
   faUsers, faHandHoldingMedical, faHouse, faBed, faFileMedical, faGear, faTrashCan, faMagnifyingGlass, faPlus,
   faCirclePlus, faEye, faEyeSlash, faFilePdf, faFile, faPencil, faRightFromBracket, faKitMedical, faChevronRight,
-    faMicrochip
+    faMicrochip, faPhone,
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
-  faUser, faCalendar, faFolder
+  faUser, faCalendar, faFolder, faEnvelope,
 } from '@fortawesome/free-regular-svg-icons'
 
 library.add(
-  faUser, faCalendar, faFolder,
+  faUser, faCalendar, faFolder,faEnvelope,
 
   faUsers, faHandHoldingMedical, faHouse, faBed, faFileMedical, faGear, faTrashCan, faPlus, faMagnifyingGlass,
   faCirclePlus, faEye, faEyeSlash, faFilePdf, faFile, faPencil, faRightFromBracket, faKitMedical, faChevronRight,
-    faMicrochip
+    faMicrochip, faPhone
 )
 
 const saved = localStorage.getItem('theme')

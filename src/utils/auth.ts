@@ -24,7 +24,7 @@ export async function signOut() {
 
   // Clear real auth tokens
   localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
-  localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
+  //localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
   localStorage.removeItem(STORAGE_KEYS.ALTH_USER)
   localStorage.removeItem('protocol_start')
 
