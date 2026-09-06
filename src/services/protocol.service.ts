@@ -4,8 +4,25 @@ import { prettyPrintErrorMsg } from '@/utils/apiErrorHandler'
 import type {
   ProtocolAgenda,
 } from '@/types/protocol.types'
+import {globalState} from "@/composables/useGlobalTimer.ts";
+import {computed} from "vue";
+
+
+export const daysElapsed = computed(() => {
+  const date = globalState.protocol?.agenda.startDate
+  if (!date) return 1
+  const msPerDay = 24*60*60*1000
+  const startDay = new Date(new Date(date).getFullYear(), new Date(date).getMonth(), new Date(date).getDate()).getTime()
+  const today = new Date(); const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
+  return Math.max(1, Math.floor((todayDay - startDay)/msPerDay) + 1)
+})
+
+export const currentWeek = computed(() => {
+  return Math.ceil(daysElapsed.value / 7)
+})
 
 export const protocolApi = {
+
   async getProtocolAgenda(): Promise<ProtocolAgenda> {
     try {
       const response = await apiClient.get<ProtocolAgenda>(
@@ -19,16 +36,10 @@ export const protocolApi = {
     }
   },
 
-  /**
-   * Get forms for the current week
-   * @param agendaData - The protocol agenda data
-   * @param currentWeek - The current week number
-   * @returns string[] - Forms for the current week
-   */
-  getCurrentWeekForms(agendaData: ProtocolAgenda, currentWeek: number): string[] {
-    const protocol = agendaData?.protocol
-    if (!Array.isArray(protocol)) return []
-    const currentWeekData = protocol.find(week => week.weekNumber === currentWeek)
+
+  getCurrentWeekForms(currentWeek: number): string[] {
+
+    const currentWeekData = globalState.protocol?.agenda.find(week => week.weekNumber === currentWeek)
     return currentWeekData?.forms || []
   },
 

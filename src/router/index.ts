@@ -8,7 +8,7 @@ import Chrome from '@/pages/preinstall/Chrome.vue'
 
 import Home from '@/pages/Home.vue'
 import Protocols from '@/pages/Protocols.vue'
-import ProtocolDetail from '@/pages/ProtocolDetail.vue'
+import Timer from '@/pages/Timer.vue'
 import Profile from '@/pages/Profile.vue'
 import FAQ from '@/pages/FAQ.vue'
 import Support from '@/pages/Support.vue'
@@ -42,7 +42,7 @@ const routes: RouteRecordRaw[] = [
 
     { path: '/home', name: 'home', component: Home, meta: { requiresAuth: true } },
     { path: '/protocols', name: 'protocols', component: Protocols, meta: { requiresAuth: true } },
-    { path: '/protocols/:id', name: 'protocol-detail', component: ProtocolDetail, meta: { requiresAuth: true } },
+    { path: '/timer/:pstid', name: 'timer', component: Timer, meta: { requiresAuth: true } , props: route => ({ pstid: Number(route.params.pstid) }) },
     { path: '/protocols-results', name: 'protocol-results', component: ProtocolResults, meta: { requiresAuth: true } },
     { path: '/profile', name: 'profile', component: Profile, meta: { requiresAuth: true } },
     { path: '/education', name: 'education', component: Education , meta: { requiresAuth: true } },

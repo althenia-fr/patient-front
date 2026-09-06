@@ -14,8 +14,6 @@ export const authApi = {
       const response = await apiClient.post<AuthData>(API_ENDPOINTS.AUTH.LOGIN, data)
 
 
-        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.data.accessToken)
-        //localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.data.refreshToken)
         localStorage.setItem(STORAGE_KEYS.ALTH_USER, JSON.stringify(response.data))
         authUser.value = { email: response.data.email, user_metadata: response.data }
 

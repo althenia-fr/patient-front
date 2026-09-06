@@ -33,10 +33,6 @@ const effectiveRemaining = computed(() => {
   return props.remainingTime !== undefined ? props.remainingTime : remaining.value
 })
 
-const isUsingGlobalState = computed(() => {
-  return props.isRunning !== undefined || props.remainingTime !== undefined
-})
-
 const timeDisplay = computed(() => {
   const m = Math.floor(effectiveRemaining.value / 60)
   const s = Math.floor(effectiveRemaining.value % 60)
@@ -50,56 +46,6 @@ const radius = computed(() => (props.size - props.stroke) / 2)
 const circumference = computed(() => 2 * Math.PI * radius.value)
 const dashOffset = computed(() => circumference.value * (1 - (props.durationSec - effectiveRemaining.value) / props.durationSec))
 
-function toggle() {
-  // If using global state, don't handle local timer logic
-  if (props.isRunning !== undefined || props.remainingTime !== undefined) {
-    return // Global timer controls the state
-  }
-
-  if (running.value) {
-    running.value = false
-    if (timer) window.clearInterval(timer)
-    timer = null
-    emit('paused', remaining.value)
-  } else {
-    if (!props.canStart) { emit('blocked'); return }
-    running.value = true
-    if (timer) window.clearInterval(timer)
-    timer = window.setInterval(() => {
-      if (remaining.value > 0) remaining.value -= 1
-      if (remaining.value <= 0) {
-        finish()
-      }
-    }, 1000)
-    emit('started')
-  }
-}
-
-function reset() {
-  // If using global state, don't handle local timer logic
-  if (props.isRunning !== undefined || props.remainingTime !== undefined) {
-    return // Global timer controls the state
-  }
-
-  if (timer) window.clearInterval(timer)
-  timer = null
-  running.value = false
-  remaining.value = props.durationSec
-}
-
-function finish() {
-  // If using global state, don't handle local timer logic
-  if (props.isRunning !== undefined || props.remainingTime !== undefined) {
-    return // Global timer controls the state
-  }
-
-  if (timer) window.clearInterval(timer)
-  timer = null
-  running.value = false
-  const elapsed = props.durationSec - remaining.value
-  remaining.value = 0
-  emit('finished', elapsed)
-}
 
 watch(() => props.durationSec, (nv) => { remaining.value = nv})
 
@@ -141,10 +87,6 @@ onBeforeUnmount(() => { if (timer) window.clearInterval(timer) })
       </text>
     </svg>
 
-    <div v-if="!isUsingGlobalState" class="flex flex-wrap justify-center gap-3">
-      <Button :variant="running ? 'secondary' : 'primary'" @click="toggle" :class="!running && !props.canStart ? 'opacity-70' : ''">{{ running ? 'Pause' : 'Démarrer' }}</Button>
-      <Button variant="secondary" @click="finish">Terminer</Button>
-    </div>
   </div>
 </template>
 

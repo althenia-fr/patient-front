@@ -46,13 +46,13 @@ const doctorContact = authUser.value.user_metadata.doctorContact;
       </div>
       <div class="mt-3 space-y-2 text-sm">
         <div class="font-semibold" v-if="doctorContact && doctorContact.siteName">{{doctorContact.siteName }}</div>
-        <div class="flex items-center gap-2"><svg class="h-4 w-4 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg> {{doctorContact.address1 }}, {{doctorContact.postcode }} {{doctorContact.city }}</div>
-        <div class="flex items-center gap-2"> <font-awesome-icon class=" text-brand-primary" icon="fa-solid fa-phone"/> {{doctorContact.phone }}</div>
-        <div class="flex items-center gap-2"><font-awesome-icon class=" text-brand-primary" icon="fa-regular fa-envelope"/> {{doctorContact.email }}</div>
+        <div class="flex items-center gap-2" v-if="doctorContact && doctorContact.address1"><svg class="h-4 w-4 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg> {{doctorContact.address1 }}, {{doctorContact.postcode }} {{doctorContact.city }}</div>
+        <div class="flex items-center gap-2" v-if="doctorContact && doctorContact.phone"> <font-awesome-icon class=" text-brand-primary" icon="fa-solid fa-phone"/> {{doctorContact.phone }}</div>
+        <div class="flex items-center gap-2" v-if="doctorContact && doctorContact.email"><font-awesome-icon class=" text-brand-primary" icon="fa-regular fa-envelope"/> {{doctorContact.email }}</div>
       </div>
       <div class="mt-4 grid grid-cols-2 gap-3">
-        <a :href="'tel:'+doctorContact.phone" class="btn-primary">Appeler</a>
-        <a :href="'mailto:'+doctorContact.email" class="rounded-full bg-gray-50 px-4 py-2 text-center font-semibold text-gray-700">Email</a>
+        <a :href="'tel:'+doctorContact.phone" class="btn-primary" v-if="doctorContact && doctorContact.phone">Appeler</a>
+        <a :href="'mailto:'+doctorContact.email" class="rounded-full bg-gray-50 px-4 py-2 text-center font-semibold text-gray-700" v-if="doctorContact && doctorContact.email">Email</a>
       </div>
     </div>
 

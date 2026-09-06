@@ -1,36 +1,31 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { authUser } from '@/utils/auth'
 import { getWeekInfo } from '@/utils/protocol'
-import { getOnboarding } from '@/utils/onboarding'
-import { protocolApi } from '@/services/api'
-import { useGlobalTimer } from '@/composables/useGlobalTimer'
-import GlobalTimer from '@/components/GlobalTimer.vue'
-import type { ProtocolAgenda } from '@/types/protocol.types'
+import {globalState, initGlobalState} from '@/composables/useGlobalTimer'
 import router from "@/router";
 
 const firstname = computed(() => {
 
   if(!authUser || !authUser.value || !authUser.value.user_metadata) router.replace({ name: 'login' })
-
-  const firstname = authUser.value.user_metadata.firstname;
-  return firstname.charAt(0).toUpperCase() + firstname.slice(1).toLowerCase()
+  else
+  {
+    const firstname = authUser.value.user_metadata.firstname;
+    return firstname.charAt(0).toUpperCase() + firstname.slice(1).toLowerCase()
+  }
 })
 
-// Protocol agenda state
-const protocolAgenda = ref<ProtocolAgenda | null>(null)
-const agendaLoading = ref(false)
-
-// Global timer
-const { initializeTimer } = useGlobalTimer()
 
 const week = computed(() => {
-  return getWeekInfo(protocolAgenda.value)
+  return getWeekInfo(globalState.protocol)
 })
 
-const unread = ref(0)
+//const unread = ref(0)
 onMounted(() => {
 
+  initGlobalState()
+
+  /*
   const readUnread = () => {
     const v = Number(localStorage.getItem('unread_notifications') || '0')
     unread.value = Number.isNaN(v) ? 0 : v
@@ -39,31 +34,31 @@ onMounted(() => {
   window.addEventListener('storage', readUnread)
   const id = window.setInterval(readUnread, 3000)
   onUnmounted(() => { window.removeEventListener('storage', readUnread); clearInterval(id) })
+
+   */
 })
+
+
+
 </script>
 
 <template>
-  <div class="sticky z-[9998] bg-brand-bg/90 backdrop-blur" style="top: env(safe-area-inset-top)">
-    <div class="w-full px-0">
-      <div class="w-full border border-gray-100 bg-white p-3">
+  <div class="sticky z-[9998] bg-white backdrop-blur" style="top: env(safe-area-inset-top)">
+    <div class="w-full mx-auto px-4 sm:max-w-md md:max-w-lg lg:max-w-xl">
+      <div class="w-full bg-white p-3">
       <div class="flex items-start justify-between">
-        <div class="flex items-center gap-3">
-          <!--RouterLink :to="{ name: 'notifications' }" class="relative grid h-9 w-9 place-items-center rounded-full bg-white text-gray-700 hover:bg-gray-50" :title="'Alertes'">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span v-if="unread>0" class="absolute -top-1 -right-1 grid h-5 min-w-[1.25rem] place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{{ unread }}</span>
-          </RouterLink-->
-          <div>
+        <div class="flex items-center gap-3" style="justify-content: space-between; align-items: center; width: 100%">
+
             <div class="text-base font-bold whitespace-nowrap">Bonjour, {{ firstname }}</div>
-            <span v-if="week" class="inline-flex items-center gap-2 rounded-full bg-brand-secondary/30 px-3 py-1 text-xs font-semibold text-gray-700 whitespace-nowrap">
+            <div v-if="week" style="margin-left: auto; min-width: max-content" class="inline-flex items-center gap-2 rounded-full bg-brand-secondary/30 px-3 py-1 text-xs font-semibold text-gray-700 whitespace-nowrap">
               <!-- <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> -->
               Semaine {{ week.current }}/{{ week.total }}
-            </span>
-          </div>
+            </div>
         </div>
-        <div class="flex items-center gap-6">
-          <!-- Global Timer -->
+
+        <!--div class="flex items-center gap-6">
           <GlobalTimer />
-        </div>
+        </div -->
       </div>
     </div>
   </div>

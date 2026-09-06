@@ -1,47 +1,44 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { computed, ref, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import Timer from '@/components/Timer.vue'
 import GamificationModal from '@/components/GamificationModal.vue'
-import { getOnboarding } from '@/utils/onboarding'
-import { protocolApi } from '@/services/api'
-import { useGlobalTimer } from '@/composables/useGlobalTimer'
-import type { ProtocolAgenda } from '@/types/protocol.types'
+import {globalState, useGlobalTimer} from '@/composables/useGlobalTimer'
+import {sessionTrackingApi} from "@/services/sessionTracking.service.ts";
 
-// Protocol agenda state
-const protocolAgenda = ref<ProtocolAgenda | null>(null)
 
-// Route and session number handling
-const route = useRoute()
 const router = useRouter()
-const sessionNumber = computed(() => {
-  return Number(route.query.sessionNumber) || 1
-})
+
+const sessionNumber = ref(null)
+
+const props = defineProps({
+  pstid: Number,
+});
 
 // Global timer state
 const {
   isRunning,
   remainingTime,
   totalTime,
-  progress,
-  timeDisplay,
-  hasActiveSession,
   canResumeSession,
   initializeTimer,
   toggleTimer,
   endTimer,
 } = useGlobalTimer()
 
-// Fetch protocol agenda and initialize global timer
-const fetchProtocolAgenda = async () => {
-  try {
-    protocolAgenda.value = await protocolApi.getProtocolAgenda()
 
-    // Initialize global timer with session duration
-    if (protocolAgenda.value) {
-      const sessionDuration = protocolAgenda.value?.sessionDurationMin || getOnboarding()?.sessionDuration || 20
-      await initializeTimer(protocolAgenda.value, sessionDuration)
-    }
+// Fetch protocol agenda and initialize global timer
+const fetchAndInitializeTimer = async () => {
+  try {
+
+    let pecid = globalState.protocol?.pecid
+    let pstid = props.pstid
+    if(!globalState.pstid) globalState.pstid= pstid //paranoid
+
+   let trackingSession = await sessionTrackingApi.getSessionTracking(pecid,pstid)
+
+    if (trackingSession) initializeTimer(trackingSession)
+
   } catch (error) {
     console.error('Failed to fetch protocol agenda in ProtocolDetail:', error)
   }
@@ -49,7 +46,7 @@ const fetchProtocolAgenda = async () => {
 
 const sessionDurationMinutes = computed(() => {
   // Use API data if available, otherwise fallback to onboarding
-  return protocolAgenda.value?.sessionDurationMin || getOnboarding()?.sessionDuration || 20
+  return  globalState.protocol?.sessionDurationMin
 })
 
 const steps = ref([
@@ -65,8 +62,6 @@ watch(sessionDurationMinutes, () => {
 
 const showCongrats = ref(false)
 const congratsMsg = ref('')
-
-const specialty = computed(() => getOnboarding()?.protocol?.specialty || '')
 
 const showSessionCompleteModal = ref(false)
 
@@ -87,9 +82,8 @@ function closeSessionModal() {
   router.replace({ name: 'home' })
 }
 
-// Fetch protocol agenda on component mount
 onMounted(() => {
-  fetchProtocolAgenda()
+  fetchAndInitializeTimer()
 })
 
 </script>
@@ -119,7 +113,7 @@ onMounted(() => {
 
     <!-- Timer card -->
     <div class="mt-4 rounded-xl border border-gray-100 bg-white p-5 shadow-soft">
-      <div class="text-xl font-bold text-center">Protocole TENS {{ specialty }}</div>
+      <div class="text-xl font-bold text-center">Protocole TENS</div>
       <br/>
       <Timer
         :duration-sec="totalTime"
@@ -142,7 +136,7 @@ onMounted(() => {
               : 'bg-green-500 text-white hover:bg-green-600'
           ]"
         >
-          {{ isRunning ? 'Pause' : canResumeSession ? 'Reprendre la séance' : `Démarrer la séance ${sessionNumber}` }}
+          {{ isRunning ? 'Pause' : (remainingTime<totalTime) ? 'Reprendre la séance' : `Démarrer la séance` }}
         </button>
 
       </div>

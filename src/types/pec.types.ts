@@ -1,5 +1,3 @@
-import type { ApiResponse } from './api.types'
-
 export interface PersonalEmergencyContact {
   id: string
   fullName: string
@@ -40,7 +38,7 @@ export interface PecData {
   updatedAt: string
 }
 
-export interface GetPecResponse extends ApiResponse<PecData> {}
+export interface GetPecResponse extends PecData {}
 
 export interface UpdatePecRequest {
   emergencyContacts: PersonalEmergencyContact[]
@@ -59,5 +57,3 @@ export interface UpdatePecRequest {
   allergies?: string[]
   medications?: string[]
 }
-
-export type UpdatePecResponse = ApiResponse<PecData>

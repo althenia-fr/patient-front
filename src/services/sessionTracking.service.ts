@@ -2,42 +2,26 @@ import apiClient from './core/apiClient'
 import { API_ENDPOINTS } from '@/types/api.types'
 import { createApiError, logError, isNetworkError } from '@/utils/apiErrorHandler'
 import type {
-  ApiResponse,
   SessionTrackingItem,
-  SessionTrackingPayload,
-  UpdateSessionTrackingPayload,
 } from '@/types/api.types'
 
-// Response types for the API calls
-export interface GetSessionTrackingResponse extends ApiResponse<SessionTrackingItem[]> {}
-export interface CreateSessionTrackingResponse extends ApiResponse<SessionTrackingItem[]> {}
-export interface UpdateSessionTrackingResponse extends ApiResponse<SessionTrackingItem> {}
 
 export const sessionTrackingApi = {
-  /**
-   * Get session tracking data for a specific PEC
-   * @param pecid - The PEC ID
-   * @returns Promise<SessionTrackingItem[]> - Array of session tracking items
-   */
-  async getSessionTracking(pecid: number): Promise<SessionTrackingItem[]> {
+
+  async listSessionTracking(pecid: number): Promise<SessionTrackingItem[]> {
     if (!pecid || isNaN(Number(pecid))) {
       // console.warn('getSessionTracking: pecid is missing or invalid:', pecid)
       return []
     }
 
     try {
-      const response = await apiClient.get<GetSessionTrackingResponse>(
-        API_ENDPOINTS.SESSION_TRACKING.GET_SESSIONS,
+      const response = await apiClient.get<any>(
+        API_ENDPOINTS.SESSION_TRACKING.LIST_SESSIONS,
         { params: { pecid } }
       )
 
-      // console.log('getSessionTracking response:', response);
+      return response.data
 
-      if (response.data.success && response.data.data) {
-        return response.data.data
-      }
-
-      throw new Error(response.data.message || 'Failed to fetch session tracking data')
     } catch (error: any) {
       logError('GetSessionTracking', error)
 
@@ -53,25 +37,46 @@ export const sessionTrackingApi = {
     }
   },
 
+  async getSessionTracking(pecid: number, pstid: number): Promise<SessionTrackingItem | null> {
+
+    try {
+      const response = await apiClient.get<any>(
+          API_ENDPOINTS.SESSION_TRACKING.GET_SESSION,
+          { params: { pecid, pstid } }
+      )
+
+      return response.data
+
+    } catch (error: any) {
+      logError('GetSessionTracking', error)
+
+      const apiError = createApiError(error)
+
+      if (isNetworkError(error)) {
+        throw new Error(
+            'Impossible de récupérer les données de suivi des séances. Veuillez vérifier votre connexion internet.',
+        )
+      }
+
+      throw new Error(apiError.message)
+    }
+  },
+
+
+
   /**
    * Create session tracking entries
    * @param payload - The session tracking payload
    * @returns Promise<SessionTrackingItem[]> - Array of created session tracking items
    */
-  async createSessionTracking(payload: SessionTrackingPayload): Promise<SessionTrackingItem[]> {
+  async createSessionTracking(payload: any): Promise<SessionTrackingItem> {
     try {
-      const response = await apiClient.post<CreateSessionTrackingResponse>(
-        API_ENDPOINTS.SESSION_TRACKING.CREATE_SESSIONS,
+      const response = await apiClient.post<any>(
+        API_ENDPOINTS.SESSION_TRACKING.CREATE_SESSION,
         payload,
       )
+      return response.data
 
-      // console.log('createSessionTracking response:', response);
-
-      if (response.data.success && response.data.data) {
-        return response.data.data
-      }
-
-      throw new Error(response.data.message || 'Failed to create session tracking entries')
     } catch (error: any) {
       logError('CreateSessionTracking', error)
 
@@ -92,31 +97,14 @@ export const sessionTrackingApi = {
    * @param payload - The update payload with id and sessionTimeRemaining
    * @returns Promise<SessionTrackingItem> - Updated session tracking item
    */
-  async updateSessionTracking(payload: UpdateSessionTrackingPayload): Promise<SessionTrackingItem> {
+  async updateSessionTracking(payload: any): Promise<SessionTrackingItem> {
     try {
-      const response = await apiClient.put<UpdateSessionTrackingResponse>(
+      const response = await apiClient.put<any>(
         API_ENDPOINTS.SESSION_TRACKING.UPDATE_SESSION,
         payload,
       )
+      return response.data;
 
-      console.log('updateSessionTracking response:', response.data);
-
-      // Handle success response - API might return success=true with or without data
-      if (response.data.success) {
-        // If data is returned, use it; otherwise create a basic success response
-        if (response.data.data) {
-          return response.data.data
-        } else {
-          // Create a minimal session item for successful update when no data returned
-          return {
-            id: payload.id,
-            date: new Date().toISOString().split('T')[0], // Today's date
-            sessionTimeRemaining: payload.sessionTimeRemaining
-          }
-        }
-      }
-
-      throw new Error(response.data.message || 'Failed to update session tracking entry')
     } catch (error: any) {
       logError('UpdateSessionTracking', error)
 

@@ -4,7 +4,6 @@ import { createApiError, logError, isNetworkError } from '@/utils/apiErrorHandle
 import type {
   GetPecResponse,
   UpdatePecRequest,
-  UpdatePecResponse,
   PecData,
 } from '@/types/pec.types'
 
@@ -16,12 +15,7 @@ export const pecApi = {
   async getPecData(): Promise<PecData> {
     try {
       const response = await apiClient.get<GetPecResponse>(API_ENDPOINTS.PEC.GET_PEC)
-
-      if (response.data.success && response.data.data) {
-        return response.data.data
-      }
-
-      throw new Error(response.data.message || 'Failed to fetch PEC data')
+      return response.data;
     } catch (error: any) {
       logError('GetPecData', error)
 
@@ -44,7 +38,7 @@ export const pecApi = {
    */
   async updatePecData(data: UpdatePecRequest): Promise<PecData> {
     try {
-      const response = await apiClient.put<UpdatePecResponse>(
+      const response = await apiClient.put<any>(
         API_ENDPOINTS.PEC.UPDATE_PEC,
         data,
       )
@@ -78,7 +72,7 @@ export const pecApi = {
     try {
       // First get current PEC data
       const currentData = await this.getPecData()
-      
+
       // Add the new contact
       const updatedData: UpdatePecRequest = {
         emergencyContacts: [...currentData.emergencyContacts, contact],
@@ -104,7 +98,7 @@ export const pecApi = {
     try {
       // First get current PEC data
       const currentData = await this.getPecData()
-      
+
       // Remove the contact
       const updatedData: UpdatePecRequest = {
         emergencyContacts: currentData.emergencyContacts.filter(
@@ -136,7 +130,7 @@ export const pecApi = {
     try {
       // First get current PEC data
       const currentData = await this.getPecData()
-      
+
       // Update the specific contact
       const updatedData: UpdatePecRequest = {
         emergencyContacts: currentData.emergencyContacts.map(c =>

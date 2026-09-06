@@ -1,36 +1,15 @@
 
-// Session Tracking Types
 export interface SessionTrackingItem {
-  id: number
-  date: string
+  pstid: number
+  sessionDate: string
   sessionTimeRemaining: number
-  sessionStatus?: string
-  sessionNumber?: number
-}
-
-// For POST requests (creating new sessions - no id yet)
-export interface SessionTrackingRequestItem {
-  date: string
-  sessionTimeRemaining: number
-  sessionNumber: number
-}
-
-export interface SessionTrackingPayload {
-  pecid: number
-  weekNumber: number
-  sessions: SessionTrackingRequestItem[]
-}
-
-export interface UpdateSessionTrackingPayload {
-  id: number
-  sessionTimeRemaining: number
+  sessionTimeMax?: number
   sessionNumber?: number
 }
 
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/patient/login',
-    //REFRESH_TOKEN: '/auth/refresh-token',
   },
   PEC: {
     GET_PEC: '/pec',
@@ -40,14 +19,14 @@ export const API_ENDPOINTS = {
     GET_AGENDA: '/patient/protocolAgenda/get',
   },
   SESSION_TRACKING: {
-    GET_SESSIONS: '/patient/sessionTracking/list',
-    CREATE_SESSIONS: '/patient/sessionTracking/add',
+    LIST_SESSIONS: '/patient/sessionTracking/list',
+    GET_SESSION: '/patient/sessionTracking/get',
+    CREATE_SESSION: '/patient/sessionTracking/create',
     UPDATE_SESSION: '/patient/sessionTracking/update',
   },
 } as const
 
 export const STORAGE_KEYS = {
-  AUTH_TOKEN: 'auth_token',
-  //REFRESH_TOKEN: 'refresh_token',
   ALTH_USER: 'alth_user',
+  ALTH_PROTOCOL : 'alth_protocol'
 } as const

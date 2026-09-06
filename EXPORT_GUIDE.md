@@ -134,7 +134,7 @@ Et ajouter dans le tableau `routes`:
 const routes: RouteRecordRaw[] = [
   // ... routes existantes ...
   { path: '/protocols', name: 'protocols', component: Protocols, meta: { requiresAuth: true } },
-  { path: '/protocols/:id', name: 'protocol-detail', component: ProtocolDetail, meta: { requiresAuth: true } },
+  { path: '/timer/:pstid', name: 'timer', component: Timer, meta: { requiresAuth: true } },
   { path: '/protocols-results', name: 'protocol-results', component: ProtocolResults, meta: { requiresAuth: true } },
   { path: '/qualiveen', name: 'qualiveen', component: Qualiveen, meta: { requiresAuth: true } },
   { path: '/usp', name: 'usp', component: USP, meta: { requiresAuth: true } },
