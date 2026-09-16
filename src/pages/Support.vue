@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { getOnboarding } from '@/utils/onboarding'
-import {RouterLink, useRouter} from 'vue-router'
-import {authUser, signOut} from "@/utils/auth.ts";
+import {RouterLink} from 'vue-router'
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+const {user} = wrapLocalStorage()
 
 const ob = getOnboarding()
 const facility = computed(() => ({
@@ -11,10 +12,7 @@ const facility = computed(() => ({
   doctor: ob.facility?.doctor || 'Dr. Marie BERNARD',
 }))
 
-const router = useRouter()
-async function doLogout(){ await signOut(); router.replace({ name: 'login' }) }
-
-const doctorContact = authUser.value.user_metadata.doctorContact;
+const doctorContact = user.value.doctorContact;
 
 </script>
 
@@ -34,7 +32,7 @@ const doctorContact = authUser.value.user_metadata.doctorContact;
       </div>
       <div class="mt-3 grid grid-cols-2 gap-3">
         <a href="tel:0801270111" class="btn-primary">Appeler</a>
-        <a href="mailto:crp@stimeo.care" class="rounded-full bg-gray-50 px-4 py-2 text-center font-semibold text-gray-700">Email</a>
+        <a href="mailto:crp@stimeo.care" class="rounded-full bg-gray-200 px-4 py-2 text-center font-semibold text-gray-700">Email</a>
       </div>
     </div>
 
@@ -52,7 +50,7 @@ const doctorContact = authUser.value.user_metadata.doctorContact;
       </div>
       <div class="mt-4 grid grid-cols-2 gap-3">
         <a :href="'tel:'+doctorContact.phone" class="btn-primary" v-if="doctorContact && doctorContact.phone">Appeler</a>
-        <a :href="'mailto:'+doctorContact.email" class="rounded-full bg-gray-50 px-4 py-2 text-center font-semibold text-gray-700" v-if="doctorContact && doctorContact.email">Email</a>
+        <a :href="'mailto:'+doctorContact.email" class="rounded-full bg-gray-200 px-4 py-2 text-center font-semibold text-gray-700" v-if="doctorContact && doctorContact.email">Email</a>
       </div>
     </div>
 
@@ -70,23 +68,6 @@ const doctorContact = authUser.value.user_metadata.doctorContact;
           Foire Aux Questions
         </RouterLink>
       </div>
-    </div>
-
-    <!-- Log Out Button -->
-    <div v-if="authUser" class="pb-12">
-      <button
-          @click="doLogout"
-          class="card flex w-full items-center justify-between !border-red-50 text-red-600 shadow-soft active:scale-[0.98] transition-all duration-200"
-      >
-        <div class="flex items-center gap-3">
-          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-500">
-            <font-awesome-icon icon="right-from-bracket" class="text-xl text-red-500" />
-          </div>
-          <div>
-            <span class="block font-bold text-base text-left">Déconnexion</span>
-          </div>
-        </div>
-      </button>
     </div>
 
   </section>

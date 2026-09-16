@@ -1,22 +1,25 @@
 <script setup lang="ts">
 import {ref, onMounted, watch} from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { authApi } from '@/services/auth.service'
-import { authUser } from '@/utils/auth'
+import { api } from '@/services/api'
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+const {user, setUser} = wrapLocalStorage()
 
 const router = useRouter()
 const route = useRoute()
-const mobile = ref('')
-const year = ref('')
-const month = ref('')
-const day = ref('')
+const mobile = ref(user.value?.mobile || '')
+const year = ref(user.value?.dob?user.value.dob.substring(0,4):'')
+const month = ref(user.value?.dob?user.value.dob.substring(5,7):'')
+const day = ref(user.value?.dob?user.value.dob.substring(8,10):'')
 const error = ref('')
 const loading = ref(false)
 
+
 const version = import.meta.env.VITE_APP_VERSION || 'dev';
 
+
 onMounted(() => {
-  if (authUser.value) {
+  if (user.value) {
     router.replace({ name: 'home' })
   }
 })
@@ -26,13 +29,14 @@ async function submit(e: Event) {
   error.value = ''
   loading.value = true
   try {
-    await authApi.login({
+    let loginUser = await api.login({
       mobile: mobile.value,
       year: year.value,
       month: month.value,
       day: day.value,
       app:'patient'
     })
+    setUser(loginUser)
     const redirect = (route.query.redirect as string) || '/home'
     router.replace(redirect)
   } catch (err: any) {

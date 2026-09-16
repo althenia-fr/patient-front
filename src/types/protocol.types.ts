@@ -13,6 +13,7 @@ export interface ProtocolWeek {
 }
 
 export interface ProtocolAgenda {
+  pecid: number,
   durationWeeks: number
   sessionDurationMin: number
   startDate: string

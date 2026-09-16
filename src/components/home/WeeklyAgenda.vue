@@ -8,7 +8,7 @@
 
     <div class="mt-3 space-y-2">
       <!-- API-driven agenda forms -->
-      <div v-if="globalState.protocol?.agenda && currentWeekForms.length > 0" class="space-y-2">
+      <div v-if="currentWeekForms?.length > 0" class="space-y-2">
         <RouterLink
             v-for="form in currentWeekForms"
             :key="form"
@@ -21,12 +21,9 @@
           </p>
         </RouterLink>
       </div>
-      <p v-else-if="!globalState.protocol?.agenda" class="text-sm text-gray-500">
-        Vous n'êtes pas connecté
-      </p>
       <!-- No items message -->
       <p v-else class="text-sm text-gray-500">
-        Aucun agenda cette semaine
+        Pas d'agenda
       </p>
     </div>
   </div>
@@ -34,21 +31,23 @@
 
 </template>
 <script setup lang="ts">
-import {globalState} from "@/composables/useGlobalTimer.ts";
 import {formIdToDisplayName, formIdToRouteName} from "@/types/protocol.types.ts";
 import {RouterLink} from "vue-router";
 import {computed, onMounted, ref} from "vue";
-import {currentWeek, protocolApi} from "@/services/protocol.service.ts";
-import apiClient from "@/services/core/apiClient.ts";
+import {currentWeek, getCurrentWeekForms} from "@/services/agenda.service.ts";
+import apiClient from "@/services/apiClient.ts";
+
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+const {user} = wrapLocalStorage()
 
 const completedForms = ref<string[]>([])
 
 const currentWeekForms = computed(() => {
 
-  let res = protocolApi.getCurrentWeekForms(currentWeek.value)
+  let res = getCurrentWeekForms(currentWeek.value)
 
   // Automatically hide forms that have already been submitted this week
-  return res.filter((form: string) => {
+  return res.forms?.filter((form: string) => {
     const displayName = formIdToDisplayName(form) || ''
     const upperName = displayName.toUpperCase()
 
@@ -61,6 +60,7 @@ const currentWeekForms = computed(() => {
       if (upperName.includes('USP') && completedType.includes('USP')) return true
       return completedType === upperName
     })
+
     return !isCompleted
   })
 })
@@ -68,9 +68,8 @@ const currentWeekForms = computed(() => {
 
 const fetchCompletedForms = async () => {
   try {
-    const userStr = localStorage.getItem('alth_user') || '{}'
-    const user = JSON.parse(userStr)
-    const patientId = user.uid || null
+
+    const patientId = user.value.uid
 
     const response = await apiClient.get('/formSubmission/list', {
       params: { patientId }

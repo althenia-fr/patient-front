@@ -5,6 +5,7 @@ import Timer from '@/components/Timer.vue'
 import GamificationModal from '@/components/GamificationModal.vue'
 import {globalState, useGlobalTimer} from '@/composables/useGlobalTimer'
 import {sessionTrackingApi} from "@/services/sessionTracking.service.ts";
+import {STORAGE_KEYS} from "@/types/api.types.ts";
 
 
 const router = useRouter()
@@ -15,12 +16,13 @@ const props = defineProps({
   pstid: Number,
 });
 
+if(props.pstid) globalState.pstid = props.pstid
+
 // Global timer state
 const {
   isRunning,
-  remainingTime,
-  totalTime,
-  canResumeSession,
+  sessionRemainingSec,
+  sessionMaxSec,
   initializeTimer,
   toggleTimer,
   endTimer,
@@ -31,9 +33,11 @@ const {
 const fetchAndInitializeTimer = async () => {
   try {
 
-    let pecid = globalState.protocol?.pecid
+    let protocolDataJson = localStorage.getItem(STORAGE_KEYS.STIMEO_PROTOCOL)
+    let protocolData = protocolDataJson?JSON.parse(protocolDataJson):null
+    let pecid = protocolData?.pecid
     let pstid = props.pstid
-    if(!globalState.pstid) globalState.pstid= pstid //paranoid
+    if(!protocolData.pstid) protocolData.pstid= pstid //paranoid
 
    let trackingSession = await sessionTrackingApi.getSessionTracking(pecid,pstid)
 
@@ -46,7 +50,9 @@ const fetchAndInitializeTimer = async () => {
 
 const sessionDurationMinutes = computed(() => {
   // Use API data if available, otherwise fallback to onboarding
-  return  globalState.protocol?.sessionDurationMin
+  let protocolDataJson = localStorage.getItem(STORAGE_KEYS.STIMEO_PROTOCOL)
+  let protocolData = protocolDataJson?JSON.parse(protocolDataJson):null
+  return  protocolData?.sessionMaxSec * 60
 })
 
 const steps = ref([
@@ -83,7 +89,7 @@ function closeSessionModal() {
 }
 
 onMounted(() => {
-  fetchAndInitializeTimer()
+  if(!globalState.running) fetchAndInitializeTimer()
 })
 
 </script>
@@ -101,8 +107,7 @@ onMounted(() => {
           <h3 class="text-xl font-extrabold text-gray-800">Séance terminée</h3>
           <p class="mx-auto mt-2 max-w-sm whitespace-pre-line text-sm text-gray-600">
             Votre séance TENS du jour est validée.
-            Excellent travail !
-            votre régularité fait vraiment la différence
+            Votre régularité fait la différence !
           </p>
           <button class="btn-primary mt-5 w-full" @click="closeSessionModal">Fermer</button>
         </div>
@@ -116,12 +121,8 @@ onMounted(() => {
       <div class="text-xl font-bold text-center">Protocole TENS</div>
       <br/>
       <Timer
-        :duration-sec="totalTime"
         :size="220"
         :stroke="12"
-        :can-start="true"
-        :remaining-time="remainingTime"
-        :is-running="isRunning"
         @finished="onFinished"
       />
 
@@ -130,13 +131,13 @@ onMounted(() => {
         <button
           @click="toggleTimer(sessionNumber)"
           :class="[
-            'px-6 py-2 rounded-full font-semibold transition-colors',
+            'px-6 py-2 rounded-full font-semibold transition-colors w-full',
             isRunning
               ? 'bg-yellow-500 text-white hover:bg-yellow-600'
               : 'bg-green-500 text-white hover:bg-green-600'
           ]"
         >
-          {{ isRunning ? 'Pause' : (remainingTime<totalTime) ? 'Reprendre la séance' : `Démarrer la séance` }}
+          {{ isRunning ? 'Pause' : (sessionRemainingSec<sessionMaxSec) ? 'Reprendre la séance' : 'Démarrer la séance' }}
         </button>
 
       </div>

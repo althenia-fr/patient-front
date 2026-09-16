@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import apiClient from '@/services/core/apiClient'
+import apiClient from '@/services/apiClient.ts'
 import { calculateMonthlyStats, calculateGlobalStats, getChartDataByWeek } from '@/utils/mictionnelStats'
 import { getWeekInfo, getProtocolStart } from '@/utils/protocol'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js'
 import { Chart } from 'vue-chartjs'
+
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+const {user} = wrapLocalStorage()
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend)
 
@@ -596,9 +599,8 @@ const saveDayData = async () => {
   loading.value = true
 
   try {
-    const userStr = localStorage.getItem('alth_user') || '{}'
-    const user = JSON.parse(userStr)
-    const patientId = user.uid || user.id || null
+
+    const patientId = user.value.uid
     const payload = {
       patientId: patientId,
       formType: 'Mictionnel',

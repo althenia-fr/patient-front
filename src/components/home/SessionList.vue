@@ -8,25 +8,24 @@
       <div class="mt-3 space-y-2">
 
         <!-- Multiple session buttons based on sessionsDaily -->
-        <div v-if="availableSessions.length >= 1" class="space-y-2">
+        <div v-if="todayEnrichedSessions.length >= 1" class="space-y-2">
           <!--RouterLink
             v-for="session in availableSessions"
             :key="session.pstid"
             :to="{ name: 'timer', params: { pecid:session.pecid, pstid: session.pstid } }"
             class="block w-full"
           -->
-          <div  v-for="session in availableSessions" @click="gotoTimer(session)"
-                class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none"
-                :class="{
+          <button v-for="session in todayEnrichedSessions" @click="gotoTimer(session.sessionNumber)"
+               class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none"
+               :class="{
                 'bg-brand-secondary text-white': session.isAvailable && !session.isCompleted,
                 'bg-gray-300 text-gray-500 cursor-not-allowed': !session.isAvailable || session.isCompleted
               }"
-          >
+           :disabled="session.isCompleted || !session.isAvailable">
             {{ session.isCompleted ? `Séance ${session.sessionNumber} terminée` :
-              !session.isAvailable ? `Séance ${session.sessionNumber} non disponible` :
-                  session.isAvailable && session.sessionTimeRemaining===session.sessionTimeMax? `Commencer la Séance ${session.sessionNumber}` :
-                      `Continuer la séance ${session.sessionNumber}` }}
-          </div>
+              !session.isAvailable ? `Séance ${session.sessionNumber}` :
+                      `Séance ${session.sessionNumber}` }}
+          </button>
           <!--/RouterLink-->
         </div>
 
@@ -38,23 +37,17 @@
 </template>
 <script setup lang="ts">
 
-import {computed, onMounted, ref, watch} from "vue";
+import {computed, onMounted, ref} from "vue";
 import router from "@/router";
-import {globalState} from "@/composables/useGlobalTimer.ts";
-import {sessionTrackingApi} from "@/services/sessionTracking.service.ts";
-import {currentWeek} from "@/services/protocol.service.ts";
+import {currentWeek} from "@/services/agenda.service.ts";
 import {useSessionTracking} from "@/composables/useSessionTracking.ts";
 import {getNowParisDateYYYYMMDD} from "@/utils/protocol.ts";
+import {STORAGE_KEYS} from "@/types/api.types.ts";
 
 const { createSession } = useSessionTracking()
 
-interface AvailableSession {
-  sessionNumber: number
-  isCompleted: boolean
-  isAvailable: boolean | undefined
-}
 
-const availableSessions = ref<AvailableSession[]>([])
+const todayEnrichedSessions = ref([])
 
 const today = computed(() => {
   try {
@@ -65,20 +58,50 @@ const today = computed(() => {
   }
 })
 
-async function gotoTimer(session: any)
+async function gotoTimer(sessionNumber: any)
 {
-  let pstid = +session.pstid
+  const todayYYYYMMDD = getNowParisDateYYYYMMDD()
+  let sessionsJson = localStorage.getItem(STORAGE_KEYS.STIMEO_SESSIONS+'_'+todayYYYYMMDD);
+  let sessions = sessionsJson?JSON.parse(sessionsJson):null
+
+  let pstid = 0;
+  for(let i=0;i<sessions.length;i++)
+  {
+    let session = sessions[i]
+    if(session.sessionNumber===sessionNumber)
+    {
+      pstid = session.pstid
+    }
+  }
+
   if(pstid===0)
   {
+    let protocolDataJson = localStorage.getItem(STORAGE_KEYS.STIMEO_PROTOCOL)
+    let protocolData = protocolDataJson?JSON.parse(protocolDataJson):null
+
     const payload = {
-      pecid: globalState.protocol?.pecid,
+      pecid: protocolData?protocolData.pecid:null,
       weekNumber: currentWeek.value,
-      sessionNumber : session.sessionNumber,
+      sessionNumber : sessionNumber,
     }
 
     const createdSession = await createSession(payload)
     pstid = createdSession.pstid
+
+    sessions.push({
+      pstid: pstid,
+      pecid: createdSession.pecid,
+      sessionRemainingSec: createdSession.sessionRemainingSec,
+      sessionMaxSec: createdSession.sessionMaxSec,
+      sessionNumber: sessionNumber,
+      sessionDate: createdSession.sessionDate,
+      isCompleted: false,
+      isAvailable: true //if 1st session hasnt started yet, it's available for start
+    });
+
+    localStorage.setItem(STORAGE_KEYS.STIMEO_SESSIONS+'_'+todayYYYYMMDD,JSON.stringify(sessions));
   }
+
   router.push({
     name: 'timer',
     params: { pstid:pstid }
@@ -95,63 +118,53 @@ const canStartSession = (sessionNumber: number, sessionsArray: any) => {
   // Session 1 can always be started if not completed
   if (sessionNumber === 1) {
     const session1 = todaySessions.find((s: any) => s.sessionNumber === 1)
-    return session1 && session1.sessionTimeRemaining > 0
+    return session1 && session1.sessionRemainingSec > 0
   }
 
   // For session 2+, check if previous session is completed
   const previousSession = todaySessions.find((s: any) => s.sessionNumber === sessionNumber - 1)
   const currentSession = todaySessions.find((s: any) => s.sessionNumber === sessionNumber)
 
-  const isPreviousCompleted = previousSession && previousSession.sessionTimeRemaining <= 0
-  const isCurrentCompleted = currentSession && currentSession.sessionTimeRemaining <= 0
+  const isPreviousCompleted = previousSession && previousSession.sessionRemainingSec <= 0
+  const isCurrentCompleted = currentSession && currentSession.sessionRemainingSec <= 0
 
   return isPreviousCompleted && !isCurrentCompleted
 }
 
-function initSessions(pecid:number, trackedSessions:any, sessionsDaily:number)
-{
+function initSessions(){
+
   const todayYYYYMMDD = getNowParisDateYYYYMMDD()
+  let sessionsJson = localStorage.getItem(STORAGE_KEYS.STIMEO_SESSIONS+'_'+todayYYYYMMDD);
+  let sessions = sessionsJson?JSON.parse(sessionsJson):null
 
   // work out today's sessions
-  const todaySessions = trackedSessions.filter((session: any) =>
+  const todayTrackedSessions =sessions.filter((session: any) =>
       session.sessionDate.startsWith(todayYYYYMMDD)
   )
 
-  const sessions = []
-  for (let i = 1; i <= sessionsDaily; i++) {
-    const session = todaySessions.find(s => s.sessionNumber === i)
-    sessions.push({
+  let protocolDataJson = localStorage.getItem(STORAGE_KEYS.STIMEO_PROTOCOL)
+  let protocolData = protocolDataJson?JSON.parse(protocolDataJson):null
+
+  let sessionsOfTheDay = []
+  for (let i = 1; i <= protocolData?.sessionsDaily; i++) {
+    const session = todayTrackedSessions.find(s => s.sessionNumber === i)
+    sessionsOfTheDay.push({
       pstid: session?session.pstid:0,
-      pecid: session?session.pecid:pecid,
-      sessionNumber: i,
-      isCompleted: session ? session.sessionTimeRemaining <= 0 : false,
-      isAvailable: i===1 && !session?true:canStartSession(i, todaySessions) //if 1st session hasnt started yet, it's available for start
+      pecid: protocolData?.pecid,
+      sessionRemainingSec: session?session.sessionRemainingSec:0,
+      sessionMaxSec: session?session.sessionMaxSec:0,
+      sessionNumber: session?session.sessionNumber:i,
+      isCompleted: session ? session.sessionRemainingSec <= 0 : false,
+      isAvailable: i===1 && !session?true:canStartSession(i, todayTrackedSessions) //if 1st session hasnt started yet, it's available for start
     })
   }
 
-  availableSessions.value = sessions
-
+  todayEnrichedSessions.value = sessionsOfTheDay
 }
-
-watch(()=> globalState.protocol?.pecid, async (newPecid : any) => {
-
-  console.log('new pecid '+newPecid)
-
-  if(!newPecid) return
-
-  // After getting protocol agenda, fetch session tracking data
-  let sessions = await sessionTrackingApi.listSessionTracking(newPecid)
-  initSessions(newPecid, sessions, globalState.protocol?.sessionsDaily)
-
-})
 
 onMounted(() => {
 
-  let pecid = globalState.protocol?.pecid
-  let sessions = globalState.sessions
-  let sessionsDaily = globalState.protocol?.sessionsDaily
-
-  if(pecid && sessions && sessionsDaily) initSessions(pecid, sessions,sessionsDaily) //when we navigate back to this page, we must redisplay the sessions
+  initSessions()
 
 })
 

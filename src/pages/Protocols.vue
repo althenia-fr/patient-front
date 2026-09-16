@@ -2,15 +2,19 @@
 import { RouterLink } from 'vue-router'
 import { computed, ref, onMounted } from 'vue'
 import { listMeasures } from '@/utils/measures'
-import { getWeekInfo, getProtocolStart } from '@/utils/protocol'
+import { getProtocolStart } from '@/utils/protocol'
 import { getHistory, ACTION_POINTS } from '@/utils/gamification'
 import { getOnboarding } from '@/utils/onboarding'
 import { getProtocolAgenda, getQuestionnairesForWeek } from '@/utils/protocolAgenda'
 import { useProtocol } from '@/composables/useProtocol'
-import { protocolApi } from '@/services/api'
-import apiClient from '@/services/core/apiClient'
+import { api } from '@/services/api'
+import apiClient from '@/services/apiClient.ts'
 import type { ProtocolAgenda } from '@/types/protocol.types'
 import { formIdToRouteName, formIdToDisplayName } from '@/types/protocol.types'
+import {daysElapsed} from "@/services/agenda.service.ts";
+
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+const {user} = wrapLocalStorage()
 
 const agendaOpen = ref(false)
 const completedForms = ref<string[]>([])
@@ -20,7 +24,7 @@ const fetchedAgenda = ref<ProtocolAgenda | null>(null)
 
 const fetchAgenda = async () => {
   try {
-    fetchedAgenda.value = await protocolApi.getProtocolAgenda()
+    fetchedAgenda.value = await api.getProtocolAgenda()
     await fetchCompletedForms()
   } catch (e) {
     console.error('Failed to fetch protocol agenda on Protocols page:', e)
@@ -29,9 +33,8 @@ const fetchAgenda = async () => {
 
 const fetchCompletedForms = async () => {
   try {
-    const userStr = localStorage.getItem('alth_user') || '{}'
-    const user = JSON.parse(userStr)
-    const patientId = user.uid || user.id || null
+
+    const patientId = user.value.uid
 
     const response = await apiClient.get('/formSubmission/list', {
       params: { patientId }
@@ -97,29 +100,8 @@ const questionnairesForCurrentWeek = computed(() => {
   return getQuestionnairesForWeek(currentWeek.value, protocolDuration.value)
 })
 
-const inProgress = {
-  id: 1,
-  name: 'Protocole Rhumatologie',
-  tags: ['Éducation', 'TENS'],
-  week: '3/13',
-  progress: 23,
-  start: '25 Nov 2024',
-  end: '17 Fév 2025',
-  adherence: 95,
-  sessionsDone: 18,
-  sessionsTotal: 31,
-  painAvg: 4.2,
-}
-
 const gamHistory = computed(() => getHistory())
 const sessionsDone = computed(() => gamHistory.value.filter(h => h.points === ACTION_POINTS.sessionComplete || /séance/i.test(h.reason || '')).length)
-const daysElapsed = computed(() => {
-  const start = getProtocolStart()
-  const msPerDay = 24 * 60 * 60 * 1000
-  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime()
-  const today = new Date(); const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
-  return Math.max(1, Math.floor((todayDay - startDay) / msPerDay) + 1)
-})
 const adherence = computed(() => Math.min(100, Math.round((sessionsDone.value / daysElapsed.value) * 100)))
 
 // Pain trend last 7 days vs previous 7

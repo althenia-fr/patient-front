@@ -8,6 +8,9 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+const {user} = wrapLocalStorage()
+
 const router = useRouter()
 const route = useRoute()
 const results = ref<QuestionnaireResult[]>([])
@@ -15,7 +18,8 @@ const apiRawWeeks = ref<any[]>([])
 const chartData = ref([])
 const expandedWeeks = ref<Set<number>>(new Set())
 
-import apiClient from '@/services/core/apiClient'
+import apiClient from '@/services/apiClient.ts'
+import {STORAGE_KEYS} from "@/types/api.types.ts";
 
 function normalizeFormType(type: string): string {
   const upper = String(type).toUpperCase()
@@ -30,9 +34,7 @@ function normalizeFormType(type: string): string {
 
 async function refreshResults() {
   try {
-    const userStr = localStorage.getItem('alth_user') || '{}'
-    const user = JSON.parse(userStr)
-    const patientId = user.uid || user.id || null
+    const patientId = user.value.uid
 
     const response = await apiClient.get('/formSubmission/list', {
       params: { patientId }

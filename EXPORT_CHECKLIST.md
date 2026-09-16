@@ -46,7 +46,6 @@ Dans `src/utils/`:
 - [ ] demoMictionnelData.ts
 
 **Utilitaires supplémentaires:**
-- [ ] auth.ts
 - [ ] notifications.ts
 - [ ] (copier les autres fichiers `.ts` du dossier `utils/`)
 

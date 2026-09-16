@@ -2,7 +2,6 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import { initAuth } from './utils/auth'
 import { startScheduler } from './utils/reminders'
 import { getDailyCoachMessage } from './utils/coach'
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -37,7 +36,6 @@ if (saved === 'dark') {
 //   })
 // }
 
-initAuth()
 startScheduler(() => {
   try { new Notification('Coaching quotidien', { body: getDailyCoachMessage() }) } catch {}
 })

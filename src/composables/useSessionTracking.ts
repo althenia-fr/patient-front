@@ -1,6 +1,7 @@
 import { ref, computed, readonly } from 'vue'
 import { sessionTrackingApi } from '@/services/sessionTracking.service'
 import type { SessionTrackingItem } from '@/types/api.types'
+import {msgModal} from '@/utils/modals/msg-modal.ts';
 
 export function useSessionTracking() {
   // State
@@ -12,37 +13,24 @@ export function useSessionTracking() {
   const hasSessions = computed(() => sessions.value.length > 0)
   const sessionsCount = computed(() => sessions.value.length)
 
-  const fetchSession = async (pecid: number, pstid: number) => {
-    if (!pecid) return
-    try {
-      loading.value = true
-      error.value = null
-      let session = await sessionTrackingApi.getSessionTracking(pecid,pstid)
-      return session
-    } catch (err: any) {
-      console.error('Failed to fetch sessions:', err)
-      error.value = err.message || 'Impossible de charger les sessions'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
   // Create new session tracking entries
   const createSession = async (payload: any) => {
     try {
       loading.value = true
       error.value = null
       const newSession = await sessionTrackingApi.createSessionTracking(payload)
-      sessions.value.push({pstid: newSession.pstid, sessionDate: newSession.sessionDate, sessionTimeRemaining: newSession.sessionTimeRemaining, sessionNumber:newSession.sessionNumber})
+      sessions.value.push({pstid: newSession.pstid, sessionDate: newSession.sessionDate, sessionRemainingSec: newSession.sessionRemainingSec, sessionNumber:newSession.sessionNumber})
       return newSession
-    } catch (err: any) {
-      console.error('Failed to create sessions:', err)
-      error.value = err.message || 'Impossible de créer les sessions'
-      throw err
+    } catch (error: any) {
+
+      let err = error.message
+      console.error("Erreur:",err );
+      msgModal.show('Erreur', err, 'OK',msgModal.defaultClose);
+
     } finally {
       loading.value = false
     }
+
   }
 
   // Update a specific session
@@ -65,10 +53,10 @@ export function useSessionTracking() {
 
       // console.log('Session updated successfully:', updatedSession)
       return updatedSession
-    } catch (err: any) {
-      console.error('Failed to update session:', err)
-      error.value = err.message || 'Impossible de mettre à jour la session'
-      throw err
+    } catch (error: any) {
+      let err = error.message
+      console.error("Erreur:",err );
+      msgModal.show('Erreur', err, 'OK',msgModal.defaultClose);
     } finally {
       loading.value = false
     }

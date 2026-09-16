@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import MsgModal from "@/components/modals/MsgModal.vue";
 
 const route = useRoute()
 const isActive = (name: string) => route.name === (name as any)
@@ -7,12 +8,18 @@ const isActive = (name: string) => route.name === (name as any)
 
 <template>
   <nav role="navigation" aria-label="Navigation principale" class="pointer-events-auto pb-safe w-full bg-white border-t border-gray-100 shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
-    <ul class="grid grid-cols-4 text-[11px] font-semibold text-gray-600">
+    <ul class="grid grid-cols-5 text-[11px] font-semibold text-gray-600">
       <li>&nbsp;</li>
       <li>
         <RouterLink :to="{ name: 'home' }" class="flex flex-col items-center gap-1 py-3" :aria-current="isActive('home') ? 'page' : undefined" :class="isActive('home') ? 'text-brand-primary' : ''">
           <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
           <span>Accueil</span>
+        </RouterLink>
+      </li>
+      <li>
+        <RouterLink :to="{ name: 'profile' }" class="flex flex-col items-center gap-1 py-3" :aria-current="route.path === '/profile' ? 'page' : undefined" :class="route.path === '/profile' ? 'text-brand-primary' : ''">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
+          <span>Profil</span>
         </RouterLink>
       </li>
       <li>
@@ -23,6 +30,7 @@ const isActive = (name: string) => route.name === (name as any)
       </li>
       <li>&nbsp;</li>
     </ul>
+    <MsgModal />
   </nav>
 </template>
 

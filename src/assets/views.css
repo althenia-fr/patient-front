@@ -1,0 +1,326 @@
+/* =========================================
+   LAYOUT GLOBAL (Condensé)
+   ========================================= */
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.5rem 0 2rem 0;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 1.25rem;
+}
+
+.header-titles h1,
+.header-titles h2.title {
+    margin: 0 0 0.2rem 0;
+    color: var(--stimeo-primary);
+    font-size: 1.75rem;
+}
+
+.header-titles p,
+.header-titles .subtitle {
+    margin: 0;
+    color: var(--stimeo-text-light);
+    font-size: 0.9rem;
+}
+
+.title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: var(--stimeo-primary);
+}
+
+.subtitle {
+    color: var(--stimeo-text-light);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+}
+
+label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--stimeo-text);
+}
+
+.link {
+    font-size: 0.85rem;
+    color: var(--stimeo-text-light);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.link:hover {
+    color: var(--stimeo-primary);
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   BARRE DE RECHERCHE
+   ========================================= */
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    width: 280px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.search-icon {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.search-input {
+    border: none;
+    outline: none;
+    margin-left: 0.5rem;
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+/* =========================================
+   BOUTONS
+   ========================================= */
+.btn{
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: filter 0.2s;
+}
+
+.btn-primary{
+    background: var(--stimeo-primary);
+    color: #fff;
+}
+
+.btn-secondary{
+    background: #cbd5e1;
+    color: #fff;
+}
+
+.btn-danger{
+    background: var(--stimeo-danger);
+    color: #fff;
+}
+
+.txt-danger{
+    color: var(--stimeo-danger);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--stimeo-accent);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
+.edit-btn {
+    color: var(--stimeo-primary);
+}
+
+.edit-btn:hover {
+    background: rgba(0,0,0, 0.05);
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+.btn-md {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+}
+
+/* =========================================
+   TABLEAUX DE DONNÉES (Densité optimisée)
+   ========================================= */
+
+/* 1. La page s'étire sur toute la hauteur disponible du main-content */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0; /* Permet le redimensionnement Flexbox */
+}
+
+
+.table-scroll-container, .table-container {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    overflow-x: auto;
+    border: 1px solid #f1f5f9;
+}
+
+
+
+/* 2. Le conteneur du tableau absorbe le scroll */
+.table-container {
+    /* On limite la hauteur du tableau par rapport à la hauteur de l'écran (100vh)
+       moins la taille des en-têtes/paddings (ex: 220px) */
+    max-height: calc(100vh - 150px);
+    overflow-y: auto; /* Le scroll est confiné ICI */
+}
+/* 3. L'en-tête du tableau se fige en haut lors du défilement */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+
+/* En-tête sticky grisé */
+.data-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #f1f5f9; /* Teinte grise */
+    color: #334155;
+    border-bottom: 2px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+
+.stimeo-table, .data-table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.825rem;
+}
+
+.stimeo-table th, .data-table th {
+    background: #f8fafc;
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.stimeo-table td, .data-table td {
+    padding: 0.4rem 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+    color: #334155;
+}
+
+.stimeo-table tbody tr:hover, .data-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+td{
+    word-break: break-word;      /* Coupe le texte pour forcer le retour à la ligne */
+    overflow-wrap: anywhere;   /* Solution moderne pour permettre la coupure partout */
+    white-space: normal;
+}
+
+
+/* =========================================
+   ÉTATS & BADGES
+   ========================================= */
+.ref-badge {
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    font-weight: 500;
+}
+
+.empty-state, .loading-state {
+    text-align: center !important;
+    padding: 3rem 1rem !important;
+    color: #94a3b8 !important;
+}
+
+.clickable:hover {
+    cursor: pointer !important;
+    text-decoration: underline;
+}
+
+label {
+    position: relative;
+    display: inline-flex;  /* Permet au badge de se caler juste après le texte et non au bout de la ligne */
+    align-items: center;
+}
+
+.badge {
+    position: absolute;
+    top: -4px;               /* Remonte la pastille légèrement au-dessus du texte */
+    right: -4px;            /* Décale la pastille juste après le mot */
+
+    background-color: var(--stimeo-danger, #ef4444); /* Utilise la couleur de votre charte */
+    color: #ffffff;
+
+    font-size: 0.65rem;      /* Taille de police miniature et lisible */
+    font-weight: 700;        /* Donne de l'impact au chiffre */
+    line-height: 1;
+
+    /* Gestion de la géométrie */
+    min-width: 15px;         /* Largeur minimale pour garantir un rond parfait avec 1 chiffre */
+    height: 15px;            /* Hauteur fixe identique à la largeur minimale */
+    padding: 0 4px;          /* Espace interne latéral si le chiffre passe à 2 ou 3 caractères (ex: "99+") */
+    border-radius: 9999px;   /* Forme parfaitement ronde qui s'étire en "pilule" si le texte grandit */
+
+    /* Centrage absolu du texte à l'intérieur de la pastille */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Ombre fine pour détacher visuellement le badge des éléments en arrière-plan */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+    /* Empêche l'utilisateur de sélectionner accidentellement le chiffre */
+    user-select: none;
+}
+
+/* =========================================
+   UTILITAIRES
+   ========================================= */
+.text-center { text-align: center !important; }
+.font-semibold { font-weight: 600; }
+.text-wrap { white-space: normal; }
+.text-truncate {
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.side-hint-text { font-size: 0.75rem; color: var(--stimeo-text-light); }
+
+label {
+    position: relative;
+    display: inline-flex;  /* Permet au badge de se caler juste après le texte et non au bout de la ligne */
+    align-items: center;
+}

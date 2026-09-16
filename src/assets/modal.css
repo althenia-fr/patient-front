@@ -1,0 +1,86 @@
+/* Arrière-plan semi-transparent avec flou d'ambiance */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(10, 37, 64, 0.4); /* Teinte basée sur --stimeo-primary */
+    backdrop-filter: blur(4px); /* Effet de flou moderne */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Boîte blanche du contenu */
+.modal-content {
+    background: var(--stimeo-bg);
+    width: 100%;
+    max-width: 440px;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--stimeo-border);
+    box-shadow: 0 20px 25px -5px rgba(10, 37, 64, 0.1),
+    0 8px 10px -6px rgba(10, 37, 64, 0.1);
+}
+
+/* Titre */
+h3 {
+    color: var(--stimeo-primary);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.3px;
+}
+
+/* Message */
+.modal-message {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+/* Séparateur discret */
+.modal-divider {
+    border: none;
+    border-top: 1px solid var(--stimeo-border);
+    margin: 1rem 0;
+}
+
+/* Agencement des boutons (alignés à droite, secondaire à gauche du principal) */
+.modal-actions {
+    display: flex;
+    flex-direction: row-reverse; /* Aligne à droite et inverse l'ordre visuel */
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+/* --- ANIMATIONS DE TRANSITION (Vue.js) --- */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+    transition: opacity 0.25s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+    opacity: 0;
+}
+
+/* Effet de léger zoom/pop sur la boîte de dialogue en même temps que le fondu */
+.modal-fade-enter-active .modal-content,
+.modal-fade-leave-active .modal-content {
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-fade-enter-from .modal-content,
+.modal-fade-leave-to .modal-content {
+    transform: scale(0.95);
+}
+
+/* Effet graphique pour TOUS les boutons du modal lorsqu'ils sont désactivés */
+.btn:disabled {
+    opacity: 0.3;               /* Rend le bouton semi-transparent */
+    cursor: not-allowed;        /* Change le curseur en signe "interdit" */
+    pointer-events: none;       /* Sécurité bonus : empêche les interactions au survol */
+}

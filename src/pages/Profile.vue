@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
-import { authUser } from '@/utils/auth'
 import { getOnboarding, saveOnboarding } from '@/utils/onboarding'
 import { getAttestations, getMethod, setMethod } from '@/utils/caution'
 import { useProtocol } from '@/composables/useProtocol'
+import {useRouter} from "vue-router";
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+import {STORAGE_KEYS} from "@/types/api.types.ts";
+const {user} = wrapLocalStorage()
 
 const version = ref('v.'+import.meta.env.VITE_APP_VERSION || 'v.dev');
 
-const user = authUser
-const fullName = computed(() => `${user.value?.user_metadata?.firstname || 'Marie'} ${user.value?.user_metadata?.lastName || 'DUPONT'}`)
-const email = computed(() => user.value?.email || 'marie.dupont@email.fr')
-const phone = computed(() => user.value?.user_metadata?.phone || '06 12 34 56 78')
+const fullName = computed(() => `${user.value.firstname} ${user.value.lastName}`)
+const email = computed(() => user.value.email)
+const phone = computed(() => user.value.mobile)
 
 const deviceData = computed(() => getOnboarding()?.device || {}) as any
 const deviceModel = computed(() => deviceData.value?.model || '—')
@@ -32,6 +34,10 @@ const evaluationEvolutionFrequency = ref<string>(getOnboarding()?.evaluationEvol
 const evaluationEvolutionStartWeek = ref<number>(getOnboarding()?.evaluationEvolutionStartWeek || 4)
 const protocolExtension = ref<number>(getOnboarding()?.protocolExtension || 0)
 const deviceSleepDate = ref<string>(getOnboarding()?.deviceSleepDate || '')
+
+
+const router = useRouter()
+async function doLogout(){ signOut(); router.replace({ name: 'login' }) }
 
 let lock = false
 function reloadSoftware()
@@ -78,7 +84,6 @@ watch(deviceSleepDate, (val) => {
 })
 
 const personalInfoOpen = ref(false)
-const protocolOpen = ref(false)
 const tensMaterialOpen = ref(false)
 const documentsOpen = ref(false)
 
@@ -86,6 +91,16 @@ const attestations = ref(getAttestations())
 const selectedMethod = ref<'CB' | 'Chèque'>(getMethod())
 watch(selectedMethod, (m) => setMethod(m))
 function refreshAttestations() { attestations.value = getAttestations() }
+
+function signOut() {
+  localStorage.removeItem(STORAGE_KEYS.STIMEO_USER)
+  localStorage.removeItem(STORAGE_KEYS.STIMEO_SESSIONS)
+  localStorage.removeItem(STORAGE_KEYS.STIMEO_PROTOCOL)
+  user.value = null
+}
+
+
+
 </script>
 
 <template>
@@ -134,7 +149,7 @@ function refreshAttestations() { attestations.value = getAttestations() }
     </div>
 
     <!-- Protocole -->
-    <div class="card mt-4">
+    <!--div class="card mt-4">
       <div class="flex items-center justify-between cursor-pointer" @click="protocolOpen = !protocolOpen">
         <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
           <font-awesome-icon icon="fa-regular fa-calendar"/>
@@ -235,7 +250,7 @@ function refreshAttestations() { attestations.value = getAttestations() }
           />
         </div>
       </div>
-    </div>
+    </div-->
 
     <!-- Matériel -->
     <div class="card mt-4">
@@ -312,6 +327,23 @@ function refreshAttestations() { attestations.value = getAttestations() }
           {{version}}
         </div>
       </div>
+    </div>
+
+    <!-- Log Out Button -->
+    <div v-if="user" class="pb-12 mt-4">
+      <button
+          @click="doLogout"
+          class="card flex w-full items-center justify-between !border-red-50 text-red-600 shadow-soft active:scale-[0.98] transition-all duration-200"
+      >
+        <div class="flex items-center gap-3">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-500">
+            <font-awesome-icon icon="right-from-bracket" class="text-xl text-red-500" />
+          </div>
+          <div>
+            <span class="block font-bold text-base text-left">Déconnexion</span>
+          </div>
+        </div>
+      </button>
     </div>
 
     <div class="h-24"></div>

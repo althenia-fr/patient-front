@@ -2,10 +2,12 @@
 import { ref, computed } from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import { saveResult } from '@/utils/questionnaireResults.ts'
-import apiClient from '@/services/core/apiClient.ts'
+import apiClient from '@/services/apiClient.ts'
 import { getWeekInfo } from '@/utils/protocol.ts'
-import {STORAGE_KEYS} from "@/types/api.types.ts";
 import {formConfig} from "@/data/form.data.ts";
+
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+const {user} = wrapLocalStorage()
 
 const router = useRouter()
 const route = useRoute()
@@ -78,9 +80,7 @@ const submitQuestionnaire = async () => {
   loading.value = true
 
   try {
-    const userStr = localStorage.getItem(STORAGE_KEYS.ALTH_USER) || '{}'
-    const user = JSON.parse(userStr)
-    const patientId = user.uid || user.id || null
+    const patientId = user.value.uid
 
     let weekInfo = getWeekInfo()
     let week = weekInfo && weekInfo.current?weekInfo.current:1

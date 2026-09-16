@@ -75,7 +75,6 @@ src/utils/
 ├── chartData.ts                  (données pour graphiques)
 ├── mictionnelStats.ts            (stats mictionnel)
 ├── demoMictionnelData.ts         (données mictionnel démo)
-├── auth.ts                       (authentification)
 ├── notifications.ts              (notifications)
 └── ...autres utilitaires
 ```

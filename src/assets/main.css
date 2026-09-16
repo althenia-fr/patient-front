@@ -1,1 +1,11 @@
 @import './base.css';
+
+:root {
+  --stimeo-primary: #b7aa40;
+  --stimeo-accent: #91873e;
+  --stimeo-bg: #ffffff;           /* Fond ultra-clair */
+  --stimeo-text: #1E293B;         /* Texte principal */
+  --stimeo-text-light: #b4b4b4;   /* Texte secondaire */
+  --stimeo-border: #E2E8F0;       /* Lignes de séparation */
+  --stimeo-danger: #e12d2d;
+}

@@ -25,7 +25,7 @@
           class="transition-all duration-1000 ease-linear"
         />
       </svg>
-      
+
       <!-- Time Display -->
       <div class="absolute inset-0 flex items-center justify-center">
         <span class="text-xs font-semibold text-gray-700 leading-none">{{ timeDisplay }}</span>
@@ -39,11 +39,11 @@
         @click="handleToggle"
         :class="[
           'p-2 rounded-full transition-colors flex items-center justify-center',
-          isRunning 
-            ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' 
-            : 'bg-green-100 text-green-700 hover:bg-green-200'
+          isRunning
+            ? 'bg-yellow-500 text-white hover:bg-yellow-700'
+            : 'bg-green-500 text-white hover:bg-green-700'
         ]"
-        :title="isRunning ? 'Pause' : canResumeSession ? 'Resume' : 'Start'"
+
       >
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <!-- Pause Icon -->
@@ -54,16 +54,6 @@
         </svg>
       </button>
 
-      <!-- End Button -->
-      <!-- <button
-        @click="handleEnd"
-        class="p-2 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors flex items-center justify-center"
-        title="End Session"
-      >
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="6" y="6" width="12" height="12" />
-        </svg>
-      </button> -->
     </div>
   </div>
 </template>
@@ -74,14 +64,10 @@ import { useGlobalTimer } from '@/composables/useGlobalTimer'
 
 const {
   isRunning,
-  remainingTime,
-  totalTime,
   progress,
   timeDisplay,
   hasActiveSession,
-  canResumeSession,
   toggleTimer,
-  endTimer,
 } = useGlobalTimer()
 
 // SVG calculations
@@ -96,9 +82,6 @@ const handleToggle = async () => {
   await toggleTimer()
 }
 
-const handleEnd = async () => {
-  await endTimer()
-}
 </script>
 
 <style scoped>

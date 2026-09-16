@@ -1,6 +1,10 @@
-import apiClient from './core/apiClient'
+import apiClient from './apiClient.ts'
 import { API_ENDPOINTS } from '@/types/api.types'
-import { createApiError, logError, isNetworkError } from '@/utils/apiErrorHandler'
+import {
+  createApiError,
+  logError,
+  isNetworkError,
+} from '@/utils/apiErrorHandler'
 import type {
   SessionTrackingItem,
 } from '@/types/api.types'
@@ -70,53 +74,26 @@ export const sessionTrackingApi = {
    * @returns Promise<SessionTrackingItem[]> - Array of created session tracking items
    */
   async createSessionTracking(payload: any): Promise<SessionTrackingItem> {
-    try {
-      const response = await apiClient.post<any>(
-        API_ENDPOINTS.SESSION_TRACKING.CREATE_SESSION,
-        payload,
-      )
-      return response.data
 
-    } catch (error: any) {
-      logError('CreateSessionTracking', error)
-
-      const apiError = createApiError(error)
-
-      if (isNetworkError(error)) {
-        throw new Error(
-          'Impossible de créer les entrées de suivi des séances. Veuillez vérifier votre connexion internet.',
-        )
-      }
-
-      throw new Error(apiError.message)
-    }
+    const response = await apiClient.post<any>(
+      API_ENDPOINTS.SESSION_TRACKING.CREATE_SESSION,
+      payload,
+    )
+    return response.data
   },
 
   /**
    * Update a specific session tracking entry
-   * @param payload - The update payload with id and sessionTimeRemaining
+   * @param payload - The update payload with id and sessionRemainingSec
    * @returns Promise<SessionTrackingItem> - Updated session tracking item
    */
   async updateSessionTracking(payload: any): Promise<SessionTrackingItem> {
-    try {
-      const response = await apiClient.put<any>(
+
+    const response = await apiClient.put<any>(
         API_ENDPOINTS.SESSION_TRACKING.UPDATE_SESSION,
         payload,
-      )
-      return response.data;
+    )
+    return response.data;
 
-    } catch (error: any) {
-      logError('UpdateSessionTracking', error)
-
-      const apiError = createApiError(error)
-
-      if (isNetworkError(error)) {
-        throw new Error(
-          'Impossible de mettre à jour l\'entrée de suivi de séance. Veuillez vérifier votre connexion internet.',
-        )
-      }
-
-      throw new Error(apiError.message)
-    }
   },
 }

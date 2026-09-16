@@ -30,7 +30,8 @@ import ProtocolResults from '@/pages/ProtocolResults.vue'
 //import Evolution from '@/pages/forms/Evolution.vue'
 import Form from '@/pages/Form.vue'
 
-import { authUser } from '@/utils/auth'
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+const {user} = wrapLocalStorage()
 
 const routes: RouteRecordRaw[] = [
     { path: '/', name: 'splash', component: Splash, meta: { requiresAuth: false } },
@@ -75,12 +76,12 @@ export const router = createRouter({
 
 router.beforeEach((to, _from, next) => {
 
-    if (to.meta && (to.meta as any).requiresAuth && !authUser.value) {
+    if (to.meta && (to.meta as any).requiresAuth && !user.value) {
     next({ name: 'login', query: { redirect: to.fullPath } })
     return
   }
 
-  if (to.name === 'splash' && authUser.value) {
+  if (to.name === 'splash' && user.value) {
     next({ name: 'home' })
     return
   }

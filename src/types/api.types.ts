@@ -2,8 +2,8 @@
 export interface SessionTrackingItem {
   pstid: number
   sessionDate: string
-  sessionTimeRemaining: number
-  sessionTimeMax?: number
+  sessionRemainingSec: number
+  sessionMaxSec?: number
   sessionNumber?: number
 }
 
@@ -27,6 +27,7 @@ export const API_ENDPOINTS = {
 } as const
 
 export const STORAGE_KEYS = {
-  ALTH_USER: 'alth_user',
-  ALTH_PROTOCOL : 'alth_protocol'
+  STIMEO_USER: 'stimeo_user',
+  STIMEO_PROTOCOL : 'stimeo_protocol',
+  STIMEO_SESSIONS : 'stimeo_sessions'
 } as const
