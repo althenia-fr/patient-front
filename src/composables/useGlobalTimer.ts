@@ -2,6 +2,11 @@ import {computed, reactive} from 'vue'
 import { useSessionTracking } from './useSessionTracking'
 import {sessionTrackingApi} from "@/services/sessionTracking.service.ts";
 
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+import {msgModal} from "@/utils/modals/msg-modal.ts";
+import router from "@/router";
+const {protocol, setSessions, addSession} = wrapLocalStorage()
+
 // Global timer state (singleton-like)
 
 export const globalState = reactive(
@@ -12,17 +17,13 @@ export const globalState = reactive(
       pstid: null as null | number,
       sessionNumber: null as null | number, // Track current session number
       interval: null as null | number,
-      startTime: null as null | number,
-      pausedTime: 0, // Total time spent paused
-      lastPauseTime: 0, // When timer was last paused
     }
 )
 
 
 export function useGlobalTimer() {
-  const { createSession, updateSession, getSessionByDate, sessions } = useSessionTracking()
+  const { createSession, updateSession } = useSessionTracking()
 
-  // Computed properties
   const isRunning = computed(() => globalState.running)
   const sessionRemainingSec =  computed(() => globalState.sessionRemainingSec)
   const sessionMaxSec = computed(() => globalState.sessionMaxSec)
@@ -40,7 +41,6 @@ export function useGlobalTimer() {
 
   const hasActiveSession = computed(() => globalState.pstid !== null)
 
-  // Initialize timer with protocol agenda and check for existing sessions
   const initializeTimer = (session: any) => {
 
     globalState.pstid = session.pstid
@@ -50,42 +50,42 @@ export function useGlobalTimer() {
 
   }
 
-  // Start timer (create new or resume existing session)
-  const startTimer = async (sessionNumber: number) => {
+  function doStartTimer()
+  {
+    // Start the timer
+    globalState.running = true
 
-    function doStartTimer()
-    {
-      // Start the timer
-      globalState.running = true
-      globalState.startTime = Date.now()
-
-      // Clear any existing interval
-      if (globalState.interval) {
-        clearInterval(globalState.interval)
-      }
-
-      // Start countdown
-      globalState.interval = window.setInterval(() => {
-
-        if (globalState.sessionRemainingSec > 0) {
-
-          globalState.sessionRemainingSec -= 1
-
-          if(globalState.sessionRemainingSec % 15===0)
-          {
-            let payload = {
-              pstid: globalState.pstid,
-              sessionRemainingSec: globalState.sessionRemainingSec,
-            }
-            sessionTrackingApi.updateSessionTracking(payload)  //we are updating on the fly, no need to wait for response
-          }
-
-        } else {
-          // Timer completed
-          endTimer()
-        }
-      }, 1000)
+    // Clear any existing interval
+    if (globalState.interval) {
+      clearInterval(globalState.interval)
+      globalState.interval = null
     }
+
+    // Start countdown
+    globalState.interval = window.setInterval(() => {
+
+      if (globalState.sessionRemainingSec > 0) {
+
+        globalState.sessionRemainingSec -= 1
+
+        if(globalState.sessionRemainingSec % 15===0)
+        {
+          let payload = {
+            pstid: globalState.pstid,
+            sessionRemainingSec: globalState.sessionRemainingSec,
+          }
+          sessionTrackingApi.updateSessionTracking(payload)  //we are updating on the fly, no need to wait for response
+        }
+
+      }
+      else endTimer()
+
+    }, 1000)
+  }
+
+
+
+  const timerOn = async (sessionNumber: number) => {
 
     if (globalState.running) return
 
@@ -95,7 +95,7 @@ export function useGlobalTimer() {
         doStartTimer();
       } else {
         // Create new session tracking entry
-        const pecid = globalState.protocol?.pecid
+        const pecid = protocol.pecid
 
         const payload = {
           pecid,
@@ -107,6 +107,7 @@ export function useGlobalTimer() {
         if (createdSession) {
           globalState.pstid = createdSession.pstid
           globalState.sessionNumber = createdSession.sessionNumber // Store the session number
+          addSession(createdSession)
           doStartTimer();
         }
       }
@@ -117,12 +118,11 @@ export function useGlobalTimer() {
   }
 
   // Pause timer and update session tracking
-  const pauseTimer = async () => {
+  const timerOff = async () => {
     if (!globalState.running) return
 
     // Update UI state immediately
     globalState.running = false
-    globalState.lastPauseTime = Date.now()
 
     // Clear interval immediately to stop timer
     if (globalState.interval) {
@@ -134,10 +134,12 @@ export function useGlobalTimer() {
     if (globalState.pstid) {
       try {
 
-        await updateSession({
+        let listSessions = await updateSession({
           pstid: globalState.pstid,
           sessionRemainingSec: globalState.sessionRemainingSec,
         })
+        //use setter to make sure we handle day change correctly
+        setSessions(listSessions)
 
       } catch (error) {
         console.error('Failed to pause session tracking:', error)
@@ -146,22 +148,6 @@ export function useGlobalTimer() {
     }
   }
 
-  // Resume timer
-  const resumeTimer = () => {
-    if (globalState.running) return
-
-    globalState.running = true
-
-    // Resume countdown
-    globalState.interval = window.setInterval(() => {
-      if (globalState.sessionRemainingSec > 0) {
-        globalState.sessionRemainingSec -= 1
-      } else {
-        // Timer completed
-        endTimer()
-      }
-    }, 1000)
-  }
 
   // End timer (completion or manual end)
   const endTimer = async () => {
@@ -176,75 +162,42 @@ export function useGlobalTimer() {
     // Update session tracking with 0 remaining time
     if (globalState.pstid) {
       try {
-        await updateSession({
+        let listSessions = await updateSession({
           pstid: globalState.pstid,
           sessionRemainingSec: 0, // Timer completed - set to 0 sec
         })
+        //use setter to make sure we handle day change correctly
+        setSessions(listSessions)
       } catch (error) {
         console.error('Failed to end session tracking:', error)
       }
     }
 
     // Reset timer state
-    resetTimer()
-  }
-
-  // Reset timer state
-  async function resetTimer() {
-
-    let pecid = globalState.protocol?.pecid
-
     globalState.running = false
     globalState.sessionRemainingSec = globalState.sessionMaxSec
     globalState.pstid = null
     globalState.sessionNumber = null
-    globalState.startTime = null
-    globalState.pausedTime = 0
-    globalState.lastPauseTime = null
 
-    if (globalState.interval) {
-      clearInterval(globalState.interval)
-      globalState.interval = null
-    }
-
-    let sessions = await sessionTrackingApi.listSessionTracking(pecid)
-    globalState.sessions = sessions
+    let msg = "Vous venez de finir la séance.<br/><br/>Les premiers résultats mettent souvent plus d'un mois pour apparaître.<br/><br/>Persévérez sans vous décourager, la régularité paye toujours à la fin."
+    msgModal.show('Félicitation', msg, 'OK',msgModal.defaultClose);
+    router.replace("/home")
 
   }
+
 
   // Toggle between start/pause and resume
   const toggleTimer = async (sessionNumber: number) => {
-    if (!globalState.pstid) {
-      await startTimer(sessionNumber)
-    } else if (globalState.running) {
-      await pauseTimer()
-    } else {
-      resumeTimer()
+
+    if (globalState.running) {
+      await timerOff()
     }
-  }
-
-  // Cleanup on component unmount (only if no other components are using it)
-  const cleanup = () => {
-    // Note: We don't automatically cleanup on unmount since timer should persist
-    // Timer will be cleaned up when explicitly ended or when page refreshes
-  }
-
-  // Watch for page visibility changes to handle tab switching
-  const handleVisibilityChange = () => {
-    if (document.hidden) {
-      // Tab is hidden, timer continues running (no action needed)
-    } else {
-      // Tab is visible, ensure timer is still running if it was running
-      if (globalState.running && !globalState.interval) {
-        resumeTimer()
-      }
+    else {
+      await timerOn(sessionNumber)
     }
+
   }
 
-  // Add visibility change listener
-  if (typeof document !== 'undefined') {
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-  }
 
   return {
     // State
@@ -257,12 +210,6 @@ export function useGlobalTimer() {
 
     // Methods
     initializeTimer,
-    startTimer,
-    pauseTimer,
-    resumeTimer,
-    endTimer,
-    resetTimer,
     toggleTimer,
-    cleanup,
   }
 }

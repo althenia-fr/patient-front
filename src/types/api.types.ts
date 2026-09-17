@@ -16,7 +16,8 @@ export const API_ENDPOINTS = {
     UPDATE_PEC: '/pec',
   },
   PROTOCOL: {
-    GET_AGENDA: '/patient/protocolAgenda/get',
+    GET_AGENDA: '/patient/protocol/agenda',
+    GET_KPI: '/patient/protocol/kpi',
   },
   SESSION_TRACKING: {
     LIST_SESSIONS: '/patient/sessionTracking/list',

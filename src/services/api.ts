@@ -18,8 +18,13 @@ export const api = {
             const response = await apiClient.get<ProtocolAgenda>(API_ENDPOINTS.PROTOCOL.GET_AGENDA)
             return response.data;
 
+    },
+
+    async getProtocolKpi(): Promise<ProtocolAgenda> {
+
+        const response = await apiClient.get<ProtocolAgenda>(API_ENDPOINTS.PROTOCOL.GET_KPI)
+        return response.data;
+
     }
-
-
 
 }

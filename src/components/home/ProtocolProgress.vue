@@ -32,21 +32,19 @@
     </div>
     <div class="mt-3 grid grid-cols-3 gap-3 text-center">
       <div class="rounded-xl border border-gray-100 bg-white p-3">
-        <div class="text-lg font-bold text-brand-primary">{{ sessionsDone }}</div>
+        <div class="text-lg font-bold text-brand-primary">{{ kpi.completedSessions?kpi.completedSessions:'-' }}</div>
         <div class="text-[11px] text-gray-500 whitespace-nowrap">
-          <p>Séances</p>
-          <p>réalisées</p>
+          <p>Réalisé</p>
         </div>
       </div>
       <div class="rounded-xl border border-gray-100 bg-white p-3">
-        <div class="text-lg font-bold text-brand-primary">{{ adherence }}%</div>
+        <div class="text-lg font-bold text-brand-primary">{{ kpi.expectedCompletedSessions>0?Math.round(100*kpi.completedSessions/kpi.expectedCompletedSessions)+'%':'-' }}</div>
         <div class="text-[11px] text-gray-500 whitespace-nowrap">Assiduité</div>
       </div>
       <div class="rounded-xl border border-gray-100 bg-white p-3">
-        <div class="text-lg font-bold text-brand-primary">{{ incompleteSessionsCount }}</div>
+        <div class="text-lg font-bold text-brand-primary">{{ kpi.expectedCompletedSessions?kpi.expectedCompletedSessions - kpi.completedSessions:'-' }}</div>
         <div class="text-[11px] text-gray-500 whitespace-nowrap">
-          <p>Séances</p>
-          <p>incomplètes</p>
+          <p>Manqué</p>
         </div>
       </div>
     </div>
@@ -56,11 +54,13 @@
 </template>
 <script setup lang="ts">
 
-import {computed} from "vue";
-import {daysElapsed} from "@/services/agenda.service.ts";
+import {computed, onMounted, reactive} from "vue";
 
 import {wrapLocalStorage} from "@/services/storage.service.ts";
-const {protocol,sessions} = wrapLocalStorage()
+import {api} from "@/services/api.ts";
+const {protocol} = wrapLocalStorage()
+
+const kpi = reactive({})
 
 
 const protocolLocaleStartDate = computed(() => {
@@ -101,53 +101,10 @@ const protocolProgress = computed(() => {
   return { percentage, remainingWeek }
 })
 
-const adherence = computed(() => {
-
-  if(protocol.value)
-  {
-    // Calculate adherence based on completed sessions vs expected sessions
-    // Now supports multiple sessions per day
-    const sessionsDaily = protocol.value.sessionsDaily || 1
-    const expectedSessions = daysElapsed.value * sessionsDaily
-    const completedSessions = sessionsDone.value
-
-    if (expectedSessions === 0) return 0
-    return Math.min(100, Math.round((completedSessions / expectedSessions) * 100))
-  }
-  else return 0;
+onMounted(async ()=>{
+  let newKpi = await api.getProtocolKpi();
+  Object.assign(kpi, newKpi); //as kpi is reactive, do not use = or it will kill reactivity
 
 })
-
-
-const sessionsDone = computed(() => {
-
-  // Use session tracking API data instead of history
-  const startDate = new Date(protocolLocaleStartDate.value)
-  const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime()
-
-  if(sessions.value)
-  {
-    return sessions.value.filter((session: any) => {
-      const sessionDate = new Date(session.date).getTime()
-      // Consider a session "done" if sessionRemainingSec is 0 or less
-      return sessionDate >= startDateOnly && session.sessionRemainingSec <= 0
-    }).length
-  }
-  else return []
-
-})
-
-const incompleteSessionsCount = computed(() => {
-  if(protocol.value)
-  {
-    let sessionsDaily = protocol.value.sessionsDaily
-    let elapsedDays = daysElapsed.value
-    let expectedSessions = sessionsDaily * elapsedDays
-    return expectedSessions - sessionsDone.value
-  }
-  else return 0
-
-})
-
 
 </script>

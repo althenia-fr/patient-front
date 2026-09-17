@@ -9,12 +9,6 @@
 
         <!-- Multiple session buttons based on sessionsDaily -->
         <div v-if="todayEnrichedSessions.length >= 1" class="space-y-2">
-          <!--RouterLink
-            v-for="session in availableSessions"
-            :key="session.pstid"
-            :to="{ name: 'timer', params: { pecid:session.pecid, pstid: session.pstid } }"
-            class="block w-full"
-          -->
           <button v-for="session in todayEnrichedSessions" @click="gotoTimer(session.sessionNumber)"
                class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none"
                :class="{
@@ -22,11 +16,8 @@
                 'bg-gray-300 text-gray-500 cursor-not-allowed': !session.isAvailable || session.isCompleted
               }"
            :disabled="session.isCompleted || !session.isAvailable">
-            {{ session.isCompleted ? `Séance ${session.sessionNumber} terminée` :
-              !session.isAvailable ? `Séance ${session.sessionNumber}` :
-                      `Séance ${session.sessionNumber}` }}
+            {{`Séance ${session.sessionNumber}`}} {{workoutSessionState(session)}}
           </button>
-          <!--/RouterLink-->
         </div>
 
       </div>
@@ -42,12 +33,60 @@ import router from "@/router";
 import {currentWeek} from "@/services/agenda.service.ts";
 import {useSessionTracking} from "@/composables/useSessionTracking.ts";
 import {getNowParisDateYYYYMMDD} from "@/utils/protocol.ts";
-import {STORAGE_KEYS} from "@/types/api.types.ts";
+
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+import {globalState} from "@/composables/useGlobalTimer.ts";
+const {getSessions,protocol,setSessions, sessionRefresh} = wrapLocalStorage()
 
 const { createSession } = useSessionTracking()
 
+onMounted(() => {
 
-const todayEnrichedSessions = ref([])
+  // Le problème vient du fait que todayEnrichedSessions est une propriété calculée (computed). Dans Vue.js, un computed
+  // met en cache son résultat et ne se recalcule que si l'une de ses dépendances réactives change.
+  // Puisque getSessions() va lire directement dans le LocalStorage (qui n'est pas réactif par défaut),
+  // Vue ne sait pas que les données ont changé lorsque tu reviens de la page du timer.
+  // Pour forcer la mise à jour à chaque visite de la page, la méthode la plus simple et efficace est de créer un
+  // déclencheur réactif (ref) qu'on incrémente à chaque fois que le composant est monté ou affiché.
+  sessionRefresh.value++;
+});
+
+function workoutSessionState(session : any)
+{
+  if(session.isCompleted) return 'terminée'
+  else if(globalState.sessionNumber===session.sessionNumber){
+    if(globalState.running) return 'en cours'
+     else return 'en pause'
+   }
+   else if(!session.isAvailable) return ''
+}
+
+
+const todayEnrichedSessions = computed(()=>{
+
+  //On lit la valeur : à chaque fois que sessionRefresh changera, ce computed sera recalculé
+  sessionRefresh.value;
+
+  let todayTrackedSessions = getSessions()
+
+  let sessionsOfTheDay = []
+  for (let i = 1; i <= protocol.value.sessionsDaily; i++) {
+    const session = todayTrackedSessions.find(s => s.sessionNumber === i)
+    sessionsOfTheDay.push({
+      pstid: session?session.pstid:0,
+      pecid: protocol.value.pecid,
+      sessionRemainingSec: session?session.sessionRemainingSec:0,
+      sessionMaxSec: session?session.sessionMaxSec:0,
+      sessionNumber: session?session.sessionNumber:i,
+      isCompleted: session ? session.sessionRemainingSec <= 0 : false,
+      isAvailable: i===1 && !session?true:canStartSession(i, todayTrackedSessions) //if 1st session hasnt started yet, it's available for start
+    })
+  }
+
+  return sessionsOfTheDay
+
+})
+
 
 const today = computed(() => {
   try {
@@ -60,11 +99,8 @@ const today = computed(() => {
 
 async function gotoTimer(sessionNumber: any)
 {
-  const todayYYYYMMDD = getNowParisDateYYYYMMDD()
-  let sessionsJson = localStorage.getItem(STORAGE_KEYS.STIMEO_SESSIONS+'_'+todayYYYYMMDD);
-  let sessions = sessionsJson?JSON.parse(sessionsJson):null
-
   let pstid = 0;
+  let sessions = getSessions()
   for(let i=0;i<sessions.length;i++)
   {
     let session = sessions[i]
@@ -76,11 +112,8 @@ async function gotoTimer(sessionNumber: any)
 
   if(pstid===0)
   {
-    let protocolDataJson = localStorage.getItem(STORAGE_KEYS.STIMEO_PROTOCOL)
-    let protocolData = protocolDataJson?JSON.parse(protocolDataJson):null
-
     const payload = {
-      pecid: protocolData?protocolData.pecid:null,
+      pecid: protocol.value.pecid,
       weekNumber: currentWeek.value,
       sessionNumber : sessionNumber,
     }
@@ -99,7 +132,8 @@ async function gotoTimer(sessionNumber: any)
       isAvailable: true //if 1st session hasnt started yet, it's available for start
     });
 
-    localStorage.setItem(STORAGE_KEYS.STIMEO_SESSIONS+'_'+todayYYYYMMDD,JSON.stringify(sessions));
+    setSessions(sessions);
+
   }
 
   router.push({
@@ -130,43 +164,6 @@ const canStartSession = (sessionNumber: number, sessionsArray: any) => {
 
   return isPreviousCompleted && !isCurrentCompleted
 }
-
-function initSessions(){
-
-  const todayYYYYMMDD = getNowParisDateYYYYMMDD()
-  let sessionsJson = localStorage.getItem(STORAGE_KEYS.STIMEO_SESSIONS+'_'+todayYYYYMMDD);
-  let sessions = sessionsJson?JSON.parse(sessionsJson):null
-
-  // work out today's sessions
-  const todayTrackedSessions =sessions.filter((session: any) =>
-      session.sessionDate.startsWith(todayYYYYMMDD)
-  )
-
-  let protocolDataJson = localStorage.getItem(STORAGE_KEYS.STIMEO_PROTOCOL)
-  let protocolData = protocolDataJson?JSON.parse(protocolDataJson):null
-
-  let sessionsOfTheDay = []
-  for (let i = 1; i <= protocolData?.sessionsDaily; i++) {
-    const session = todayTrackedSessions.find(s => s.sessionNumber === i)
-    sessionsOfTheDay.push({
-      pstid: session?session.pstid:0,
-      pecid: protocolData?.pecid,
-      sessionRemainingSec: session?session.sessionRemainingSec:0,
-      sessionMaxSec: session?session.sessionMaxSec:0,
-      sessionNumber: session?session.sessionNumber:i,
-      isCompleted: session ? session.sessionRemainingSec <= 0 : false,
-      isAvailable: i===1 && !session?true:canStartSession(i, todayTrackedSessions) //if 1st session hasnt started yet, it's available for start
-    })
-  }
-
-  todayEnrichedSessions.value = sessionsOfTheDay
-}
-
-onMounted(() => {
-
-  initSessions()
-
-})
 
 
 </script>

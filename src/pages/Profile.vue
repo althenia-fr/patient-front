@@ -1,40 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
-import { getOnboarding, saveOnboarding } from '@/utils/onboarding'
+import {ref, watch } from 'vue'
 import { getAttestations, getMethod, setMethod } from '@/utils/caution'
-import { useProtocol } from '@/composables/useProtocol'
 import {useRouter} from "vue-router";
 import {wrapLocalStorage} from "@/services/storage.service.ts";
-import {STORAGE_KEYS} from "@/types/api.types.ts";
 const {user} = wrapLocalStorage()
 
 const version = ref('v.'+import.meta.env.VITE_APP_VERSION || 'v.dev');
-
-const fullName = computed(() => `${user.value.firstname} ${user.value.lastName}`)
-const email = computed(() => user.value.email)
-const phone = computed(() => user.value.mobile)
-
-const deviceData = computed(() => getOnboarding()?.device || {}) as any
-const deviceModel = computed(() => deviceData.value?.model || '—')
-const deviceSerial = computed(() => deviceData.value?.serial || '—')
-
-const protocolStartDate = computed(() => {
-  const date = getOnboarding()?.protocolStartDate
-  if (!date) return '—'
-  return new Date(date).toLocaleDateString('fr-FR')
-})
-
-const { protocolDuration, checkupDate } = useProtocol()
-
-
-
-const sessionCount = ref<number>(getOnboarding()?.sessionCount || 1)
-const sessionDuration = ref<string>(String(getOnboarding()?.sessionDuration || 20))
-const evaluationEvolutionFrequency = ref<string>(getOnboarding()?.evaluationEvolutionFrequency || 'Hebdomadaire')
-const evaluationEvolutionStartWeek = ref<number>(getOnboarding()?.evaluationEvolutionStartWeek || 4)
-const protocolExtension = ref<number>(getOnboarding()?.protocolExtension || 0)
-const deviceSleepDate = ref<string>(getOnboarding()?.deviceSleepDate || '')
-
 
 const router = useRouter()
 async function doLogout(){ signOut(); router.replace({ name: 'login' }) }
@@ -53,38 +24,7 @@ function reloadSoftware()
 }
 
 
-watch(sessionCount, (val) => {
-  const onb = getOnboarding()
-  saveOnboarding({ ...onb, sessionCount: val })
-})
-
-watch(sessionDuration, (val) => {
-  const onb = getOnboarding()
-  saveOnboarding({ ...onb, sessionDuration: Number(val) })
-})
-
-watch(evaluationEvolutionFrequency, (val) => {
-  const onb = getOnboarding()
-  saveOnboarding({ ...onb, evaluationEvolutionFrequency: val })
-})
-
-watch(evaluationEvolutionStartWeek, (val) => {
-  const onb = getOnboarding()
-  saveOnboarding({ ...onb, evaluationEvolutionStartWeek: val })
-})
-
-watch(protocolExtension, (val) => {
-  const onb = getOnboarding()
-  saveOnboarding({ ...onb, protocolExtension: val })
-})
-
-watch(deviceSleepDate, (val) => {
-  const onb = getOnboarding()
-  saveOnboarding({ ...onb, deviceSleepDate: val })
-})
-
 const personalInfoOpen = ref(false)
-const tensMaterialOpen = ref(false)
 const documentsOpen = ref(false)
 
 const attestations = ref(getAttestations())
@@ -93,33 +33,21 @@ watch(selectedMethod, (m) => setMethod(m))
 function refreshAttestations() { attestations.value = getAttestations() }
 
 function signOut() {
-  localStorage.removeItem(STORAGE_KEYS.STIMEO_USER)
-  localStorage.removeItem(STORAGE_KEYS.STIMEO_SESSIONS)
-  localStorage.removeItem(STORAGE_KEYS.STIMEO_PROTOCOL)
+  localStorage.clear();
   user.value = null
 }
-
-
 
 </script>
 
 <template>
   <section class="mx-auto w-full px-4 py-6 sm:max-w-md md:max-w-lg lg:max-w-xl">
-    <header class="mb-4">
-      <div class="card">
-        <div>
-          <h1 class="text-lg font-bold">Mon Profil</h1>
-          <p class="text-xs text-gray-500">Informations personnelles et médicales</p>
-        </div>
-      </div>
-    </header>
 
     <!-- Informations personnelles -->
     <div class="card">
       <div class="flex items-center justify-between cursor-pointer" @click="personalInfoOpen = !personalInfoOpen">
         <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
           <font-awesome-icon icon="fa-regular fa-user"/>
-          Informations personnelles
+          Profil
         </div>
         <svg v-if="personalInfoOpen" viewBox="0 0 24 24" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="18 15 12 9 6 15"></polyline>
@@ -131,19 +59,19 @@ function signOut() {
       <div v-if="personalInfoOpen" class="mt-3 grid grid-cols-2 gap-3 text-sm">
         <div>
           <div class="text-gray-500">Prénom</div>
-          <div class="mt-1 rounded-xl bg-brand-primary/5 px-3 py-2">{{ fullName.split(' ')[0] }}</div>
+          <div class="mt-1 rounded-xl bg-brand-primary/5 px-3 py-2">{{ user.firstname }}</div>
         </div>
         <div>
           <div class="text-gray-500">Nom</div>
-          <div class="mt-1 rounded-xl bg-brand-primary/5 px-3 py-2">{{ fullName.split(' ').slice(1).join(' ') }}</div>
+          <div class="mt-1 rounded-xl bg-brand-primary/5 px-3 py-2">{{ user.lastname }}</div>
         </div>
         <div class="col-span-2">
           <div class="text-gray-500">Email</div>
-          <div class="mt-1 rounded-xl bg-brand-primary/5 px-3 py-2">{{ email }}</div>
+          <div class="mt-1 rounded-xl bg-brand-primary/5 px-3 py-2">{{ user.email }}</div>
         </div>
         <div class="col-span-2">
           <div class="text-gray-500">Téléphone</div>
-          <div class="mt-1 rounded-xl bg-brand-primary/5 px-3 py-2">{{ phone }}</div>
+          <div class="mt-1 rounded-xl bg-brand-primary/5 px-3 py-2">{{ user.mobile }}</div>
         </div>
       </div>
     </div>
@@ -253,7 +181,7 @@ function signOut() {
     </div-->
 
     <!-- Matériel -->
-    <div class="card mt-4">
+    <!--div class="card mt-4">
       <div class="flex items-center justify-between cursor-pointer" @click="tensMaterialOpen = !tensMaterialOpen">
         <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
           <font-awesome-icon icon="fa-solid fa-kit-medical"/>
@@ -276,7 +204,7 @@ function signOut() {
           <div class="mt-1 rounded-xl bg-orange-50 px-3 py-2">{{ deviceSerial }}</div>
         </div>
       </div>
-    </div>
+    </div-->
 
     <!-- Documents -->
     <div class="card mt-4">

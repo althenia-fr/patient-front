@@ -25,7 +25,6 @@ const {
   sessionMaxSec,
   initializeTimer,
   toggleTimer,
-  endTimer,
 } = useGlobalTimer()
 
 
@@ -72,17 +71,6 @@ const congratsMsg = ref('')
 const showSessionCompleteModal = ref(false)
 
 
-// Handle global timer completion
-const handleTimerEnd = async (elapsedTime: number) => {
-  lastElapsed.value = Math.max(0, elapsedTime)
-  endTimer()
-  showSessionCompleteModal.value = true
-}
-
-function onFinished(sec: number) {
-  handleTimerEnd(sec)
-}
-
 function closeSessionModal() {
   showSessionCompleteModal.value = false
   router.replace({ name: 'home' })
@@ -123,7 +111,6 @@ onMounted(() => {
       <Timer
         :size="220"
         :stroke="12"
-        @finished="onFinished"
       />
 
       <!-- Global Timer Controls (if needed for larger interface) -->
