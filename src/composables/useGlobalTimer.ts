@@ -151,7 +151,6 @@ export function useGlobalTimer() {
 
   // End timer (completion or manual end)
   const endTimer = async () => {
-    globalState.running = false
 
     // Clear interval
     if (globalState.interval) {

@@ -1,17 +1,50 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import {computed, onMounted, onUnmounted} from 'vue'
 import TopBarTimer from "@/components/TopBarTimer.vue";
 import {currentWeek} from "@/services/agenda.service.ts";
 import {useRoute} from "vue-router";
 
 import {wrapLocalStorage} from "@/services/storage.service.ts";
+import {globalState, useGlobalTimer} from "@/composables/useGlobalTimer.ts";
 const {user,protocol} = wrapLocalStorage()
+const {hasActiveSession} = useGlobalTimer()
 
 
 const route = useRoute()
 const isTimerPage = computed(() => route.name.indexOf('timer')>-1)
 
 const firstname = computed(() => user.value?.firstname)
+
+const memoVisibilityState ={
+  wentOff:0,
+  sessionRemainingSec:0
+}
+
+// 3. Forcer le rafraîchissement au retour en premier plan
+function handleVisibilityChange() {
+  if(globalState.running)
+  {
+    if (document.visibilityState === 'visible') {
+      let deltaTimeMsec =  Date.now() - memoVisibilityState.wentOff
+      globalState.sessionRemainingSec = memoVisibilityState.sessionRemainingSec - Math.round(deltaTimeMsec/1000)
+    }
+    else
+    {
+      memoVisibilityState.wentOff = Date.now()
+      memoVisibilityState.sessionRemainingSec = globalState.sessionRemainingSec
+    }
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+})
+
+
 
 </script>
 
@@ -22,11 +55,11 @@ const firstname = computed(() => user.value?.firstname)
       <div class="flex items-start justify-between">
         <div class="grid grid-cols-3 items-center w-full">
 
-          <div class="text-base font-bold whitespace-nowrap justify-self-start">
-            Bonjour, {{ firstname }}
+          <div class="text-base font-bold whitespace-nowrap justify-self-start" >
+            <span v-if="!hasActiveSession">Bonjour, {{ firstname }}</span>
           </div>
-          <div class="flex justify-center items-center">
-            <TopBarTimer v-if="!isTimerPage" />
+          <div class="flex justify-center items-center" >
+            <TopBarTimer v-if="!isTimerPage && hasActiveSession" />
           </div>
           <div
               v-if="currentWeek"

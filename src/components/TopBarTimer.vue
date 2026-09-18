@@ -1,5 +1,5 @@
 <template>
-  <div v-if="hasActiveSession" class="flex items-center gap-3">
+  <div class="flex items-center gap-3">
     <!-- Timer Display -->
     <div class="relative flex items-center justify-center">
       <!-- Circular Progress -->
@@ -66,7 +66,6 @@ const {
   isRunning,
   progress,
   timeDisplay,
-  hasActiveSession,
   toggleTimer,
 } = useGlobalTimer()
 

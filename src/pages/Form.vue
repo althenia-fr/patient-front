@@ -182,13 +182,13 @@ const submitQuestionnaire = async () => {
   <!-- Sticky navigation buttons -->
   <div v-if="currentScreen !== screenOrder[0]" class="sticky bottom-0 left-0 right-0 mx-auto max-w-md px-4 py-3 z-40 pb-24">
     <div class="flex gap-2">
-      <button @click="goPrev" class="flex-1 rounded-full bg-gray-100 text-gray-800 font-semibold py-3 text-sm transition hover:bg-gray-200">
+      <button @click="goPrev" class="flex-1 rounded-full bg-gray-100 text-gray-800 font-semibold px-3 py-3 text-sm transition hover:bg-gray-200">
         Précédent
       </button>
       <button
         v-if="currentScreen !== screenOrder[screenOrder.length-1]"
         @click="goNext"
-        class="flex-1 rounded-full bg-brand-primary text-white font-semibold py-3 text-sm transition"
+        class="flex-1 rounded-full bg-brand-primary text-white font-semibold px-3 py-3 text-sm transition"
       >
         Suivant
       </button>
@@ -196,7 +196,7 @@ const submitQuestionnaire = async () => {
         v-if="currentScreen === screenOrder[screenOrder.length-1]"
         @click="submitQuestionnaire"
         :disabled="loading || !allAnswersProvided"
-        class="flex-1 rounded-full bg-brand-primary text-white font-semibold py-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed transition"
+        class="flex-1 rounded-full bg-brand-primary text-white font-semibold px-3 py-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed transition"
       >
         {{ loading ? 'Envoi...' : 'Envoyer' }}
       </button>

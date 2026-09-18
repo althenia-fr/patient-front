@@ -2,7 +2,7 @@
 import {ref, onMounted, watch} from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { api } from '@/services/api'
-import {wrapLocalStorage} from "@/services/storage.service.ts";
+import {wrapLocalStorage,syncStorageData} from "@/services/storage.service.ts";
 const {user, setUser} = wrapLocalStorage()
 
 const router = useRouter()
@@ -37,6 +37,7 @@ async function submit(e: Event) {
       app:'patient'
     })
     setUser(loginUser)
+    await syncStorageData()
     const redirect = (route.query.redirect as string) || '/home'
     router.replace(redirect)
   } catch (err: any) {

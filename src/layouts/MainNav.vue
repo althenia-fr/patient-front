@@ -17,9 +17,9 @@ const isActive = (name: string) => route.name === (name as any)
         </RouterLink>
       </li>
       <li>
-        <RouterLink :to="{ name: 'profile' }" class="flex flex-col items-center gap-1 py-3 text-gray-700" :aria-current="route.path === '/profile' ? 'page' : undefined" :class="route.path === '/profile' ? 'text-brand-primary' : ''">
+        <RouterLink :to="{ name: 'profile' }" class="flex flex-col items-center gap-1 py-3" :aria-current="route.path === '/profile' ? 'page' : undefined" :class="route.path === '/profile' ? 'text-brand-primary' : ''">
           <!--svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg-->
-          <font-awesome-icon class="text-gray-700 text-2xl" icon="fa-solid fa-gear"/>
+          <font-awesome-icon class="text-2xl" icon="fa-solid fa-gear"/>
           <span>Réglages</span>
         </RouterLink>
       </li>
