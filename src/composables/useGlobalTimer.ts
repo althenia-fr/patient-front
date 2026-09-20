@@ -41,19 +41,22 @@ export function useGlobalTimer() {
 
   const hasActiveSession = computed(() => globalState.pstid !== null)
 
-  const initializeTimer = (session: any) => {
-
-    globalState.pstid = session.pstid
-    globalState.sessionMaxSec = session.sessionMaxSec
-    globalState.sessionNumber = session.sessionNumber || null
-    globalState.sessionRemainingSec = Math.round(session.sessionRemainingSec)
+  function updateSessionTracking(status:string)
+  {
+      let payload = {
+          pstid: globalState.pstid,
+          sessionRemainingSec: globalState.sessionRemainingSec,
+          status:status,
+      }
+      sessionTrackingApi.updateSessionTracking(payload)  //we are updating on the fly, no need to wait for response
 
   }
 
   function doStartTimer()
   {
     // Start the timer
-    globalState.running = true
+    globalState.running = true;
+    updateSessionTracking('running');
 
     // Clear any existing interval
     if (globalState.interval) {
@@ -70,11 +73,7 @@ export function useGlobalTimer() {
 
         if(globalState.sessionRemainingSec % 15===0)
         {
-          let payload = {
-            pstid: globalState.pstid,
-            sessionRemainingSec: globalState.sessionRemainingSec,
-          }
-          sessionTrackingApi.updateSessionTracking(payload)  //we are updating on the fly, no need to wait for response
+          updateSessionTracking('running');
         }
 
       }
@@ -82,8 +81,6 @@ export function useGlobalTimer() {
 
     }, 1000)
   }
-
-
 
   const timerOn = async (sessionNumber: number) => {
 
@@ -137,6 +134,7 @@ export function useGlobalTimer() {
         let listSessions = await updateSession({
           pstid: globalState.pstid,
           sessionRemainingSec: globalState.sessionRemainingSec,
+            status:'paused'
         })
         //use setter to make sure we handle day change correctly
         setSessions(listSessions)
@@ -164,6 +162,7 @@ export function useGlobalTimer() {
         let listSessions = await updateSession({
           pstid: globalState.pstid,
           sessionRemainingSec: 0, // Timer completed - set to 0 sec
+            status:'completed'
         })
         //use setter to make sure we handle day change correctly
         setSessions(listSessions)
@@ -208,7 +207,8 @@ export function useGlobalTimer() {
     hasActiveSession,
 
     // Methods
-    initializeTimer,
     toggleTimer,
+    timerOn,
+    timerOff,
   }
 }

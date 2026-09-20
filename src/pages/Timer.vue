@@ -23,8 +23,9 @@ const {
   isRunning,
   sessionRemainingSec,
   sessionMaxSec,
-  initializeTimer,
   toggleTimer,
+    timerOn,
+    timerOff,
 } = useGlobalTimer()
 
 
@@ -40,7 +41,19 @@ const fetchAndInitializeTimer = async () => {
 
    let trackingSession = await sessionTrackingApi.getSessionTracking(pecid,pstid)
 
-    if (trackingSession) initializeTimer(trackingSession)
+    if (trackingSession)
+    {
+      globalState.pstid = trackingSession.pstid
+      globalState.sessionMaxSec = trackingSession.sessionMaxSec
+      globalState.sessionNumber = trackingSession.sessionNumber || null
+      globalState.sessionRemainingSec = Math.round(trackingSession.sessionRemainingSec)
+      if(trackingSession.status==='running')
+      {
+        await timerOn(trackingSession.sessionNumber)
+      }
+      else  await timerOff()
+
+    }
 
   } catch (error) {
     console.error('Failed to fetch protocol agenda in ProtocolDetail:', error)
@@ -59,7 +72,6 @@ const steps = ref([
   { id: 2, label: 'Placer les électrodes', done: true },
   { id: 3, label: `Lancer la séance TENS – ${sessionDurationMinutes.value} min`, done: true },
 ])
-const lastElapsed = ref(0)
 
 watch(sessionDurationMinutes, () => {
   steps.value[2].label = `Lancer la séance TENS – ${sessionDurationMinutes.value} min`

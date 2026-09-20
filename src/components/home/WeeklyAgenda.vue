@@ -66,7 +66,7 @@ const currentWeekForms = computed(() => {
 })
 
 
-const fetchCompletedForms = async () => {
+const initCompletedForms = async () => {
   try {
 
     const patientId = user.value.uid
@@ -81,20 +81,17 @@ const fetchCompletedForms = async () => {
         : null
 
     if (currentWeekFormSubmissions && currentWeekFormSubmissions.forms) {
-      completedForms.value = currentWeekFormSubmissions.forms
+      return currentWeekFormSubmissions.forms
           .filter((f: any) => f.submissions && f.submissions.length > 0)
           .map((f: any) => String(f.formType).toUpperCase())
     } else {
-      completedForms.value = []
+      return []
     }
   } catch (e) {
     console.error('Failed to fetch completed forms', e)
   }
 }
+completedForms.value = await initCompletedForms();
 
-
-onMounted(() => {
-  fetchCompletedForms()
-})
 
 </script>

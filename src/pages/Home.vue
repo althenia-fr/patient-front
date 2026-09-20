@@ -12,7 +12,10 @@ import ProtocolProgress from "@/components/home/ProtocolProgress.vue";
 
     <SessionList />
 
-    <WeeklyAgenda />
+    <Suspense>
+      <WeeklyAgenda />
+    </Suspense>
+
 
     <ProtocolProgress />
 
