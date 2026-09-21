@@ -43,21 +43,3 @@ export function getResults(): QuestionnaireResult[] {
   }
 }
 
-export function getResultsByWeek(week: number): QuestionnaireResult[] {
-  return getResults().filter(r => r.week === week).sort((a, b) => a.timestamp - b.timestamp)
-}
-
-export function getResultsByQuestionnaire(questionnaireName: string): QuestionnaireResult[] {
-  return getResults().filter(r => r.questionnaireName === questionnaireName).sort((a, b) => a.timestamp - b.timestamp)
-}
-
-export function getLatestResultByWeekAndQuestionnaire(week: number, questionnaireName: string): QuestionnaireResult | null {
-  const results = getResults()
-    .filter(r => r.week === week && r.questionnaireName === questionnaireName)
-    .sort((a, b) => b.timestamp - a.timestamp)
-  return results.length > 0 ? results[0] : null
-}
-
-export function clearResults() {
-  localStorage.removeItem(RESULTS_KEY)
-}

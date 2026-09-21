@@ -30,5 +30,6 @@ export const API_ENDPOINTS = {
 export const STORAGE_KEYS = {
   STIMEO_USER: 'stimeo_user',
   STIMEO_PROTOCOL : 'stimeo_protocol',
-  STIMEO_SESSIONS : 'stimeo_sessions'
+  STIMEO_SESSIONS : 'stimeo_sessions',
+  STIMEO_FORMS : 'stimeo_forms',
 } as const

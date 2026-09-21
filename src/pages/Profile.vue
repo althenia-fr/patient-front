@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, watch } from 'vue'
+import {computed, ref, watch} from 'vue'
 import { getAttestations, getMethod, setMethod } from '@/utils/caution'
 import {useRouter} from "vue-router";
 import {wrapLocalStorage} from "@/services/storage.service.ts";
@@ -31,6 +31,18 @@ const attestations = ref(getAttestations())
 const selectedMethod = ref<'CB' | 'Chèque'>(getMethod())
 watch(selectedMethod, (m) => setMethod(m))
 function refreshAttestations() { attestations.value = getAttestations() }
+
+const dayOfWeekStartDate  = computed(()=>{
+  let startDate = user.value.startDate
+  if(startDate) return new Date(startDate).toLocaleDateString('fr-FR', { weekday: 'long' });
+  else return null;
+})
+
+const startDate  = computed(()=>{
+  let startDate2 = user.value.startDate
+  if(startDate2) return new Date(startDate2).toLocaleDateString('fr-FR');
+  else return null
+})
 
 function signOut() {
   localStorage.clear();
@@ -72,6 +84,13 @@ function signOut() {
         <div class="col-span-2">
           <div class="text-gray-500">Téléphone</div>
           <div class="mt-1 rounded-xl bg-brand-primary/5 px-3 py-2">{{ user.mobile }}</div>
+        </div>
+        <div class="col-span-2">
+          <div class="text-gray-500">Date de Naissance</div>
+          <div class="mt-1 rounded-xl bg-brand-primary/5 px-3 py-2">{{ new Date(user.dob).toLocaleDateString('fr-FR') }}</div>
+        </div>
+        <div class="col-span-2" v-if="dayOfWeekStartDate">
+          <div class="text-gray-500 text-justify">Votre traitement ayant commencé le <b>{{ dayOfWeekStartDate }}</b> {{ startDate }}, les semaines de traitement commencent le <b>{{ dayOfWeekStartDate }}</b></div>
         </div>
       </div>
     </div>

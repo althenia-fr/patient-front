@@ -7,6 +7,8 @@ import { getWeekInfo } from '@/utils/protocol.ts'
 import {formConfig} from "@/data/form.data.ts";
 
 import {wrapLocalStorage} from "@/services/storage.service.ts";
+import {msgModal} from "@/utils/modals/msg-modal.ts";
+import {STORAGE_KEYS} from "@/types/api.types.ts";
 const {user} = wrapLocalStorage()
 
 const router = useRouter()
@@ -94,12 +96,25 @@ const submitQuestionnaire = async () => {
 
     saveResult(formType, payload)
 
+    msgModal.show('Veuillez patienter', 'Sauvegarde en cours...', null,null);
     const response = await apiClient.post('/formSubmission/add', payload)
 
-    successMessage.value = 'Questionnaire envoyé avec succès !'
+    let formSubmissions = response.data || []
+
+    // Enregistrement dans le localStorage avec un timestamp d'expiration
+    const CACHE_TTL = 2 * 60 * 60 * 1000 // 2 heures en millisecondes
+    localStorage.setItem(STORAGE_KEYS.STIMEO_FORMS, JSON.stringify({
+      data: formSubmissions,
+      expiry: Date.now() + CACHE_TTL
+    }))
+
+    msgModal.show('Succès', 'Questionnaire envoyé avec succès !', 'OK', function(){msgModal.defaultClose();router.push({ name: 'home' }) });
+
+    /*
     setTimeout(() => {
       router.push({ name: 'home' })
-    }, 1500)
+    }, 1500)*/
+
   } catch (error: any) {
     errorMessage.value = 'Erreur d\'envoi, veuillez réessayer'
   } finally {
