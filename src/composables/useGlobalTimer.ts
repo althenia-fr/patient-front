@@ -177,7 +177,7 @@ export function useGlobalTimer() {
     globalState.pstid = null
     globalState.sessionNumber = null
 
-    let msg = "Vous venez de finir la séance.<br/><br/>Les premiers résultats mettent souvent plus d'un mois pour apparaître.<br/><br/>Persévérez sans vous décourager, la régularité paye toujours à la fin."
+    let msg = "Vous venez de finir la séance.<br/><br/>Les premiers résultats mettent souvent 6 à 8 semaines pour apparaître.<br/><br/>Les effets peuvent prendre du temps à se manifester. Restez motivé et continuez votre traitement."
     msgModal.show('Félicitation', msg, 'OK',msgModal.defaultClose);
     router.replace("/home")
 
