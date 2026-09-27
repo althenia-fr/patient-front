@@ -37,10 +37,7 @@ import {RouterLink} from "vue-router";
 import {computed, onMounted, ref} from "vue";
 import {currentWeek, getCurrentWeekForms} from "@/services/agenda.service.ts";
 import apiClient from "@/services/apiClient.ts";
-import {wrapLocalStorage} from "@/services/storage.service.ts";
 import {STORAGE_KEYS} from "@/types/api.types.ts";
-
-const {user} = wrapLocalStorage()
 
 const initDone = ref(false)
 const completedForms = ref<string[]>([])
