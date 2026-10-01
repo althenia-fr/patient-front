@@ -3,8 +3,6 @@ import type { RouteRecordRaw } from 'vue-router'
 
 
 import Splash from '@/pages/preinstall/Splash.vue'
-import Safari from '@/pages/preinstall/Safari.vue'
-import Chrome from '@/pages/preinstall/Chrome.vue'
 
 import Home from '@/pages/Home.vue'
 import Protocols from '@/pages/Protocols.vue'
@@ -35,8 +33,6 @@ const {user} = wrapLocalStorage()
 
 const routes: RouteRecordRaw[] = [
     { path: '/', name: 'splash', component: Splash, meta: { isSplash: true, requiresAuth: false } },
-    { path: '/safari', name: 'safari', component: Safari, meta: { requiresAuth: false } },
-    { path: '/chrome', name: 'chrome', component: Chrome, meta: { requiresAuth: false } },
 
     { path: '/login', name: 'login', component: Login, meta: { requiresAuth: false }  },
     { path: '/consent', name: 'consent', component: Consent, meta: { requiresAuth: false }  },

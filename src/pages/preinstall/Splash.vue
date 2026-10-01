@@ -164,7 +164,7 @@ onMounted(() => {
               class="space-y-4 text-gray-700 fade-in">
             <li class="flex gap-3">
               <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold mt-0.5">1</span>
-              <p>Ouvrez la page web depuis le navigateur <strong>Safari</strong>.</p>
+              <p>Vous lisez cette page depuis le navigateur <strong>Safari</strong> sur iPhone Apple.</p>
             </li>
             <li class="flex gap-3">
               <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold mt-0.5">2</span>
@@ -175,8 +175,8 @@ onMounted(() => {
                                                                    height="25"
                                                                    alt=""
                                                                    data-mime-type="image/svg+xml">
-                située dans la barre d'adresse, à droite.
-                <img src="/chrome1.png"
+                située dans la barre de navigation en bas de l'écran.
+                <img src="/safari1.png"
                      style="height: 30px; display: inline-block; margin-left: 5px;"/>
               </p>
             </li>
@@ -199,7 +199,7 @@ onMounted(() => {
               class="space-y-4 text-gray-700 fade-in">
             <li class="flex gap-3">
               <span class="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-sm font-bold mt-0.5">1</span>
-              <p>Ouvrez la page web depuis l'application <strong>Google Chrome</strong>.</p>
+              <p>Vous lisez cette page depuis le navigateur <strong>Google Chrome</strong> sur iPhone Apple.</p>
             </li>
             <li class="flex gap-3">
               <span class="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-sm font-bold mt-0.5">2</span>
@@ -260,7 +260,7 @@ onMounted(() => {
         <ol class="space-y-4 text-gray-700">
           <li class="flex gap-3">
             <span class="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-sm font-bold mt-0.5">1</span>
-            <p>Ouvrez la page web depuis le navigateur <strong>Google Chrome</strong>.</p>
+            <p>Vous lisez cette page depuis le navigateur <strong>Google Chrome</strong> sur Android.</p>
           </li>
           <li class="flex gap-3">
             <span class="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-sm font-bold mt-0.5">2</span>
