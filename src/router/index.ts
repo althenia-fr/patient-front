@@ -34,7 +34,7 @@ import {wrapLocalStorage} from "@/services/storage.service.ts";
 const {user} = wrapLocalStorage()
 
 const routes: RouteRecordRaw[] = [
-    { path: '/', name: 'splash', component: Splash, meta: { requiresAuth: false } },
+    { path: '/', name: 'splash', component: Splash, meta: { isSplash: true, requiresAuth: false } },
     { path: '/safari', name: 'safari', component: Safari, meta: { requiresAuth: false } },
     { path: '/chrome', name: 'chrome', component: Chrome, meta: { requiresAuth: false } },
 

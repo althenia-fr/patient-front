@@ -11,6 +11,19 @@ const requiresAuth = computed(() => {
   return route.meta?.requiresAuth
 })
 
+const isSplash = computed(() => {
+  return route.meta?.isSplash
+})
+
+
+const computedClassForMain = computed(() => {
+
+  if(isSplash.value) return "pt-safe bg-white"
+  else if(requiresAuth.value) return "pt-safe pb-[92px] pb-safe"
+  else return "pt-safe"
+
+})
+
 onMounted(() => {
   syncStorageData()
 })
@@ -19,7 +32,7 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen overflow-x-hidden overflow-y-auto bg-[#e0d8a0] text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-    <main :class="[requiresAuth ? 'pt-safe pb-[92px] pb-safe' : 'pt-safe']" class="flex flex-col sm:block">
+    <main :class="computedClassForMain" class="flex flex-col sm:block">
       <TopBar v-if="requiresAuth" />
       <router-view />
     </main>
