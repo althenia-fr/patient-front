@@ -36,7 +36,7 @@ const fetchCompletedForms = async () => {
 
     const patientId = user.value.uid
 
-    const response = await apiClient.get('/formSubmission/list', {
+    const response = await apiClient.get('/patient/survey/list', {
       params: { patientId }
     })
     const apiData = response.data?.data || response.data || []

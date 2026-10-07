@@ -634,7 +634,7 @@ const saveDayData = async () => {
       }
     }
 
-    await apiClient.post('/formSubmission/add', payload)
+    await apiClient.post('/patient/survey/add', payload)
 
     // Save to local results
     if (currentDay.value) {

@@ -97,7 +97,7 @@ const submitQuestionnaire = async () => {
     saveResult(formType, payload)
 
     msgModal.show('Veuillez patienter', 'Sauvegarde en cours...', null,null);
-    const response = await apiClient.post('/formSubmission/add', payload)
+    const response = await apiClient.post('/patient/survey/add', payload)
 
     let formSubmissions = response.data || []
 

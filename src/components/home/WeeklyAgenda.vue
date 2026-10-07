@@ -85,7 +85,7 @@ const initCompletedForms = async () => {
 
     // 2. Appel API si aucun cache valide n'est trouvé
     if (!formSubmissions || formSubmissions.length === 0) {
-      const response = await apiClient.get('/formSubmission/list')
+      const response = await apiClient.get('/patient/survey/list')
       formSubmissions = response.data || []
 
       // Enregistrement dans le localStorage avec un timestamp d'expiration

@@ -20,10 +20,10 @@ export const API_ENDPOINTS = {
     GET_KPI: '/patient/protocol/kpi',
   },
   SESSION_TRACKING: {
-    LIST_SESSIONS: '/patient/sessionTracking/list',
-    GET_SESSION: '/patient/sessionTracking/get',
-    CREATE_SESSION: '/patient/sessionTracking/create',
-    UPDATE_SESSION: '/patient/sessionTracking/update',
+    LIST_SESSIONS: '/patient/session/list',
+    GET_SESSION: '/patient/session/get',
+    CREATE_SESSION: '/patient/session/create',
+    UPDATE_SESSION: '/patient/session/update',
   },
 } as const
 

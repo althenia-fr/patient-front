@@ -27,6 +27,12 @@ import ProtocolResults from '@/pages/ProtocolResults.vue'
 //import Satisfaction from '@/pages/forms/Satisfaction.vue'
 //import Evolution from '@/pages/forms/Evolution.vue'
 import Form from '@/pages/Form.vue'
+import Miction from '@/pages/mictionnel/Miction.vue'
+import Leak from '@/pages/mictionnel/Leak.vue'
+import Drink from '@/pages/mictionnel/Drink.vue'
+import Protect from '@/pages/mictionnel/Protect.vue'
+import History from '@/pages/mictionnel/History.vue'
+
 
 import {wrapLocalStorage} from "@/services/storage.service.ts";
 const {user} = wrapLocalStorage()
@@ -47,7 +53,13 @@ const routes: RouteRecordRaw[] = [
     { path: '/usp', name: 'usp', component: Form, meta: { requiresAuth: true } },
     { path: '/pgi', name: 'pgi', component: Form, meta: { requiresAuth: true } },
     { path: '/satisfaction', name: 'satisfaction', component: Form, meta: { requiresAuth: true } },
-    { path: '/evolution', name: 'evolution', component: Form, meta: { requiresAuth: true } },
+  { path: '/evolution', name: 'evolution', component: Form, meta: { requiresAuth: true } },
+    { path: '/miction', name: 'miction', component: Miction, meta: { requiresAuth: true } },
+    { path: '/leak', name: 'leak', component: Leak, meta: { requiresAuth: true } },
+    { path: '/drink', name: 'drink', component: Drink, meta: { requiresAuth: true } },
+    { path: '/protect', name: 'protect', component: Protect, meta: { requiresAuth: true } },
+    { path: '/history', name: 'history', component: History, meta: { requiresAuth: true } },
+
     { path: '/questionnaire-results', name: 'questionnaire-results', component: QuestionnaireResults, meta: { requiresAuth: true } },
     { path: '/chart-results', name: 'chart-results', component: ChartResults, meta: { requiresAuth: true } },
     { path: '/mictionnel', name: 'mictionnel', component: MictionnelCalendar, meta: { requiresAuth: true } },

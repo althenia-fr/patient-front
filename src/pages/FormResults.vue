@@ -36,7 +36,7 @@ async function refreshResults() {
   try {
     const patientId = user.value.uid
 
-    const response = await apiClient.get('/formSubmission/list', {
+    const response = await apiClient.get('/patient/survey/list', {
       params: { patientId }
     })
 

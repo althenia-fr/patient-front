@@ -3,6 +3,7 @@
 import SessionList from "@/components/home/SessionList.vue";
 import WeeklyAgenda from "@/components/home/WeeklyAgenda.vue";
 import ProtocolProgress from "@/components/home/ProtocolProgress.vue";
+import MictionDashboard from "@/components/home/MictionDashboard.vue";
 
 
 </script>
@@ -13,6 +14,8 @@ import ProtocolProgress from "@/components/home/ProtocolProgress.vue";
     <SessionList />
 
     <WeeklyAgenda />
+
+    <MictionDashboard />
 
     <ProtocolProgress />
 
