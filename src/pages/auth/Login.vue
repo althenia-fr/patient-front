@@ -3,6 +3,8 @@ import {ref, onMounted, watch} from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { api } from '@/services/api'
 import {wrapLocalStorage,syncStorageData} from "@/services/storage.service.ts";
+import apiClient from "@/services/apiClient.ts";
+import {prettyPrintErrorMsg} from "@/utils/apiErrorHandler.ts";
 const {user, setUser} = wrapLocalStorage()
 
 const router = useRouter()
@@ -29,21 +31,29 @@ async function submit(e: Event) {
   error.value = ''
   loading.value = true
   try {
-    let loginUser = await api.login({
+
+    let data = {
       mobile: mobile.value,
       year: year.value,
       month: month.value,
       day: day.value,
       app:'patient'
-    })
-    setUser(loginUser)
+    }
+
+    let loginUserResponse = await apiClient.post('/patient/login', data)
+
+    setUser(loginUserResponse)
     await syncStorageData()
     const redirect = (route.query.redirect as string) || '/home'
     router.replace(redirect)
+
   } catch (err: any) {
 
-      if(err.message==='INVALID_CREDENTIALS') error.value = 'Mauvais identifiants'
-      else error.value = err?.message || 'Échec de connexion'
+    let msg = prettyPrintErrorMsg(err.response)
+
+    if(msg==='INVALID_CREDENTIALS') error.value = 'Mauvais identifiants'
+    else if(msg?.indexOf('PEC_NOT_FOUND')>-1) error.value = "Il n'y a pas de prise en charge pour ce patient"
+    else error.value = msg || 'Échec de connexion'
 
   } finally {
     loading.value = false
