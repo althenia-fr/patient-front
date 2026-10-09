@@ -35,7 +35,7 @@
 import {formIdToDisplayName, formIdToRouteName} from "@/types/protocol.types.ts";
 import {RouterLink} from "vue-router";
 import {computed, onMounted, ref} from "vue";
-import {currentWeek, getCurrentWeekForms} from "@/services/agenda.service.ts";
+import {currentWeek, getAgendaForCurrentWeek} from "@/services/agenda.service.ts";
 import apiClient from "@/services/apiClient.ts";
 import {STORAGE_KEYS} from "@/types/api.types.ts";
 
@@ -43,19 +43,20 @@ const initDone = ref(false)
 const completedForms = ref<string[]>([])
 
 const currentWeekForms = computed(() => {
-  let res = getCurrentWeekForms(currentWeek.value)
+  let res = getAgendaForCurrentWeek(currentWeek.value)
 
   // Automatically hide forms that have already been submitted this week
   return res.forms?.filter((form: string) => {
     const displayName = formIdToDisplayName(form) || ''
     const upperName = displayName.toUpperCase()
 
+    if (upperName.includes('MICTION')) return false //never displayed in the weekly agenda since there is a dedicated MictionDashboard
+
     const isCompleted = completedForms.value.some(completedType => {
       if (upperName.includes('QUALIVEEN') && completedType.includes('QUALIVEEN')) return true
       if (upperName.includes('SATISFACTION') && completedType.includes('SATISFACTION')) return true
       if (upperName.includes('PGI') && completedType.includes('PGI')) return true
       if (upperName.includes('EVOLUTION') && completedType.includes('EVOLUTION') ) return true
-      if (upperName.includes('MICTION')/* && completedType.includes('MICTION')*/) return true //bugs in the MICTION survey => remove it
       if (upperName.includes('USP') && completedType.includes('USP')) return true
       return completedType === upperName
     })

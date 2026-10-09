@@ -19,7 +19,6 @@ const chartData = ref([])
 const expandedWeeks = ref<Set<number>>(new Set())
 
 import apiClient from '@/services/apiClient.ts'
-import {STORAGE_KEYS} from "@/types/api.types.ts";
 
 function normalizeFormType(type: string): string {
   const upper = String(type).toUpperCase()

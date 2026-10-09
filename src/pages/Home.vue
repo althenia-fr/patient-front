@@ -4,7 +4,13 @@ import SessionList from "@/components/home/SessionList.vue";
 import WeeklyAgenda from "@/components/home/WeeklyAgenda.vue";
 import ProtocolProgress from "@/components/home/ProtocolProgress.vue";
 import MictionDashboard from "@/components/home/MictionDashboard.vue";
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+import {ref} from "vue";
 
+const {user} = wrapLocalStorage()
+
+
+const mictionEnabled = ref(user.value.miction);
 
 </script>
 
@@ -15,7 +21,7 @@ import MictionDashboard from "@/components/home/MictionDashboard.vue";
 
     <WeeklyAgenda />
 
-    <MictionDashboard />
+    <MictionDashboard v-if="mictionEnabled"/>
 
     <ProtocolProgress />
 

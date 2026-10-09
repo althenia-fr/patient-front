@@ -4,16 +4,7 @@
 
       <!-- En-tête -->
       <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-        <h3 class="text-base font-semibold text-gray-800">Historique des saisies</h3>
-        <button
-            type="button"
-            @click="fetchHistory"
-            :disabled="isLoading"
-            class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-95 transition disabled:opacity-50"
-            title="Rafraîchir"
-        >
-          <i class="fa-solid fa-rotate text-xs" :class="{ 'animate-spin': isLoading }"></i>
-        </button>
+        <h3 class="text-base font-semibold text-gray-800">Historique</h3>
       </div>
 
       <!-- Spinner de chargement -->
@@ -67,7 +58,7 @@
           <!-- Bouton de suppression -->
           <button
               type="button"
-              @click="deleteItem(item.mid)"
+              @click="deleteItem(item)"
               :disabled="deletingId === item.mid"
               class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 active:scale-95 transition disabled:opacity-50"
               title="Supprimer cet enregistrement"
@@ -194,23 +185,27 @@ const fetchHistory = async () => {
 }
 
 // Suppression avec confirmation modal
-const deleteItem = async (mid: number | string) => {
+const deleteItem = async (item: any ) => {
+  let mid = item.mid
   msgModal.show(
-      'Confirmation',
-      'Voulez-vous vraiment supprimer cet enregistrement ?',
+      'Effacer un relevé',
+      'Voulez-vous vraiment supprimer ce relevé '+getTypeLabel(item.type)+' du '+(new Date(item.creation).toLocaleString())+' ?',
       'Supprimer',
       async () => {
         msgModal.defaultClose()
-        deletingId.value = mid
+        deletingId.value = item.mid
         try {
           await apiClient.post('/patient/miction/delete', { mid })
-          historyList.value = historyList.value.filter(item => item.mid !== mid)
+          historyList.value = historyList.value.filter(record => record.mid !== item.mid)
         } catch (error) {
           console.error('Erreur lors de la suppression :', error)
         } finally {
           deletingId.value = null
         }
-      }
+      },
+      'Annuler',
+      msgModal.defaultClose,
+      true
   )
 }
 

@@ -11,7 +11,7 @@
       </div>
       <div class="mt-2 flex items-center justify-between text-xs text-gray-500">
         <span>{{ protocolProgress.percentage }}% terminé</span>
-        <span>{{ protocolProgress.remainingWeek }} semaines restantes</span>
+        <span>{{ protocolProgress.remainingWeek-1 }} semaines restantes</span>
       </div>
     </div>
     <div class="mt-3 grid grid-cols-2 gap-3 text-sm">

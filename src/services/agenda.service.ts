@@ -1,13 +1,14 @@
 import {computed} from "vue";
 
 import {wrapLocalStorage} from "@/services/storage.service.ts";
+import {formIdToDisplayName} from "@/types/protocol.types.ts";
 const {protocol} = wrapLocalStorage()
 
 export const daysElapsed = computed(() => {
 
-  if(protocol.agenda && protocol.agenda.startDate)
+  if(protocol.value && protocol.value.startDate)
   {
-    const date = protocol.agenda.startDate
+    const date = protocol.value.startDate
     const msPerDay = 24*60*60*1000
     const startDay = new Date(new Date(date).getFullYear(), new Date(date).getMonth(), new Date(date).getDate()).getTime()
     const today = new Date();
@@ -22,9 +23,14 @@ export const currentWeek = computed(() => {
 })
 
 
-export function getCurrentWeekForms(currentWeek: number): string[]
+export function getAgendaForCurrentWeek(currentWeek: number): string[]
 {
-  if(protocol.value && protocol.value.agenda) return protocol.value.agenda.find(week => week.weekNumber === currentWeek)
+  if(protocol.value && protocol.value.agenda)
+  {
+    let weekAgenda =  protocol.value.agenda.find(week => week.weekNumber === currentWeek)
+    if(weekAgenda) return weekAgenda
+    else return []
+  }
   else return []
 }
 
