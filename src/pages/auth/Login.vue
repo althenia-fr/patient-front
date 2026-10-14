@@ -42,7 +42,7 @@ async function submit(e: Event) {
 
     let loginUserResponse = await apiClient.post('/patient/login', data)
 
-    setUser(loginUserResponse)
+    setUser(loginUserResponse.data)
     await syncStorageData()
     const redirect = (route.query.redirect as string) || '/home'
     router.replace(redirect)
