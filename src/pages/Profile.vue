@@ -2,7 +2,7 @@
 import {computed, ref} from 'vue'
 import {useRouter} from "vue-router";
 import {wrapLocalStorage} from "@/services/storage.service.ts";
-import ProfileDocuments from "@/components/profile/ProfileDocuments.vue";
+import ProfileDocuments from "@/components/profile/ProfileDocuments.vue"
 const {user} = wrapLocalStorage()
 
 const version = ref('v.'+import.meta.env.VITE_APP_VERSION || 'v.dev');

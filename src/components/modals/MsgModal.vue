@@ -35,7 +35,7 @@
   </Transition>
 </template>
 
-<script setup>
+<script setup  lang="ts">
 import { msgModal } from '@/utils/modals/msg-modal.ts';
 import {computed} from "vue";
 

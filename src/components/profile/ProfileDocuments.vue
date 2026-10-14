@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import apiClient from "@/services/apiClient.ts";
-import PreviewModal from "@/components/modals/PreviewModal.vue";
+import PreviewModal from "@/components/modals/PreviewModal.vue"; // Ajuste le chemin d'import si besoin
 
 const documentsOpen = ref(false)
 const documents = ref([])
@@ -68,15 +68,15 @@ onMounted(() => {
             <!-- Nouveau conteneur pour aligner les boutons Voir & Télécharger -->
             <div class="flex gap-2 shrink-0 ml-2">
               <button
-                  v-if="doc.previews && doc.previews.length > 0"
-                  class="btn-secondary px-3 py-1"
-                  @click="openPreview(doc)">
+                v-if="doc.previews && doc.previews.length > 0"
+                class="btn-secondary px-3 py-1"
+                @click="openPreview(doc)">
                 Voir
               </button>
 
               <button
-                  class="btn-secondary px-3 py-1"
-                  @click="openDocument(doc.docUrl)">
+                class="btn-secondary px-3 py-1"
+                @click="openDocument(doc.docUrl)">
                 Télécharger
               </button>
             </div>
@@ -92,10 +92,10 @@ onMounted(() => {
 
   <!-- Intégration de la modale de prévisualisation -->
   <PreviewModal
-      :is-open="isPreviewModalOpen"
-      :document-title="selectedDocumentTitle"
-      :previews="selectedPreviews"
-      @close="isPreviewModalOpen = false"
+    :is-open="isPreviewModalOpen"
+    :document-title="selectedDocumentTitle"
+    :previews="selectedPreviews"
+    @close="isPreviewModalOpen = false"
   />
 
 </template>

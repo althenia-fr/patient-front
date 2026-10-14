@@ -1,30 +1,30 @@
 <template>
   <Transition name="modal-fade">
-    <div v-if="isOpen" class="modal-overlay">
+    <!-- On ajoute la classe "preview-overlay" pour contrôler l'espacement externe -->
+    <div v-if="isOpen" class="modal-overlay preview-overlay">
 
-      <div class="modal-content" style="max-width: 600px; width: 90%;">
+      <div class="modal-content custom-modal">
         <h3>{{ documentTitle || 'Aperçu du document' }}</h3>
 
         <div class="modal-message preview-container">
-          <!-- Image de prévisualisation -->
-          <div class="image-wrapper">
+
+          <div class="image-scroll-wrapper">
             <img
-                v-if="currentPreview"
-                :src="currentPreview.previewUrl"
-                alt="Aperçu de la page"
-                class="preview-image"
+              v-if="currentPreview"
+              :src="currentPreview.previewUrl"
+              alt="Aperçu de la page"
+              class="preview-image"
             />
             <div v-else class="text-gray-500 py-10 text-center">
               Aperçu indisponible.
             </div>
           </div>
 
-          <!-- Contrôles de pagination (visibles uniquement s'il y a plus d'une page) -->
           <div v-if="totalPages > 1" class="pagination-controls">
             <button
-                @click="prevPage"
-                class="nav-btn"
-                :disabled="currentPageIndex === 0"
+              @click="prevPage"
+              class="nav-btn"
+              :disabled="currentPageIndex === 0"
             >
               <font-awesome-icon icon="fa-solid fa-chevron-left"/>
             </button>
@@ -34,9 +34,9 @@
             </span>
 
             <button
-                @click="nextPage"
-                class="nav-btn"
-                :disabled="currentPageIndex === totalPages - 1"
+              @click="nextPage"
+              class="nav-btn"
+              :disabled="currentPageIndex === totalPages - 1"
             >
               <font-awesome-icon icon="fa-solid fa-chevron-right"/>
             </button>
@@ -77,10 +77,8 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 
-// Pagination state
 const currentPageIndex = ref(0);
 
-// Computed properties
 const totalPages = computed(() => props.previews?.length || 0);
 const currentPreview = computed(() => {
   if (totalPages.value > 0) {
@@ -89,7 +87,6 @@ const currentPreview = computed(() => {
   return null;
 });
 
-// Navigation functions
 function nextPage() {
   if (currentPageIndex.value < totalPages.value - 1) {
     currentPageIndex.value++;
@@ -102,9 +99,8 @@ function prevPage() {
   }
 }
 
-// Close and reset modal
 function close() {
-  currentPageIndex.value = 0; // Remise à zéro pour la prochaine ouverture
+  currentPageIndex.value = 0;
   emit('close');
 }
 </script>
@@ -113,47 +109,64 @@ function close() {
 @import '@/assets/modal.css';
 @import '@/assets/views.css';
 
+/* 1. L'overlay gère l'espacement avec les bords de l'écran */
+.preview-overlay {
+  box-sizing: border-box;
+  padding-bottom: 100px !important; /* Protège l'espace de ton footer de navigation */
+  padding-top: 30px !important; /* Marge de respiration en haut */
+}
+
+/* 2. La modale prend tout l'espace restant */
+.custom-modal {
+  width: 80vw !important;
+  max-width: 1200px !important;
+  height: 100%; /* S'étire au maximum de l'espace autorisé par l'overlay */
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 1rem;
+}
+
 .preview-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 1rem;
   margin-top: 1rem;
+  flex-grow: 1;
+  min-height: 0;
 }
 
-.image-wrapper {
+.image-scroll-wrapper {
   width: 100%;
-  min-height: 200px;
-  max-height: 60vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid var(--stimeo-border, #e2e8f0);
+  border-radius: 6px;
+  background-color: #ffffff;
 }
 
 .preview-image {
-  max-width: 100%;
-  max-height: 60vh;
-  object-fit: contain;
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .pagination-controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.5rem;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .nav-btn {
   background-color: white;
   border: 1px solid #cbd5e1;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -175,12 +188,13 @@ function close() {
 
 .page-indicator {
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #64748b;
 }
 
-/* Surcharge optionnelle si nécessaire pour la modal-actions héritée */
 .modal-actions {
-  justify-content: center; /* Centrer le bouton OK si souhaité */
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0;
 }
 </style>
