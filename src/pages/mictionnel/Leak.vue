@@ -128,6 +128,7 @@ import { ref, reactive, computed, h } from 'vue'
 import {getCurrentTime, submitReport} from "@/utils/miction.ts";
 import {msgModal} from "@/utils/modals/msg-modal.ts";
 import router from "@/router";
+import {getWeekInfo} from "@/utils/protocol.ts";
 
 const isSubmitting = ref(false)
 const time = ref(getCurrentTime());
@@ -219,9 +220,13 @@ const submitForm = async () => {
   isSubmitting.value = true
   try {
 
+      let weekInfo = getWeekInfo()
+      let week = weekInfo && weekInfo.current?weekInfo.current:1
+
     let formObj = {...form}
     const payload = {
       type: 'leak',
+        week: week,
       time: time.value,
       payload: formObj,
     }

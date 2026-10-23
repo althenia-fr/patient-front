@@ -21,12 +21,17 @@ const title = formConfig[formType].title
 const introduction = formConfig[formType].introduction
 
 interface QuestionnaireData {
-  answers: []
+  answers: [],
+  questions: []
 }
 
 const screenOrder = []
 screenOrder.push('accueil')
-for(let i=0;i<questions.length;i++) screenOrder.push('q'+(i+1))
+for(let i=0;i<questions.length;i++)
+{
+  let question = questions[i]
+  screenOrder.push(question.id)
+}
 screenOrder.push('results')
 
 
@@ -35,7 +40,8 @@ const currentScreen = ref(screenOrder[0])
 console.log('currentScreen:'+currentScreen.value)
 
 const data = ref<QuestionnaireData>({
-  answers: []
+  answers: [],
+  questions: questions,
 })
 
 const loading = ref(false)
@@ -55,22 +61,28 @@ const goToScreen = (screen: string) => {
   errorMessage.value = ''
   successMessage.value = ''
   currentScreen.value = screen
-  if(currentScreen.value.startsWith('q')) qIdx.value = +currentScreen.value.substr(1) - 1
+
+  for(let i=0;i<screenOrder.length;i++)
+  {
+    let screenIter = screenOrder[i]
+    if(screenIter===screen) qIdx.value = i-1
+  }
+
+  //if(currentScreen.value.startsWith('q')) qIdx.value = +currentScreen.value.substr(1) - 1
 }
 
 const goPrev = () => {
   const idx = screenOrder.indexOf(currentScreen.value)
-  if (idx > 0) {
-    goToScreen(screenOrder[idx - 1])
-  }
+  if (idx > 0) goToScreen(screenOrder[idx - 1])
+}
+
+const goStart = () => {
+  goToScreen(screenOrder[1])
 }
 
 const goNext = () => {
   const idx = screenOrder.indexOf(currentScreen.value)
-  if (idx < screenOrder.length - 1) {
-    if(currentScreen.value && currentScreen.value.startsWith('q') && data.value.answers[idx-1]==null) return; //1st question is q1 but first answer is answers[0]
-    else goToScreen(screenOrder[idx + 1])
-  }
+  if (idx < screenOrder.length - 1) goToScreen(screenOrder[idx + 1])
 }
 
 
@@ -92,6 +104,7 @@ const submitQuestionnaire = async () => {
       formType: formType,
       week: week,
       answers: data.value.answers,
+      questions: data.value.questions,
     }
 
     saveResult(formType, payload)
@@ -116,6 +129,7 @@ const submitQuestionnaire = async () => {
     }, 1500)*/
 
   } catch (error: any) {
+    msgModal.show('Erreur', "Réssayer ou contacter l'aide si le système persiste", 'OK', msgModal.defaultClose,null,null,true);
     errorMessage.value = 'Erreur d\'envoi, veuillez réessayer'
   } finally {
     loading.value = false
@@ -137,7 +151,7 @@ const submitQuestionnaire = async () => {
 
         <div class="pb-24">
           <button
-              @click="goNext"
+              @click="goStart"
               class="w-full rounded-full bg-brand-primary text-white font-semibold py-3 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             Commencer
@@ -147,7 +161,7 @@ const submitQuestionnaire = async () => {
       </div>
 
       <!-- Questions Screen -->
-      <div v-if="currentScreen.startsWith('q')" class="space-y-6">
+      <div v-if="currentScreen!=='accueil' && currentScreen!='results'" class="space-y-6">
         <h2 class="text-xl font-extrabold">Question {{qIdx+1}} / {{questions.length}}</h2>
 
         <div class="space-y-3 rounded-lg border border-gray-100 bg-white p-4 shadow-soft">
@@ -169,7 +183,7 @@ const submitQuestionnaire = async () => {
       </div>
 
       <!-- Results & Submission Screen -->
-      <div v-if="currentScreen === screenOrder[screenOrder.length-1]" class="space-y-4">
+      <div v-if="currentScreen === 'results'" class="space-y-4">
         <h2 class="text-lg font-extrabold">Vérifier avant envoi</h2>
 
         <div v-if="errorMessage" class="rounded-lg bg-red-50 border border-red-200 p-3">

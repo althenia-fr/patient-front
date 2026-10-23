@@ -21,6 +21,26 @@ export let formConfig = {
             }
         ]
     },
+  pgi: {
+    title: 'Questionnaire PG-I',
+    introduction: "Ce questionnaire évalue l'évolution de votre état.",
+    questions: [
+      {
+        id: 'q1',
+        text: "Depuis que vous avez commencé le traitement, comment décririez-vous votre état maintenant par rapport à avant ?",
+        short_text: "Evolution",
+        options: [
+          'Très grandement mieux',
+          'Grandement mieux',
+          'Un peu mieux',
+          'Pas de changement',
+          'Un peu plus mal',
+          'Grandement plus mal',
+          'Très grandement plus mal',
+        ],
+      },
+    ]
+  },
     usp: {
         title: 'Questionnaire USP',
         introduction: "Les questions suivantes portent sur l'intensité et la fréquence des symptômes urinaires que vous avez eus au cours des 4 dernières semaines.",
@@ -159,73 +179,65 @@ export let formConfig = {
             },
         ]
     },
-    pgi: {
-        title: 'Questionnaire PG-I',
-        introduction: "Ce questionnaire évalue l'évolution de votre état.",
-        questions: [
-            {
-                id: 'q1',
-                text: "Depuis que vous avez commencé le traitement, comment décririez-vous votre état maintenant par rapport à avant ?",
-                short_text: "Evolution",
-                options: [
-                    'Très grandement mieux',
-                    'Grandement mieux',
-                    'Un peu mieux',
-                    'Pas de changement',
-                    'Un peu plus mal',
-                    'Grandement plus mal',
-                    'Très grandement plus mal',
-                ],
-            },
-        ]
-    },
     evolution: {
         title: 'Évolution Thérapeutique',
         introduction: "Ce questionnaire permet d'évaluer l'évolution de vos troubles urinaires et l'efficacité de votre traitement." +
             "<br/><br/>Vocabulaire médical: Dans la suite, on utilise le mot <b>Miction</b> qui est le nom médical pour <b>Uriner</b>; <b>Urgenturie</b> désigne un besoin soudain et intense d'uriner",
         questions: [
+          {
+            id: 'md',
+            text: 'Nombre de mictions diurnes',
+            short_text: "Mictions diurnes",
+            options: ['0-2', '3-5', '6-8', '9+'],
+          },
+          {
+            id: 'mn',
+            text: 'Nombre de mictions nocturnes',
+            short_text: "Mictions nocturnes",
+            options: ['0-2', '3-5', '6-8', '9+'],
+          },
             {
-                id: 'q1',
-                text: "Nombre d'urgenturies",
-                short_text: "Urgenturies",
-                options: ['0', '5', '10', '15', '20'],
+                id: 'ud',
+                text: "Nombre d'urgenturies diurnes",
+                short_text: "Urgenturies diurnes",
+              options: ['0-2', '3-5', '6-8', '9+'],
             },
+          {
+            id: 'un',
+            text: "Nombre d'urgenturies nocturnes",
+            short_text: "Urgenturies nocturnes",
+            options: ['0-2', '3-5', '6-8', '9+'],
+          },
             {
-                id: 'q2',
-                text: 'Nombre de mictions nocturnes',
-                short_text: "Mictions nocturnes",
-                options: ['0', '2', '4', '6', '8', '10'],
-            },
-            {
-                id: 'q3',
+                id: 'f',
                 text: 'Nombre de fuites urinaires',
                 short_text: "Fuites urinaires",
-                options: ['0', '2', '4', '6', '8', '10'],
+              options: ['0-2', '3-5', '6-8', '9+'],
             },
             {
-                id: 'q4',
+                id: 'dm',
                 text: 'Douleur pelvienne/périnéale pendant la miction',
                 short_text: "Douleur pendant miction",
                 options: ['Aucune', 'Légère -', 'Légère', 'Légère +', 'Modérée -', 'Modérée', 'Modérée +', 'Intense', 'Sévère', 'Insupportable'],
             },
             {
-                id: 'q5',
+                id: 'dh',
                 text: 'Douleur pelvienne/périnéale hors miction',
                 short_text: "Douleur hors miction",
                 options: ['Aucune', 'Légère -', 'Légère', 'Légère +', 'Modérée -', 'Modérée', 'Modérée +', 'Intense', 'Sévère', 'Insupportable'],
             },
             {
-                id: 'q6',
+                id: 'p',
                 text: 'État des Protections',
                 short_text: "Protections",
                 options: ['Sèc', 'Humide', 'Saturé'],
-            },
+            },/*
             {
                 id: 'q7',
                 text: 'Évolution de l\'état des Protections',
                 short_text: "Evolution protections",
                 options: ['Amélioration', 'Stable', 'Dégradation'],
-            }
+            }*/
         ]
     }
 }
