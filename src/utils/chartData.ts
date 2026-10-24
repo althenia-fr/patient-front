@@ -5,7 +5,6 @@ export interface ChartDataPoint {
   usp?: number
   qualiveen?: number
   pgi?: number
-  satisfaction?: number
   evolutionData?: EvolutionMetrics
 }
 
@@ -100,16 +99,6 @@ export function getChartDataByWeek(providedResults?: QuestionnaireResult[]): Cha
         const pgiScore = result.data.pgiScore
         if (pgiScore !== undefined) {
           dataPoint.pgi = pgiScore
-        }
-        break
-      case 'Satisfaction':
-        // Satisfaction score 0-6, normaliser à 0-7
-        const satisfaction = result.data.satisfaction
-        if (satisfaction !== undefined) {
-          dataPoint.satisfaction = satisfaction
-        } else if (result.data.satisfaction !== undefined) {
-          // Fallback: si satisfaction n'existe pas, calculer à partir de l'index
-          dataPoint.satisfaction = 6 - result.data.satisfaction
         }
         break
       case 'Evolution Thérapeutique':

@@ -18,7 +18,6 @@ Dans `src/pages/`:
 - [ ] Qualiveen.vue
 - [ ] USP.vue
 - [ ] PG_I.vue
-- [ ] Satisfaction.vue
 - [ ] Evolution.vue
 - [ ] QuestionnaireResults.vue
 - [ ] ChartResults.vue

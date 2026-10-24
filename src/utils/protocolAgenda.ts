@@ -51,9 +51,8 @@ export function getProtocolAgenda(protocolDuration?: number): AgendaItem[] {
       questionnaires.push('Qualiveen')
     }
 
-    // Weeks [4, 8, 12, 16, 20, 24]: Satisfaction + PG-I
+    // Weeks [4, 8, 12, 16, 20, 24]:  PG-I
     if ([4, 8, 12, 16, 20, 24].includes(week)) {
-      questionnaires.push('Satisfaction')
       questionnaires.push('PG-I')
     }
 
@@ -67,11 +66,10 @@ export function getProtocolAgenda(protocolDuration?: number): AgendaItem[] {
       questionnaires.push('Calendrier Mictionnel')
     }
 
-    // Final week (S-1): USP + Qualiveen + Satisfaction + PG-I (if not already added)
+    // Final week (S-1): USP + Qualiveen + PG-I (if not already added)
     if (week === duration - 1) {
       if (!questionnaires.includes('USP')) questionnaires.push('USP')
       if (!questionnaires.includes('Qualiveen')) questionnaires.push('Qualiveen')
-      if (!questionnaires.includes('Satisfaction')) questionnaires.push('Satisfaction')
       if (!questionnaires.includes('PG-I')) questionnaires.push('PG-I')
     }
 

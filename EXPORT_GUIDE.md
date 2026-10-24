@@ -8,7 +8,7 @@ Ce guide explique comment exporter les pages `/protocols` et toutes ses pages li
 - ✅ `/protocols` (liste des protocoles)
 - ✅ `/protocols/:id` (détail & session TENS)
 - ✅ `/protocols-results` (résultats des sessions)
-- ✅ 5 questionnaires (Qualiveen, USP, PG-I, Satisfaction, Évolution Thérapeutique)
+- ✅ questionnaires (Qualiveen, USP, PG-I, Évolution Thérapeutique)
 - ✅ `/questionnaire-results` (résultats agrégés)
 - ✅ `/chart-results` (graphiques)
 - ✅ `/mictionnel` & `/mictionnel-results` (calendrier et résultats)
@@ -49,7 +49,6 @@ src/pages/
 ├── Qualiveen.vue                 (questionnaire)
 ├── USP.vue                       (questionnaire)
 ├── PG_I.vue                      (questionnaire)
-├── Satisfaction.vue              (questionnaire)
 ├── Evolution.vue                 (questionnaire)
 ├── QuestionnaireResults.vue      (résultats)
 ├── ChartResults.vue              (graphiques)
@@ -119,7 +118,6 @@ import ProtocolResults from '@/pages/ProtocolResults.vue'
 import Qualiveen from '@/pages/Qualiveen.vue'
 import USP from '@/pages/USP.vue'
 import PGI from '@/pages/PG_I.vue'
-import Satisfaction from '@/pages/Satisfaction.vue'
 import Evolution from '@/pages/Evolution.vue'
 import QuestionnaireResults from '@/pages/QuestionnaireResults.vue'
 import ChartResults from '@/pages/ChartResults.vue'
@@ -138,7 +136,6 @@ const routes: RouteRecordRaw[] = [
   { path: '/qualiveen', name: 'qualiveen', component: Qualiveen, meta: { requiresAuth: true } },
   { path: '/usp', name: 'usp', component: USP, meta: { requiresAuth: true } },
   { path: '/pgi', name: 'pgi', component: PGI, meta: { requiresAuth: true } },
-  { path: '/satisfaction', name: 'satisfaction', component: Satisfaction, meta: { requiresAuth: true } },
   { path: '/evolution', name: 'evolution', component: EvaluationEvolution, meta: { requiresAuth: true } },
   { path: '/questionnaire-results', name: 'questionnaire-results', component: QuestionnaireResults, meta: { requiresAuth: true } },
   { path: '/chart-results', name: 'chart-results', component: ChartResults, meta: { requiresAuth: true } },

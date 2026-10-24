@@ -1,26 +1,6 @@
 
 
 export let formConfig = {
-    satisfaction: {
-        title: 'Questionnaire Satisfaction',
-        introduction: "Ce questionnaire évalue les effets perçus de la thérapie par neurostimulation.",
-        questions: [
-            {
-                id: 'q1',
-                text: "Comment évaluez-vous l'évolution de vos troubles urinaires depuis la mise en place de la thérapie par neurostimulation ?",
-                short_text: "Evolution des troubles",
-                options: [
-                    'Très grandement améliorés',
-                    'Grandement améliorés',
-                    'Légèrement améliorés',
-                    'Aucun changement',
-                    'Légèrement aggravés',
-                    'Grandement aggravés',
-                    'Très grandement aggravés',
-                ],
-            }
-        ]
-    },
   pgi: {
     title: 'Questionnaire PG-I',
     introduction: "Ce questionnaire évalue l'évolution de votre état.",

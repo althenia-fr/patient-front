@@ -26,7 +26,6 @@ export const formIdToRouteName = (formId: string): string => {
   const routeMap: Record<string, string> = {
     'USP': 'usp',
     'QUALIVEEN': 'qualiveen',
-    'SATISFACTION': 'satisfaction',
     'PGI': 'pgi',
     'EVOLUTION': 'evolution',
     'MICTION': 'mictionnel'
@@ -39,7 +38,6 @@ export const formIdToDisplayName = (formId: string): string => {
   const nameMap: Record<string, string> = {
     'USP': 'USP',
     'QUALIVEEN': 'Qualiveen',
-    'SATISFACTION': 'Satisfaction',
     'PGI': 'PG-I',
     'EVOLUTION_THERAPEUTIQUE': 'Évolution thérapeutique',
     'VOIDING_CALENDAR': 'Calendrier mictionnel'

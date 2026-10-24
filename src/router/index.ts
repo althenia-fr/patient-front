@@ -24,7 +24,6 @@ import ProtocolResults from '@/pages/ProtocolResults.vue'
 //import Qualiveen from '@/pages/forms/Qualiveen.vue'
 //import USP from '@/pages/forms/USP.vue'
 //import PGI from '@/pages/forms/PG_I.vue'
-//import Satisfaction from '@/pages/forms/Satisfaction.vue'
 //import Evolution from '@/pages/forms/Evolution.vue'
 import Form from '@/pages/Form.vue'
 import Miction from '@/pages/mictionnel/Miction.vue'
@@ -52,7 +51,6 @@ const routes: RouteRecordRaw[] = [
     { path: '/qualiveen', name: 'qualiveen', component: Form, meta: { requiresAuth: true } },
     { path: '/usp', name: 'usp', component: Form, meta: { requiresAuth: true } },
     { path: '/pgi', name: 'pgi', component: Form, meta: { requiresAuth: true } },
-    { path: '/satisfaction', name: 'satisfaction', component: Form, meta: { requiresAuth: true } },
   { path: '/evolution', name: 'evolution', component: Form, meta: { requiresAuth: true } },
     { path: '/miction', name: 'miction', component: Miction, meta: { requiresAuth: true } },
     { path: '/leak', name: 'leak', component: Leak, meta: { requiresAuth: true } },

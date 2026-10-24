@@ -33,7 +33,6 @@ const visibleDatasets = ref({
   usp: true,
   qualiveen: true,
   pgi: true,
-  satisfaction: true,
   evolution: true,
 })
 
@@ -189,7 +188,6 @@ function getCombinedChartData() {
   const hasUsp = chartData.value.some((d) => d.usp !== undefined)
   const hasQualiveen = chartData.value.some((d) => d.qualiveen !== undefined)
   const hasPgi = chartData.value.some((d) => d.pgi !== undefined)
-  const hasSatisfaction = chartData.value.some((d) => d.satisfaction !== undefined)
 
   const datasets: any[] = []
 
@@ -228,20 +226,6 @@ function getCombinedChartData() {
       data: chartData.value.map((d) => d.pgi ?? null),
       borderColor: '#8B5CF6',
       backgroundColor: 'rgba(139, 92, 246, 0.1)',
-      borderWidth: 2,
-      tension: 0.4,
-      fill: false,
-      spanGaps: true,
-      type: 'line',
-    })
-  }
-
-  if (hasSatisfaction && visibleDatasets.value.satisfaction) {
-    datasets.push({
-      label: 'Satisfaction',
-      data: chartData.value.map((d) => d.satisfaction ?? null),
-      borderColor: '#10B981',
-      backgroundColor: 'rgba(16, 185, 129, 0.1)',
       borderWidth: 2,
       tension: 0.4,
       fill: false,
@@ -332,14 +316,6 @@ onMounted(() => {
             class="w-4 h-4 rounded border-gray-300 accent-purple-600"
           />
           <span class="text-sm text-gray-700 font-medium">PG-I</span>
-        </label>
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input
-            v-model="visibleDatasets.satisfaction"
-            type="checkbox"
-            class="w-4 h-4 rounded border-gray-300 accent-green-600"
-          />
-          <span class="text-sm text-gray-700 font-medium">Satisfaction</span>
         </label>
         <label class="flex items-center gap-2 cursor-pointer">
           <input

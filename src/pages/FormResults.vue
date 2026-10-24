@@ -23,7 +23,6 @@ import apiClient from '@/services/apiClient.ts'
 function normalizeFormType(type: string): string {
   const upper = String(type).toUpperCase()
   if (upper.includes('QUALIVEEN')) return 'Qualiveen'
-  if (upper.includes('SATISFACTION')) return 'Satisfaction'
   if (upper.includes('PGI')) return 'PG-I'
   if (upper.includes('EVOLUTION')) return 'Evolution Thérapeutique'
   if (upper.includes('MICTION')) return 'Calendrier Mictionnel'
@@ -169,20 +168,6 @@ function getScoreDisplay(results: QuestionnaireResult[]): string {
   const data = result.data
 
   switch (questionnaire) {
-    case 'Satisfaction':
-      const satisfactionLevel = data.satisfaction !== undefined ? data.satisfaction : null
-      if (satisfactionLevel === null) return '—'
-      const satisfactionOptions = [
-        'Très grandement améliorés',
-        'Grandement améliorés',
-        'Légèrement améliorés',
-        'Aucun changement',
-        'Légèrement aggravés',
-        'Grandement aggravés',
-        'Très grandement aggravés',
-      ]
-      const satisfaction = data.satisfaction !== undefined ? data.satisfaction : 6 - satisfactionLevel
-      return `${satisfactionOptions[satisfactionLevel]} (${satisfaction}/6)`
 
     case 'PG-I':
       const pgiLevel = data.pgi !== undefined ? data.pgi : null
@@ -246,7 +231,6 @@ function openQuestionnaire(questionnaire: string) {
     'Qualiveen': 'qualiveen',
     'PG-I': 'pgi',
     'USP': 'usp',
-    'Satisfaction': 'satisfaction',
     'Evolution Thérapeutique': 'evolution',
   }
 

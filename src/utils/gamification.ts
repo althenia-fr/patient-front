@@ -58,7 +58,7 @@ export function getMaxPoints(weeks = 13, sessionCount = 1, evaluationFrequency: 
   // Sessions: number of sessions per day * 7 days per week * weeks
   const sessions = sessionCount * weeks * 7 * ACTION_POINTS.sessionComplete
 
-  // Questionnaires: USP, Qualiveen, Satisfaction, PG-I, Calendrier Mictionnel scheduled per protocol
+  // Questionnaires: USP, Qualiveen, PG-I, Calendrier Mictionnel scheduled per protocol
   const questionnairesCount = calculateTotalQuestionnaires(weeks, evaluationFrequency, evaluationStartWeek)
   const questionnaires = questionnairesCount * ACTION_POINTS.questionnaire
 
@@ -109,7 +109,7 @@ function calculateTotalQuestionnaires(protocolDuration: number, frequency: strin
       weekCount += 2
     }
 
-    // Weeks [4, 8, 12, 16, 20, 24]: Satisfaction + PG-I
+    // Weeks [4, 8, 12, 16, 20, 24]: PG-I
     if ([4, 8, 12, 16, 20, 24].includes(week)) {
       weekCount += 2
     }
@@ -124,7 +124,7 @@ function calculateTotalQuestionnaires(protocolDuration: number, frequency: strin
       weekCount += 1
     }
 
-    // Final week (S-1): USP + Qualiveen + Satisfaction + PG-I (if not already added)
+    // Final week (S-1): USP + Qualiveen + PG-I (if not already added)
     if (week === protocolDuration - 1) {
       if (week !== 1) {
         if (![4, 8, 12, 16, 20, 24].includes(week)) {
