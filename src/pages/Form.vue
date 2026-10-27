@@ -80,6 +80,10 @@ const goNext = () => {
   if (idx < screenOrder.length - 1) goToScreen(screenOrder[idx + 1])
 }
 
+const isCurrentAnswerSelected = computed(() => {
+  const currentAnswer = data.value.answers[qIdx.value]
+  return currentAnswer !== undefined && currentAnswer !== null
+})
 
 const submitQuestionnaire = async () => {
   if (!allAnswersProvided.value) return
@@ -198,9 +202,10 @@ const submitQuestionnaire = async () => {
         Précédent
       </button>
       <button
-        v-if="currentScreen !== screenOrder[screenOrder.length-1]"
-        @click="goNext"
-        class="flex-1 rounded-full bg-brand-primary text-white font-semibold px-3 py-3 text-sm transition"
+          v-if="currentScreen !== screenOrder[screenOrder.length-1]"
+          @click="goNext"
+          :disabled="!isCurrentAnswerSelected"
+          class="flex-1 rounded-full bg-brand-primary text-white font-semibold px-3 py-3 text-sm transition disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
       >
         Suivant
       </button>
