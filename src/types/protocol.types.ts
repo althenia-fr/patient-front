@@ -27,6 +27,7 @@ export const formIdToRouteName = (formId: string): string => {
     'USP': 'usp',
     'QUALIVEEN': 'qualiveen',
     'PGI': 'pgi',
+    'SATISFACTION': 'satisfaction',
     'EVOLUTION': 'evolution',
     'MICTION': 'mictionnel'
   }
@@ -39,6 +40,7 @@ export const formIdToDisplayName = (formId: string): string => {
     'USP': 'USP',
     'QUALIVEEN': 'Qualiveen',
     'PGI': 'PG-I',
+    'SATISFACTION': 'Satisfaction',
     'EVOLUTION_THERAPEUTIQUE': 'Évolution thérapeutique',
     'VOIDING_CALENDAR': 'Calendrier mictionnel'
   }

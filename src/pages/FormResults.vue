@@ -24,6 +24,7 @@ function normalizeFormType(type: string): string {
   const upper = String(type).toUpperCase()
   if (upper.includes('QUALIVEEN')) return 'Qualiveen'
   if (upper.includes('PGI')) return 'PG-I'
+  if (upper.includes('SATISFACTION')) return 'Satisfaction'
   if (upper.includes('EVOLUTION')) return 'Evolution Thérapeutique'
   if (upper.includes('MICTION')) return 'Calendrier Mictionnel'
   if (upper.includes('USP')) return 'USP'
