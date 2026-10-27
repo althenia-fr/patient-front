@@ -169,7 +169,7 @@ function getScoreDisplay(results: QuestionnaireResult[]): string {
 
   switch (questionnaire) {
 
-    case 'PG-I':
+    case 'PGI':
       const pgiLevel = data.pgi !== undefined ? data.pgi : null
       if (pgiLevel === null) return '—'
       const pgiOptions = [
@@ -184,7 +184,7 @@ function getScoreDisplay(results: QuestionnaireResult[]): string {
       const pgiScore = data.pgiScore !== undefined ? data.pgiScore : 6 - pgiLevel
       return `${pgiOptions[pgiLevel]} (${pgiScore}/6)`
 
-    case 'Qualiveen':
+    case 'QUALIVEEN':
       if (data.scores) {
         return `Score: ${data.scores.total}/4`
       }
@@ -199,7 +199,7 @@ function getScoreDisplay(results: QuestionnaireResult[]): string {
       }
       return '—'
 
-    case 'Evolution Thérapeutique':
+    case 'EVOLUTION':
       if (data.urgenturies?.nombre !== undefined) {
         return `Urgences: ${data.urgenturies.nombre}, Nuit: ${data.mictions_nocturnes?.nombre || 0}, Fuites: ${data.fuites_urinaires?.nombre || 0}`
       }
@@ -228,10 +228,10 @@ function isWeekExpanded(week: number): boolean {
 
 function openQuestionnaire(questionnaire: string) {
   const routeMap: Record<string, string> = {
-    'Qualiveen': 'qualiveen',
-    'PG-I': 'pgi',
+    'QUALIVEEN': 'qualiveen',
+    'PGI': 'pgi',
     'USP': 'usp',
-    'Evolution Thérapeutique': 'evolution',
+    'EVOLUTION': 'evolution',
   }
 
   const routeName = routeMap[questionnaire]

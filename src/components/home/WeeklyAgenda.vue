@@ -47,8 +47,8 @@ const currentWeekForms = computed(() => {
 
   // Automatically hide forms that have already been submitted this week
   return res.forms?.filter((form: string) => {
-    const displayName = formIdToDisplayName(form) || ''
-    const upperName = displayName.toUpperCase()
+
+    const upperName = form.toUpperCase()
 
     if (upperName.includes('MICTION')) return false //never displayed in the weekly agenda since there is a dedicated MictionDashboard
 

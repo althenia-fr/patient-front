@@ -3,17 +3,16 @@ import { ref, computed } from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import { saveResult } from '@/utils/questionnaireResults.ts'
 import apiClient from '@/services/apiClient.ts'
-import { getWeekInfo } from '@/utils/protocol.ts'
 import {formConfig} from "@/data/form.data.ts";
 
 import {wrapLocalStorage} from "@/services/storage.service.ts";
 import {msgModal} from "@/utils/modals/msg-modal.ts";
 import {STORAGE_KEYS} from "@/types/api.types.ts";
-const {user} = wrapLocalStorage()
+import {currentWeek} from "@/services/agenda.service.ts";
+const {user,protocol} = wrapLocalStorage()
 
 const router = useRouter()
 const route = useRoute()
-console.log(route.path)
 
 const formType = route.path.substring(1);
 const questions = formConfig[formType].questions;
@@ -37,7 +36,6 @@ screenOrder.push('results')
 
 const qIdx = ref(0)
 const currentScreen = ref(screenOrder[0])
-console.log('currentScreen:'+currentScreen.value)
 
 const data = ref<QuestionnaireData>({
   answers: [],
@@ -45,8 +43,6 @@ const data = ref<QuestionnaireData>({
 })
 
 const loading = ref(false)
-const errorMessage = ref('')
-const successMessage = ref('')
 
 const allAnswersProvided = computed(() => {
   const ans = data.value.answers
@@ -58,8 +54,7 @@ const allAnswersProvided = computed(() => {
 })
 
 const goToScreen = (screen: string) => {
-  errorMessage.value = ''
-  successMessage.value = ''
+
   currentScreen.value = screen
 
   for(let i=0;i<screenOrder.length;i++)
@@ -89,20 +84,17 @@ const goNext = () => {
 const submitQuestionnaire = async () => {
   if (!allAnswersProvided.value) return
 
-  errorMessage.value = ''
-  successMessage.value = ''
   loading.value = true
 
   try {
     const patientId = user.value.uid
-
-    let weekInfo = getWeekInfo()
-    let week = weekInfo && weekInfo.current?weekInfo.current:1
+    const pecid = protocol.value?.pecid
 
     const payload = {
       patientId: patientId,
       formType: formType,
-      week: week,
+      week: currentWeek.value,
+      pecid: pecid,
       answers: data.value.answers,
       questions: data.value.questions,
     }
@@ -130,7 +122,6 @@ const submitQuestionnaire = async () => {
 
   } catch (error: any) {
     msgModal.show('Erreur', "Réssayer ou contacter l'aide si le système persiste", 'OK', msgModal.defaultClose,null,null,true);
-    errorMessage.value = 'Erreur d\'envoi, veuillez réessayer'
   } finally {
     loading.value = false
   }
@@ -185,14 +176,6 @@ const submitQuestionnaire = async () => {
       <!-- Results & Submission Screen -->
       <div v-if="currentScreen === 'results'" class="space-y-4">
         <h2 class="text-lg font-extrabold">Vérifier avant envoi</h2>
-
-        <div v-if="errorMessage" class="rounded-lg bg-red-50 border border-red-200 p-3">
-          <p class="text-xs text-red-800">{{ errorMessage }}</p>
-        </div>
-
-        <div v-if="successMessage" class="rounded-lg bg-green-50 border border-green-200 p-3">
-          <p class="text-xs text-green-800">{{ successMessage }}</p>
-        </div>
 
         <div class="space-y-4">
 

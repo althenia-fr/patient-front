@@ -2,7 +2,6 @@
 import { RouterLink } from 'vue-router'
 import { computed, ref, onMounted } from 'vue'
 import { listMeasures } from '@/utils/measures'
-import { getProtocolStart } from '@/utils/protocol'
 import { getHistory, ACTION_POINTS } from '@/utils/gamification'
 import { getOnboarding } from '@/utils/onboarding'
 import { getProtocolAgenda, getQuestionnairesForWeek } from '@/utils/protocolAgenda'
@@ -86,7 +85,9 @@ const currentWeekFormsList = computed(() => {
 
 // Calculate current week — prefer API startDate when agenda is loaded
 const currentWeek = computed(() => {
-  const start = fetchedAgenda.value?.startDate ? new Date(fetchedAgenda.value.startDate) : getProtocolStart()
+  if(!fetchedAgenda.value?.startDate) return 0;
+
+  const start = new Date(fetchedAgenda.value.startDate)
   const now = new Date()
   const msPerDay = 24 * 60 * 60 * 1000
   const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime()

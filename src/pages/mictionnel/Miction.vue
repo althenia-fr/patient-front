@@ -129,7 +129,9 @@ import { ref, reactive, computed, h } from 'vue'
 import {getCurrentTime, submitReport} from "@/utils/miction.ts";
 import {msgModal} from "@/utils/modals/msg-modal.ts";
 import router from "@/router";
-import {getWeekInfo} from "@/utils/protocol.ts";
+import {currentWeek} from "@/services/agenda.service.ts";
+import {wrapLocalStorage} from "@/services/storage.service.ts";
+const {protocol} = wrapLocalStorage()
 
 const isSubmitting = ref(false)
 const time = ref(getCurrentTime());
@@ -224,13 +226,13 @@ const submitForm = async () => {
   isSubmitting.value = true
   try {
 
-      let weekInfo = getWeekInfo()
-      let week = weekInfo && weekInfo.current?weekInfo.current:1
+    const pecid = protocol.value?.pecid
 
     let formObj = {...form}
     const payload = {
       type: 'miction',
-        week: week,
+        week: currentWeek.value,
+      pecid: pecid,
       time: time.value,
       payload: formObj,
     }
