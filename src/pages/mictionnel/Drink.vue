@@ -168,7 +168,7 @@ const submitForm = async () => {
     let formObj = {...drinks}
     const payload = {
       type: 'drink',
-        week : currentWeek,
+        week : currentWeek.value,
       time: time.value,
       payload: formObj,
     }

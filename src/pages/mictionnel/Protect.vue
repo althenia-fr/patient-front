@@ -91,7 +91,7 @@ const submitForm = async () => {
     let formObj = {...form}
     const payload = {
       type: 'protect',
-        week:currentWeek,
+        week:currentWeek.value,
       time: time.value,
       payload: formObj,
     }

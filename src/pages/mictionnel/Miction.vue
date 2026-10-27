@@ -8,13 +8,8 @@
 
       <!-- Saisie de l'heure -->
       <div class="flex items-center justify-between gap-3 rounded-xl bg-gray-50/80 p-3 border border-gray-100">
-        <label class="text-sm font-semibold text-gray-800 whitespace-nowrap">Heure de l'évènement'</label>
+        <label class="text-sm font-semibold text-gray-800 whitespace-nowrap">Heure de l'évènement</label>
         <div class="flex items-center gap-2">
-          <input
-              type="time"
-              v-model="time"
-              class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-base font-semibold text-gray-800 focus:border-brand-primary focus:outline-none"
-          />
           <button
               type="button"
               @click="resetToCurrentTime"
@@ -23,36 +18,25 @@
           >
             <i class="fa-solid fa-rotate text-sm"></i>
           </button>
+          <input
+              type="time"
+              v-model="time"
+              class="w-36 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-base font-semibold text-gray-800 focus:border-brand-primary focus:outline-none"
+          />
         </div>
       </div>
 
-      <!-- 1. Volume compact : Titre + Input centilitres + Verre animé -->
+      <!-- 1. Volume compact : Titre + Input centilitres -->
       <div class="flex items-center justify-between gap-3 rounded-xl bg-gray-50/80 p-3 border border-gray-100">
-        <div class="flex items-center gap-3 flex-1">
-          <label class="text-sm font-semibold text-gray-800 whitespace-nowrap">Volume</label>
-          <div class="flex items-center gap-2 flex-1 max-w-[210px]">
-            <input
-                type="number"
-                v-model.number="form.volume"
-                min="1"
-                max="100"
-                placeholder="1 - 100"
-                class="w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-base font-semibold text-gray-800 focus:border-brand-primary focus:outline-none"
-            />
-            <span class="text-xs font-bold text-gray-600">centilitres</span>
-          </div>
-        </div>
-
-        <!-- Illustration verre d'eau rempli de 1 à 100% -->
-        <div class="flex items-center gap-2 shrink-0">
-          <span class="text-xs font-medium text-gray-400">{{ fillPercentage }}%</span>
-          <div class="h-10 w-8 relative flex items-end justify-center rounded-b-lg border-2 border-red-300 bg-red-50/30 overflow-hidden">
-            <div
-                class="w-full bg-red-400/80 transition-all duration-300"
-                :style="{ height: fillPercentage + '%' }"
-            ></div>
-          </div>
-        </div>
+        <label class="text-sm font-semibold text-gray-800 whitespace-nowrap">Volume (centilitres)</label>
+        <input
+            type="number"
+            v-model.number="form.volume"
+            min="1"
+            max="100"
+            placeholder="1 - 100"
+            class="w-36 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-base font-semibold text-gray-800 text-center focus:border-brand-primary focus:outline-none"
+        />
       </div>
 
       <!-- 2. Circonstances : Matrice 3 x 2 -->
