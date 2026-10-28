@@ -3,65 +3,21 @@
 export let formConfig = {
     satisfaction: {
         title: 'Questionnaire de Satisfaction',
-        introduction: "Ce questionnaire évalue la façon dont votre traitement par neurostimulation vous a été expliqué et mis en place.",
+        introduction: "Ce questionnaire évalue votre satisfaction pendant la thérapie",
         questions: [
             {
                 id: 'q1',
-                text: "Les explications sur le fonctionnement et les objectifs du TENS étaient-elles claires?",
+                text: "Quel est votre niveau de satisfaction par rapport à cette thérapie?",
                 short_text: "Explications",
-                options: [
-                    'Très claires',
-                    'Plutôt claires',
-                    'Moyen',
-                    'Pas claires'
-                ]
-            },
-            {
-                id: 'q2',
-                text: "Les explications sur la pose des électrodes et le réglage de l'intensité étaient-elles claires?",
-                short_text: "Electrodes et intensité",
-                options: [
-                    'Très claires',
-                    'Plutôt claires',
-                    'Moyen',
-                    'Pas claires'
-                ]
-            },
-            {
-                id: 'q3',
-                text: "Les explications sur l'utilisation du boîtier TENS étaient-elles claires?",
-                short_text: "boitier TENS",
-                options: [
-                    'Très claires',
-                    'Plutôt claires',
-                    'Moyen',
-                    'Pas claires'
-                ]
-            },
-            {
-                id: 'q4',
-                text: "L'accès à l'assistance était-il facile ?",
-                short_text: "Accès à l'assistance",
-                options: [
-                    'Très facile',
-                    'Plutôt facile',
-                    'Moyen',
-                    'Pas facile'
-                ]
-            },
-            {
-                id: 'q5',
-                text: "Pour résumer, quelle est votre satisfaction concernant la mise en place du traitement ?",
-                short_text: "Satisfaction globale de mise en place",
-                options: [
-                    'Tres satisfait',
-                    'Satisfait',
-                    'Un peu satisfait',
-                    'Moyen',
-                    'Un peu déçu',
-                    'Déçu',
-                    'Très déçu',
-                ]
+              options: [
+                'Tres satisfait',
+                'Satisfait',
+                'Assez satisfait',
+                'Neutre',
+                'Peu satisfait',
+                'Pas du tout satisfait',
+                'Mécontent',
+              ]
             }
         ]
     },
