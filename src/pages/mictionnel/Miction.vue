@@ -36,6 +36,9 @@
             max="100"
             placeholder="1 - 100"
             class="w-36 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-base font-semibold text-gray-800 text-center focus:border-brand-primary focus:outline-none"
+            :class="form.volume && form.volume > 100
+              ? 'bg-red-200 border-red-200 focus:border-red-600 placeholder-white/70'
+              : 'bg-white text-gray-800 border-gray-200 focus:border-brand-primary'"
         />
       </div>
 
