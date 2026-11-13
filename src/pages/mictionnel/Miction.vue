@@ -28,15 +28,15 @@
 
       <!-- 1. Volume compact : Titre + Input centilitres -->
       <div class="flex items-center justify-between gap-3 rounded-xl bg-gray-50/80 p-3 border border-gray-100">
-        <label class="text-sm font-semibold text-gray-800 whitespace-nowrap">Volume (centilitres)</label>
+        <label class="text-sm font-semibold text-gray-800 whitespace-nowrap">Volume (millilitres)</label>
         <input
             type="number"
             v-model.number="form.volume"
             min="1"
-            max="100"
-            placeholder="1 - 100"
-            class="w-36 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-base font-semibold text-gray-800 text-center focus:border-brand-primary focus:outline-none"
-            :class="form.volume && form.volume > 100
+            max="500"
+            placeholder="1 - 500"
+            class="w-36 rounded-lg border border-gray-200 px-3 py-1.5 text-base font-semibold text-gray-800 text-center focus:border-brand-primary focus:outline-none"
+            :class="form.volume && form.volume > 500
               ? 'bg-red-200 border-red-200 focus:border-red-600 placeholder-white/70'
               : 'bg-white text-gray-800 border-gray-200 focus:border-brand-primary'"
         />
