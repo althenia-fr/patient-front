@@ -33,10 +33,10 @@
             type="number"
             v-model.number="form.volume"
             min="1"
-            max="500"
-            placeholder="1 - 500"
+            :max="MAX_VOLUME_ML"
+            :placeholder="'1 - '+MAX_VOLUME_ML"
             class="w-36 rounded-lg border border-gray-200 px-3 py-1.5 text-base font-semibold text-gray-800 text-center focus:border-brand-primary focus:outline-none"
-            :class="form.volume && form.volume > 500
+            :class="form.volume && form.volume > MAX_VOLUME_ML
               ? 'bg-red-200 border-red-200 focus:border-red-600 placeholder-white/70'
               : 'bg-white text-gray-800 border-gray-200 focus:border-brand-primary'"
         />
@@ -120,6 +120,8 @@ import {currentWeek} from "@/services/agenda.service.ts";
 import {wrapLocalStorage} from "@/services/storage.service.ts";
 const {protocol} = wrapLocalStorage()
 
+const MAX_VOLUME_ML = 500
+
 const isSubmitting = ref(false)
 const time = ref(getCurrentTime());
 const resetToCurrentTime = () => {
@@ -136,11 +138,11 @@ const form = reactive({
 
 const fillPercentage = computed(() => {
   if (!form.volume || form.volume < 1) return 0
-  return Math.min(100, Math.max(0, Math.round(form.volume)))
+  return Math.min(100, Math.max(0, Math.round(form.volume) / MAX_VOLUME_ML))
 })
 
 const isValidVolume = computed(() => {
-  return form.volume !== null && form.volume >= 1 && form.volume <= 100
+  return form.volume !== null && form.volume >= 1 && form.volume <= MAX_VOLUME_ML
 })
 
 // Icônes SVG
