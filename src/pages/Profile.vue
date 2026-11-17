@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue'
 import {useRouter} from "vue-router";
-import {wrapLocalStorage} from "@/services/storage.service.ts";
+import {setUser, syncStorageData, wrapLocalStorage} from "@/services/storage.service.ts";
 import ProfileDocuments from "@/components/profile/ProfileDocuments.vue"
+import apiClient from "@/services/apiClient.ts";
+import {prettyPrintErrorMsg} from "@/utils/apiErrorHandler.ts";
 const {user} = wrapLocalStorage()
 
 const version = ref('v.'+import.meta.env.VITE_APP_VERSION || 'v.dev');
@@ -21,6 +23,23 @@ function reloadSoftware()
       window.location.reload();
     }, 3000);
   }
+}
+
+async function resetDemo()
+{
+
+  try {
+
+    let resetUserResponse = await apiClient.post('/patient/reset')
+    setUser(resetUserResponse.data)
+
+  } catch (err: any) {
+
+    let msg = prettyPrintErrorMsg(err.response)
+    console.log(msg)
+
+  }
+
 }
 
 
@@ -99,6 +118,15 @@ function signOut() {
         </div>
         <div class="text-gray-400">
           {{version}}
+        </div>
+      </div>
+    </div>
+
+    <div v-if="user && user.demo" class="card mt-4">
+      <div class="flex items-center justify-between cursor-pointer" @click="resetDemo">
+        <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
+          <font-awesome-icon icon="fa-solid fa-rotate-left"/>
+          <p>Reset Démo</p>
         </div>
       </div>
     </div>

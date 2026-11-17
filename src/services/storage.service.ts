@@ -17,7 +17,7 @@ export function wrapLocalStorage() {
     }
 }
 
-function setUser(newUser: any)
+export function setUser(newUser: any)
 {
     localStorage.setItem(STORAGE_KEYS.STIMEO_USER,JSON.stringify(newUser));
     user.value = newUser

@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
   faUsers, faHandHoldingMedical, faHouse, faBed, faFileMedical, faGear, faTrashCan, faMagnifyingGlass, faPlus,
   faCirclePlus, faEye, faEyeSlash, faFilePdf, faFile, faPencil, faRightFromBracket, faKitMedical, faChevronRight,
-    faMicrochip, faPhone,
+    faMicrochip, faPhone, faRotateLeft,
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
@@ -21,7 +21,7 @@ library.add(
 
   faUsers, faHandHoldingMedical, faHouse, faBed, faFileMedical, faGear, faTrashCan, faPlus, faMagnifyingGlass,
   faCirclePlus, faEye, faEyeSlash, faFilePdf, faFile, faPencil, faRightFromBracket, faKitMedical, faChevronRight,
-    faMicrochip, faPhone
+    faMicrochip, faPhone, faRotateLeft
 )
 
 const saved = localStorage.getItem('theme')
