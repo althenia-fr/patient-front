@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue'
 import {useRouter} from "vue-router";
-import {setUser, syncStorageData, wrapLocalStorage} from "@/services/storage.service.ts";
+import {setUser, wrapLocalStorage} from "@/services/storage.service.ts";
 import ProfileDocuments from "@/components/profile/ProfileDocuments.vue"
 import apiClient from "@/services/apiClient.ts";
 import {prettyPrintErrorMsg} from "@/utils/apiErrorHandler.ts";
+import {STORAGE_KEYS} from "@/types/api.types.ts";
 const {user} = wrapLocalStorage()
 
 const version = ref('v.'+import.meta.env.VITE_APP_VERSION || 'v.dev');
+const resetStatus = ref('');
 
 const router = useRouter()
 async function doLogout(){ signOut(); router.replace({ name: 'login' }) }
@@ -30,13 +32,16 @@ async function resetDemo()
 
   try {
 
-    let resetUserResponse = await apiClient.post('/patient/reset')
-    setUser(resetUserResponse.data)
+    await apiClient.post('/patient/reset');
+    //reset cache so that forms get lookedup from backend next time we land on home page
+    localStorage.removeItem(STORAGE_KEYS.STIMEO_FORMS)
+    resetStatus.value = 'Reset effectué '+(new Date()).toLocaleTimeString()
 
   } catch (err: any) {
 
     let msg = prettyPrintErrorMsg(err.response)
     console.log(msg)
+    resetStatus.value = 'erreur '+msg
 
   }
 
@@ -127,6 +132,9 @@ function signOut() {
         <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
           <font-awesome-icon icon="fa-solid fa-rotate-left"/>
           <p>Reset Démo</p>
+        </div>
+        <div class="text-gray-400">
+          {{resetStatus}}
         </div>
       </div>
     </div>

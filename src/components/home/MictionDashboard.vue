@@ -81,29 +81,49 @@
   </div>
 </template>
 
-<script setup
-        lang="ts">
-import {ref, h} from 'vue'
-import {RouterLink} from 'vue-router'
-import {msgModal} from '@/utils/modals/msg-modal'
+<script setup lang="ts">
+import { ref, h, watch } from 'vue'
+import { RouterLink } from 'vue-router'
+import { msgModal } from '@/utils/modals/msg-modal'
 import apiClient from "@/services/apiClient"
-import {currentWeek, getAgendaForCurrentWeek} from "@/services/agenda.service.ts";
-import {formIdToDisplayName} from "@/types/protocol.types.ts";
+import { currentWeek, getAgendaForCurrentWeek } from "@/services/agenda.service.ts";
+import { formIdToDisplayName } from "@/types/protocol.types.ts";
+
+const props = withDefaults(
+    defineProps<{
+      refreshKey?: number;
+    }>(),
+    {
+      refreshKey: 0,
+    }
+);
 
 const disabled = ref(true)
 const isLoadingInfo = ref(false)
 
-
-let currentWeekAgenda = getAgendaForCurrentWeek(currentWeek.value)
-if (currentWeekAgenda && currentWeekAgenda.forms && currentWeekAgenda.forms.length > 0) {
-  for (let i = 0; i < currentWeekAgenda.forms.length; i++) {
-    let form = currentWeekAgenda.forms[i]
-    let calendarName = formIdToDisplayName(form)
-    const upperName = calendarName.toUpperCase()
-    if (upperName === 'MICTION') disabled.value = false;
+const updateMictionState = () => {
+  disabled.value = true
+  const agenda = getAgendaForCurrentWeek(currentWeek.value)
+  if (agenda && agenda.length > 0) {
+    for (let i = 0; i < agenda.length; i++) {
+      const form = agenda[i]
+      const calendarName = formIdToDisplayName(form)
+      const upperName = calendarName.toUpperCase()
+      if (upperName === 'MICTION') {
+        disabled.value = false
+        break
+      }
+    }
   }
 }
 
+watch(
+    [() => props.refreshKey, currentWeek],
+    () => {
+      updateMictionState()
+    },
+    { immediate: true }
+)
 
 const showDisabledInfo = async () => {
   if (isLoadingInfo.value) return
@@ -117,16 +137,13 @@ const showDisabledInfo = async () => {
     msg += "Les relevés s'effectuent lors de la 1ere semaine de traitement"
     if (data.followUpApt) msg += ", juste avant le rdv de suivi prévu autour du " + (new Date(data.followUpApt).toLocaleDateString())
     msg += " et à la fin du traitement ("+data.durationWeeks+" semaines). "
-    msg+= "<br/><br/>"
-    if(data.nextMictionDate)
-    {
+    msg += "<br/><br/>"
+    if (data.nextMictionDate) {
       msg += "Les prochains relevés seront à faire à partir du "
-          +(new Date(data.nextMictionDate).toLocaleDateString())
-          +" pour préparer "+(data.nextMictionWeekTrueForFollowupFalseForEndOfTreatment?"le rdv de suivi.":"le rdv de fin de traitement.")
-    }
-    else
-    {
-      msg+="Tous les relevés nécessaires ont été faits."
+          + (new Date(data.nextMictionDate).toLocaleDateString())
+          + " pour préparer " + (data.nextMictionWeekTrueForFollowupFalseForEndOfTreatment ? "le rdv de suivi." : "le rdv de fin de traitement.")
+    } else {
+      msg += "Tous les relevés nécessaires ont été faits."
     }
 
     msgModal.show(
@@ -136,7 +153,6 @@ const showDisabledInfo = async () => {
         msgModal.defaultClose
     )
   } catch (error) {
-
     msgModal.show(
         'Erreur',
         'Impossible de récupérer les informations sur le calendrier',

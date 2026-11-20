@@ -2,6 +2,7 @@ import {computed} from "vue";
 
 import {wrapLocalStorage} from "@/services/storage.service.ts";
 import {formIdToDisplayName} from "@/types/protocol.types.ts";
+import {STORAGE_KEYS} from "@/types/api.types.ts";
 const {protocol} = wrapLocalStorage()
 
 export const daysElapsed = computed(() => {
@@ -22,7 +23,7 @@ export const currentWeek = computed(() => {
   return Math.ceil(daysElapsed.value / 7)
 })
 
-
+/*
 export function getAgendaForCurrentWeek(currentWeek: number): string[]
 {
   if(protocol.value && protocol.value.agenda)
@@ -32,5 +33,25 @@ export function getAgendaForCurrentWeek(currentWeek: number): string[]
     else return []
   }
   else return []
+}*/
+
+export function getAgendaForCurrentWeek(wk: number): string[]
+{
+  const cachedData = localStorage.getItem(STORAGE_KEYS.STIMEO_FORMS)
+  if (cachedData) {
+    try {
+      const parsed = JSON.parse(cachedData)
+      let weekConfig = parsed.data[wk-1]
+      let res = []
+      for(let i=0;i<weekConfig.forms.length;i++)
+      {
+        if(!weekConfig.forms[i].submissions || weekConfig.forms[i].submissions.length===0) res.push(weekConfig.forms[i].formType)
+      }
+      return res;
+    } catch (e) {
+      console.warn('Erreur de lecture du cache JSON', e)
+      return []
+    }
+  }
 }
 
