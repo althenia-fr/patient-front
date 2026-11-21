@@ -20,6 +20,7 @@ import ChartResults from '@/pages/ChartResults.vue'
 import MictionnelCalendar from '@/pages/MictionnelCalendar.vue'
 import MictionnelResults from '@/pages/MictionnelResults.vue'
 import ProtocolResults from '@/pages/ProtocolResults.vue'
+import Calendar from '@/pages/Calendar.vue'
 
 //import Qualiveen from '@/pages/forms/Qualiveen.vue'
 //import USP from '@/pages/forms/USP.vue'
@@ -43,6 +44,7 @@ const routes: RouteRecordRaw[] = [
     { path: '/consent', name: 'consent', component: Consent, meta: { requiresAuth: false }  },
 
     { path: '/home', name: 'home', component: Home, meta: { requiresAuth: true } },
+    {path: '/calendar',name: 'calendar', component: Calendar, meta: { requiresAuth: true } },
     { path: '/protocols', name: 'protocols', component: Protocols, meta: { requiresAuth: true } },
     { path: '/timer/:pstid', name: 'timer', component: Timer, meta: { requiresAuth: true } , props: route => ({ pstid: Number(route.params.pstid) }) },
     { path: '/protocols-results', name: 'protocol-results', component: ProtocolResults, meta: { requiresAuth: true } },

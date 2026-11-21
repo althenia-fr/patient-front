@@ -1,34 +1,43 @@
 <template>
 
-    <!-- Déclaratif quotidien -->
-    <div class="rounded-2xl bg-white p-5">
-      <div class="flex justify-center">
-        <div class="text-center text-lg font-semibold text-gray-800">{{ today }}</div>
-      </div>
-      <div class="mt-3 space-y-2">
+  <!-- Déclaratif quotidien -->
+  <div class="rounded-2xl bg-white p-5">
+    <div class="flex items-center justify-center gap-2.5">
+      <div class="text-center text-lg font-semibold text-gray-800">{{ today }}</div>
+      <RouterLink
+          :to="{ name: 'calendar' }"
+          class="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700 hover:bg-cyan-100 active:scale-95 transition"
+          title="Séances des 15 derniers jours"
+          aria-label="Ouvrir le calendrier des séances"
+      >
+        <i class="fa-solid fa-calendar-days text-sm"></i>
+      </RouterLink>
+    </div>
+    <div class="mt-3 space-y-2">
 
-        <!-- Multiple session buttons based on sessionsDaily -->
-        <div v-if="todayEnrichedSessions.length >= 1" class="space-y-2">
-          <button v-for="session in todayEnrichedSessions" @click="gotoTimer(session.sessionNumber)"
-               class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none"
-               :class="{
+      <!-- Multiple session buttons based on sessionsDaily -->
+      <div v-if="todayEnrichedSessions.length >= 1" class="space-y-2">
+        <button v-for="session in todayEnrichedSessions" :key="session.sessionNumber" @click="gotoTimer(session.sessionNumber)"
+                class="flex w-full items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 font-semibold transition focus:outline-none"
+                :class="{
                 'bg-brand-secondary text-white': session.isAvailable && !session.isCompleted,
                 'bg-gray-300 text-gray-500 cursor-not-allowed': !session.isAvailable || session.isCompleted
               }"
-           :disabled="session.isCompleted || !session.isAvailable">
-            {{`Séance ${session.sessionNumber}`}} {{workoutSessionState(session)}}
-          </button>
-        </div>
-
+                :disabled="session.isCompleted || !session.isAvailable">
+          {{`Séance ${session.sessionNumber}`}} {{workoutSessionState(session)}}
+        </button>
       </div>
 
-
     </div>
+
+
+  </div>
 
 </template>
 <script setup lang="ts">
 
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted} from "vue";
+import {RouterLink} from "vue-router";
 import router from "@/router";
 import {currentWeek} from "@/services/agenda.service.ts";
 import {useSessionTracking} from "@/composables/useSessionTracking.ts";
@@ -56,9 +65,9 @@ function workoutSessionState(session : any)
   if(session.isCompleted) return 'terminée'
   else if(globalState.sessionNumber===session.sessionNumber){
     if(globalState.running) return 'en cours'
-     else return 'en pause'
-   }
-   else if(!session.isAvailable) return ''
+    else return 'en pause'
+  }
+  else if(!session.isAvailable) return ''
 }
 
 
