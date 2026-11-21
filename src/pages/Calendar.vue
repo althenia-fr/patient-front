@@ -11,8 +11,8 @@
         <i class="fa-solid fa-arrow-left"></i>
       </button>
       <div>
-        <h1 class="text-lg font-semibold text-gray-800">Séances des 15 derniers jours</h1>
-        <p class="text-xs text-gray-500">Ajoutez ou retirez vos séances oubliées</p>
+        <h1 class="text-lg font-semibold text-gray-800">Séances sans chrono</h1>
+        <p class="text-xs text-gray-500">Indiquez les séances réalisées pour lesquelles vous aviez oublié de lancer le chrono</p>
       </div>
     </div>
 

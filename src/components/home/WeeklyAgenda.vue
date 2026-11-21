@@ -7,7 +7,7 @@
 
     <div class="mt-3 space-y-2">
       <!-- API-driven agenda forms -->
-      <div v-if="!isLoading && currentWeekForms?.length > 0" class="space-y-2">
+      <div v-if="!isLoading && currentWeekForms.length > 0" class="space-y-2">
         <RouterLink
             v-for="form in currentWeekForms"
             :key="form"
@@ -34,81 +34,24 @@
 </template>
 
 <script setup lang="ts">
-import { formIdToDisplayName, formIdToRouteName } from "@/types/protocol.types.ts";
+import { computed } from "vue";
 import { RouterLink } from "vue-router";
-import { computed, ref, watch } from "vue";
+import { formIdToDisplayName, formIdToRouteName } from "@/types/protocol.types.ts";
 import { currentWeek, getAgendaForCurrentWeek } from "@/services/agenda.service.ts";
-import { STORAGE_KEYS } from "@/types/api.types.ts";
 
 const props = withDefaults(
     defineProps<{
-      refreshKey?: number;
+      forms?: any[];
       isLoading?: boolean;
     }>(),
     {
-      refreshKey: 0,
+      forms: () => [],
       isLoading: false,
     }
 );
 
-const completedForms = ref<string[]>([]);
-
-const loadCompletedFormsFromStorage = () => {
-  let formSubmissions = [];
-  const cachedData = localStorage.getItem(STORAGE_KEYS.STIMEO_FORMS);
-
-  if (cachedData) {
-    try {
-      const parsed = JSON.parse(cachedData);
-      formSubmissions = parsed.data || [];
-    } catch (e) {
-      console.warn("Erreur de lecture du cache JSON", e);
-    }
-  }
-
-  const currentWeekFormSubmissions = Array.isArray(formSubmissions)
-      ? formSubmissions.find((w: any) => String(w.weekNumber) === String(currentWeek.value))
-      : null;
-
-  if (currentWeekFormSubmissions && currentWeekFormSubmissions.forms) {
-    completedForms.value = currentWeekFormSubmissions.forms
-        .filter((f: any) => f.submissions && f.submissions.length > 0)
-        .map((f: any) => String(f.formType).toUpperCase());
-  } else {
-    completedForms.value = [];
-  }
-};
-
-watch(
-    () => props.refreshKey,
-    () => {
-      loadCompletedFormsFromStorage();
-    },
-    { immediate: true }
-);
-
 const currentWeekForms = computed(() => {
-  // Dépendance explicite pour forcer le recalcul de getAgendaForCurrentWeek après mise à jour du localStorage
-  void props.refreshKey;
-
-  const agenda = getAgendaForCurrentWeek(currentWeek.value);
-
-  // Automatically hide forms that have already been submitted this week
-  return agenda?.filter((form: string) => {
-    const upperName = form.toUpperCase();
-
-    if (upperName.includes("MICTION")) return false; // never displayed in the weekly agenda since there is a dedicated MictionDashboard
-
-    const isCompleted = completedForms.value.some((completedType) => {
-      if (upperName.includes("QUALIVEEN") && completedType.includes("QUALIVEEN")) return true;
-      if (upperName.includes("SATISFACTION") && completedType.includes("SATISFACTION")) return true;
-      if (upperName.includes("PGI") && completedType.includes("PGI")) return true;
-      if (upperName.includes("EVOLUTION") && completedType.includes("EVOLUTION")) return true;
-      if (upperName.includes("USP") && completedType.includes("USP")) return true;
-      return completedType === upperName;
-    });
-
-    return !isCompleted;
-  });
+  const agenda = getAgendaForCurrentWeek(currentWeek.value, props.forms);
+  return agenda.filter((form: string) => !form.toUpperCase().includes("MICTION"));
 });
 </script>

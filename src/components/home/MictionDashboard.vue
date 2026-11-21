@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, h, watch } from 'vue'
+import { ref, h, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { msgModal } from '@/utils/modals/msg-modal'
 import apiClient from "@/services/apiClient"
@@ -91,39 +91,21 @@ import { formIdToDisplayName } from "@/types/protocol.types.ts";
 
 const props = withDefaults(
     defineProps<{
-      refreshKey?: number;
+      forms?: any[];
     }>(),
     {
-      refreshKey: 0,
+      forms: () => [],
     }
 );
 
-const disabled = ref(true)
 const isLoadingInfo = ref(false)
 
-const updateMictionState = () => {
-  disabled.value = true
-  const agenda = getAgendaForCurrentWeek(currentWeek.value)
-  if (agenda && agenda.length > 0) {
-    for (let i = 0; i < agenda.length; i++) {
-      const form = agenda[i]
-      const calendarName = formIdToDisplayName(form)
-      const upperName = calendarName.toUpperCase()
-      if (upperName === 'MICTION') {
-        disabled.value = false
-        break
-      }
-    }
-  }
-}
-
-watch(
-    [() => props.refreshKey, currentWeek],
-    () => {
-      updateMictionState()
-    },
-    { immediate: true }
-)
+const disabled = computed(() => {
+  const agenda = getAgendaForCurrentWeek(currentWeek.value, props.forms)
+  return !agenda.some(
+      (form) => formIdToDisplayName(form).toUpperCase() === 'MICTION'
+  )
+})
 
 const showDisabledInfo = async () => {
   if (isLoadingInfo.value) return

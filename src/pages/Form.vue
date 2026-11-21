@@ -5,7 +5,7 @@ import { saveResult } from '@/utils/questionnaireResults.ts'
 import apiClient from '@/services/apiClient.ts'
 import {formConfig} from "@/data/form.data.ts";
 
-import {wrapLocalStorage} from "@/services/storage.service.ts";
+import {setForms, wrapLocalStorage} from "@/services/storage.service.ts";
 import {msgModal} from "@/utils/modals/msg-modal.ts";
 import {STORAGE_KEYS} from "@/types/api.types.ts";
 import {currentWeek} from "@/services/agenda.service.ts";
@@ -105,19 +105,15 @@ const submitQuestionnaire = async () => {
 
     saveResult(formType, payload)
 
-    msgModal.show('Veuillez patienter', 'Sauvegarde en cours...', null,null);
-    const response = await apiClient.post('/patient/survey/add', payload)
+    msgModal.show('Veuillez patienter', 'Sauvegarde en cours...', null, null);
+    const response = await apiClient.post('/patient/survey/add', payload);
 
-    let formSubmissions = response.data || []
+    setForms(response.data);
 
-    // Enregistrement dans le localStorage avec un timestamp d'expiration
-    const CACHE_TTL = 2 * 60 * 60 * 1000 // 2 heures en millisecondes
-    localStorage.setItem(STORAGE_KEYS.STIMEO_FORMS, JSON.stringify({
-      data: formSubmissions,
-      expiry: Date.now() + CACHE_TTL
-    }))
-
-    msgModal.show('Succès', 'Questionnaire envoyé avec succès !', 'OK', function(){msgModal.defaultClose();router.push({ name: 'home' }) });
+    msgModal.show('Succès', 'Questionnaire envoyé avec succès !', 'OK', function () {
+      msgModal.defaultClose();
+      router.push({ name: 'home' });
+    });
 
     /*
     setTimeout(() => {
